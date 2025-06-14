@@ -1,0 +1,21 @@
+{
+  "name": "web-gemini",
+  "version": "1.0.0",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^7.0.3",
+    "sqlite3": "^5.1.7"
+  }
+}

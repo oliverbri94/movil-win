@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOVIL WIN - Sorteo de Smartphones</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" xintegrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-dark-bg': '#16161a',
+                        'custom-dark-bg-alt': '#242629',
+                        'custom-dark-bg-frame': '#1f1f23', // Color para el navbar
+                        'custom-primary': '#2cb67d',
+                        'custom-secondary': '#7f5af0',
+                        'custom-accent': '#ff8906',
+                        'custom-text-light': '#e4e4e7',
+                        'custom-text-alt': '#94a1b2',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="dark-theme">
+
+    <nav class="bg-custom-dark-bg-frame shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="index.html" class="flex items-center"> 
+                        <img src="images/logo.png" alt="Logo Movil Win" class="h-20 w-auto"> 
+                    </a>
+                </div>
+
+
+                <div class="flex items-center">
+                    <button id="mobileMenuButton" class="outline-none p-2 rounded-md hover:bg-custom-dark-bg-alt focus:bg-custom-dark-bg-alt transition-colors duration-300">
+                        <svg class="w-6 h-6 text-custom-text-alt hover:text-custom-primary"
+                            fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="fullScreenMenu" class="hidden fixed inset-0 bg-custom-dark-bg bg-opacity-95 backdrop-blur-sm z-40 flex flex-col items-center justify-center p-6 transition-opacity duration-300 ease-in-out">
+             <button id="closeMenuButton" class="absolute top-6 right-6 text-custom-text-alt hover:text-custom-primary text-4xl leading-none">&times;</button>
+            <img src="images/logo.png" alt="Logo Movil Win" class="h-20 w-auto mb-8">
+            <ul class="flex flex-col items-center space-y-6">
+                <li><a href="index.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Inicio</a></li>
+                <li><a href="faq.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Preguntas Frecuentes</a></li>
+                <li><a href="bases.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Bases y Condiciones</a></li>
+                <li><a href="ganadores.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Historial de Ganadores</a></li>
+            </ul>
+            <div class="social-links-footer mt-12 flex space-x-6">
+                <a href="https://wa.me/593963135510" target="_blank" rel="noopener noreferrer" aria-label="Contáctanos en WhatsApp" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
+                    <i class="fab fa-whatsapp fa-2x"></i>
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Facebook" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
+                    <i class="fab fa-facebook-f fa-2x"></i>
+                </a>
+                <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Instagram" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
+                    <i class="fab fa-instagram fa-2x"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+    <header class="site-header">
+    <h1 class="main-title-stacked gold-metallic" style="text-align:center;">
+        <img src="images/tittle.png" alt="MOVIL WIN - Sueña, Participa, ¡Gana!" style="max-width: 100%; height: auto;">
+    </h1></h1>
+    </header>
+
+ <main class="site-main">
+        
+    
+        <!-- === INICIO DEL NUEVO VISOR DE PREMIOS === -->
+        <section class="prize-carousel-section content-section">
+            <div id="prizeCarouselContainer" class="prize-carousel-container">
+                <div id="prizeCarouselTrack" class="prize-carousel-track">
+                    
+                    <!-- Las diapositivas de los premios se generarán aquí con JavaScript -->
+
+                </div>
+
+                <!-- Botones de Navegación -->
+                <button id="prevPrizeBtn" class="carousel-nav-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                <button id="nextPrizeBtn" class="carousel-nav-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+        <!-- === FIN DEL NUEVO VISOR DE PREMIOS === -->
+
+        <section class="como-participar-section content-section">
+            <h2>¿Cómo Ganar? ¡Es Muy Fácil!</h2>
+            <div class="pasos-container-nuevo">
+                <div class="paso-nuevo">
+                    <div class="paso-icono-nuevo"><i class="fas fa-hand-pointer"></i></div>
+                    <div class="paso-texto-nuevo">
+                        <h3>1. Elige tu Paquete</h3>
+                        <p>Selecciona uno de nuestros paquetes de boletos digitales. ¡Mientras más grande, más chances!</p>
+                    </div>
+                </div>
+                <div class="paso-nuevo">
+                    <div class="paso-icono-nuevo"><i class="fab fa-whatsapp"></i></div>
+                    <div class="paso-texto-nuevo">
+                        <h3>2. Contáctanos por WhatsApp</h3>
+                        <p>Haz clic en tu paquete preferido para enviarnos un mensaje y coordinar tu participación.</p>
+                    </div>
+                </div>
+                <div class="paso-nuevo">
+                    <div class="paso-icono-nuevo"><i class="fas fa-check-double"></i></div>
+                    <div class="paso-texto-nuevo">
+                        <h3>3. Confirma y ¡Listo!</h3>
+                        <p>Recibirás un email con tu guía y la confirmación de tus entradas. ¡Mucha suerte!</p>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-movilwin-border my-8">
+
+            <div class="paquetes-container">
+                 <div class="paquete-item">
+                    <h4>Pack Básico</h4>
+                    <div class="paquete-precio">$10</div>
+                    <div class="paquete-cantidad">5 Boletos Digitales</div>
+                    <p class="paquete-descripcion">¡Una excelente forma de empezar a probar tu suerte!</p>
+                    <a href="https://wa.me/593963135510?text=Hola%2C%20quiero%20el%20Pack%20B%C3%A1sico%20de%205%20boletos%20digitales%20por%20$10%20para%20el%20sorteo%20MOVIL%20WIN%21" target="_blank" class="boton-paquete">Elegir Paquete</a>
+                </div>
+                <div class="paquete-item">
+                    <h4>Pack Ahorro</h4>
+                    <div class="paquete-precio">$28 <span class="precio-original-tachado">$30</span></div>
+                    <div class="paquete-cantidad">15 Boletos Digitales</div>
+                    <p class="paquete-descripcion">¡Más chances, más ahorro! Ideal para aumentar tus posibilidades.</p>
+                    <a href="https://wa.me/593963135510?text=Hola%2C%20quiero%20el%20Pack%20Ahorro%20de%2015%20boletos%20digitales%20por%20$28%20para%20el%20sorteo%20MOVIL%20WIN%21" target="_blank" class="boton-paquete">Elegir Paquete</a>
+                </div>
+                <div class="paquete-item popular">
+                    <span class="etiqueta-popular">Más Popular</span>
+                    <h4>Pack Ahorro Pro</h4>
+                    <div class="paquete-precio">$55 <span class="precio-original-tachado">$60</span></div>
+                    <div class="paquete-cantidad">30 Boletos Digitales</div>
+                    <p class="paquete-descripcion">¡El máximo de oportunidades con el mayor ahorro!</p>
+                    <a href="https://wa.me/593963135510?text=Hola%2C%20quiero%20el%20Pack%20Ahorro%20Pro%20de%2030%20boletos%20digitales%20por%20$55%20para%20el%20sorteo%20MOVIL%20WIN%21" target="_blank" class="boton-paquete">Elegir Paquete</a>
+                </div>
+            </div>
+        </section>
+        <!-- Contenedor del Sorteo -->
+
+        <div id="countdownDisplayContainer" class="content-section oculto" style="text-align: center; background-color: var(--clr-accent); padding: 20px; border-radius: var(--border-radius-medium); margin-bottom: 20px;">
+            <h3 style="color: var(--clr-white); font-size: 1.5em; margin-bottom: 10px;">¡El Sorteo Comenzará Pronto!</h3>
+            <div id="countdownTimer" style="font-size: 2.5em; color: var(--clr-white); font-weight: bold;">00:00:00</div>
+        </div>
+        
+        <div class="contenedor-sorteo content-section">
+                <h2 class="titulo-dorado" data-text="La Gran Rueda Movil Win">La Gran Rueda Movil Win</h2>
+                <p class="rueda-subtitulo">Tus Boletos Digitales se añaden aquí abajo <br> <i class="fas fa-chevron-down"></i></p>
+                <div class="sorteo-frame price-is-right-wheel-frame">
+                <div id="wheelCanvasContainer" class="wheel-price-is-right-container">
+                    <canvas id="priceWheelCanvas"></canvas>
+                    <div id="clacker" class="clacker-pointer-front"></div>
+                </div>
+                <div class="loader-container oculto" id="loaderParticipantes">
+                    <div class="loader"></div>
+                </div>
+                <button id="botonGirar" class="boton-cta boton-girar oculto">
+                    <i class="fas fa-sync-alt"></i> Girar Rueda
+                </button>
+            </div>
+        </div>
+
+        <div id="resultadoGanador" class="resultado-area content-section">
+            <p>Esperando inicio del sorteo...</p>
+        </div>
+        <section class="seccion-ganadores-anteriores content-section">
+            <h2>🏆 ¡Nuestros Últimos Ganadores! Inspírate 🏆</h2>
+             <div class="loader-container oculto" id="loaderGanadores">
+                 <div class="loader"></div>
+             </div>
+             <div class="lista-ganadores" id="listaGanadoresAnteriores">
+             </div>
+             <div class="text-center mt-8">
+                <a href="ganadores.html" class="boton-cta boton-ver-historial">
+                    <i class="fas fa-history"></i> Ver Historial Completo de Ganadores
+                </a>
+             </div>
+        </section>
+        </main>
+    <footer class="site-footer">
+        <p>&copy; 2025 Movil Win | Todos los derechos reservados.</p>
+        <div class="social-links-footer">
+            <a href="https://wa.me/593963135510" target="_blank" rel="noopener noreferrer" aria-label="Contáctanos en WhatsApp">
+                <i class="fab fa-whatsapp"></i>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Facebook"> 
+                <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Instagram">
+                <i class="fab fa-instagram"></i>
+            </a>
+        </div>
+        </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

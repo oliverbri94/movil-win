@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preguntas Frecuentes - MOVIL WIN</title>
+    <script src="https://cdn.tailwindcss.com"></script> 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-dark-bg': '#16161a',
+                        'custom-dark-bg-alt': '#242629',
+                        'custom-dark-bg-frame': '#1f1f23',
+                        'custom-primary': '#2cb67d',
+                        'custom-secondary': '#7f5af0',
+                        'custom-accent': '#ff8906',
+                        'custom-text-light': '#e4e4e7',
+                        'custom-text-alt': '#94a1b2',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos adicionales específicos para esta página, si son necesarios */
+        .page-container {
+            max-width: 900px; /* Ancho máximo para el contenido */
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: var(--clr-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        .back-link:hover {
+            color: var(--clr-accent);
+            text-decoration: underline;
+        }
+        .faq-page-item { /* Estilo para cada pregunta/respuesta en esta página */
+            background-color: var(--clr-dark-bg); /* Un fondo ligeramente diferente al de .content-section */
+            border: 1px solid var(--clr-dark-border);
+            border-radius: var(--border-radius-medium);
+            margin-bottom: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        .faq-page-item h3 {
+            color: var(--clr-primary);
+            font-size: 1.4em; /* Un poco más grande para las preguntas */
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .faq-page-item h3 i {
+            margin-right: 10px;
+            color: var(--clr-secondary);
+        }
+        .faq-page-item p {
+            color: var(--clr-dark-text-alt);
+            line-height: 1.8;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <nav class="bg-custom-dark-bg-frame shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="index.html" class="flex items-center">
+                        <img src="images/logo.png" alt="Logo Movil Win" class="h-12 w-auto">                     </a>
+                </div>
+                <div class="flex items-center">
+                    <button id="mobileMenuButton" class="outline-none p-2 rounded-md hover:bg-custom-dark-bg-alt focus:bg-custom-dark-bg-alt transition-colors duration-300">
+                        <svg class="w-6 h-6 text-custom-text-alt hover:text-custom-primary"
+                            fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="fullScreenMenu" class="hidden fixed inset-0 bg-custom-dark-bg bg-opacity-95 backdrop-blur-sm z-40 flex flex-col items-center justify-center p-6 transition-opacity duration-300 ease-in-out">
+             <button id="closeMenuButton" class="absolute top-6 right-6 text-custom-text-alt hover:text-custom-primary text-4xl leading-none">&times;</button>
+            <img src="images/logo.png" alt="Logo Movil Win" class="h-20 w-auto mb-8">
+            <ul class="flex flex-col items-center space-y-6">
+                <li><a href="index.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Inicio</a></li>
+                <li><a href="faq.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Preguntas Frecuentes</a></li>
+                <li><a href="bases.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Bases y Condiciones</a></li>
+                <li><a href="ganadores.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Historial de Ganadores</a></li>
+            </ul>
+             <div class="social-links-footer mt-12 flex space-x-6">
+                <a href="https://wa.me/593963135510" target="_blank" rel="noopener noreferrer" aria-label="Contáctanos en WhatsApp" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
+                    <i class="fab fa-whatsapp fa-2x"></i>
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Facebook" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
+                    <i class="fab fa-facebook-f fa-2x"></i>
+                </a>
+                <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Instagram" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
+                    <i class="fab fa-instagram fa-2x"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="site-header" style="padding-top: 20px; padding-bottom: 20px;">
+        <h1 class="main-title" style="font-family: 'Anton', sans-serif;font-weight: bold;font-size: clamp(2em, 5vw, 3em);">Preguntas Frecuentes</h1>
+        <h2 class="subtitle" style="font-size: clamp(1em, 2.5vw, 1.2em);">Resolvemos tus dudas sobre MOVIL WIN</h2>
+    </header>
+
+    <main class="page-container">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver al Sorteo Principal</a>
+
+        <section class="content-section">
+            <div class="faq-page-item">
+                <h3><i class="fas fa-shield-alt"></i>¿Cómo sé que el sorteo es real y transparente?</h3>
+                <p>En MOVIL WIN nos comprometemos con la transparencia. El sorteo se realiza utilizando un sistema de selección aleatoria y, siempre que sea posible, se transmitirá en vivo o se grabará para que todos puedan ver el proceso. Publicamos las bases y condiciones claramente y la lista de ganadores es anunciada públicamente, así como el código elaborado para realizar todo el proceso.</p>
+            </div>
+            <div class="faq-page-item">
+                <h3><i class="fas fa-truck"></i>¿Puedo participar desde cualquier lugar de Ecuador?</h3>
+                <p>¡Así es! Si resultas ganador y resides dentro de Ecuador (según el ámbito territorial definido en nuestras bases), coordinaremos contigo la entrega segura de tu premio. Revisa nuestras bases para más detalles sobre la entrega.</p>
+            </div>
+            <div class="faq-page-item">
+                <h3><i class="fas fa-credit-card"></i>¿Cuáles son los métodos de pago aceptados?</h3>
+                <p>Actualmente aceptamos pagos mediante transferencia bancaria o depósito a la cuenta que te indicaremos por WhatsApp al momento de confirmar tu participación. Estamos trabajando para añadir más opciones en el futuro.</p>
+            </div>
+            <div class="faq-page-item">
+                <h3><i class="fas fa-calendar-alt"></i>¿Hasta cuándo puedo participar en el sorteo actual?</h3>
+                <p>Puedes adquirir participaciones hasta que se alcance la meta de participaciones, o hasta la fecha límite que se anuncie para el sorteo actual. ¡Revisa la barra de progreso en la página principal para ver cuán cerca estamos!</p>
+            </div>
+             <div class="faq-page-item">
+                <h3><i class="fas fa-random"></i>¿Cómo se elige al ganador?</h3>
+                <p>El ganador se elige de forma completamente aleatoria entre todas las participaciones válidas registradas, utilizando un sistema digital que asegura la imparcialidad, ¡potenciado con IA! El proceso se realiza de forma transparente y, de ser posible, se documenta o transmite.</p>
+            </div>
+            <div class="faq-page-item">
+                <h3><i class="fas fa-envelope-open-text"></i>¿Cómo recibiré mi Mini-Guía Digital?</h3>
+                <p>Una vez confirmada tu compra y tu participación, la "Mini-Guía Digital: Trucos para Sacarle el Jugo a tu Smartphone" será enviada directamente al correo electrónico que nos proporciones durante el proceso de registro.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2025 MOVIL WIN | Todos los derechos reservados.</p>
+        <div class="social-links-footer">
+            <a href="https://wa.me/593963135510" target="_blank" rel="noopener noreferrer" aria-label="Contáctanos en WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Instagram"><i class="fab fa-instagram"></i></a>
+        </div>
+    </footer>
+    <script>
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const fullScreenMenu = document.getElementById('fullScreenMenu');
+        const closeMenuButton = document.getElementById('closeMenuButton');
+
+        function toggleFullScreenMenu() {
+            if (fullScreenMenu) {
+                const isVisible = fullScreenMenu.classList.contains('menu-visible');
+                if (isVisible) {
+                    fullScreenMenu.classList.remove('menu-visible');
+                    setTimeout(() => { fullScreenMenu.classList.add('hidden'); }, 300);
+                } else {
+                    fullScreenMenu.classList.remove('hidden');
+                    void fullScreenMenu.offsetWidth;
+                    fullScreenMenu.classList.add('menu-visible');
+                }
+            }
+        }
+        if (mobileMenuButton) mobileMenuButton.addEventListener('click', toggleFullScreenMenu);
+        if (closeMenuButton) closeMenuButton.addEventListener('click', toggleFullScreenMenu);
+        if (fullScreenMenu) {
+            const menuLinks = fullScreenMenu.querySelectorAll('ul a');
+            menuLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    // No es necesario cerrar si navega a otra página
+                });
+            });
+        }
+    </script>
+</body>
+</html>

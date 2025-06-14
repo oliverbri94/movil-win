@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Sorteo Exclusivo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- <<<--- LIBRERÍA DE GRÁFICOS (CHART.JS) ---<<< -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .admin-container { max-width: 800px; margin: 30px auto; padding: 20px; }
+        .reiniciar-section { margin-top: 40px; padding-top: 30px; border-top: 1px solid var(--clr-dark-border); }
+        .boton-reiniciar { background-color: var(--clr-red); color: var(--clr-white); }
+        .boton-reiniciar:hover { background-color: color-mix(in srgb, var(--clr-red) 80%, var(--clr-black) 20%); }
+        .logout-button-container { text-align: right; margin-bottom: 20px; }
+        .logout-button {
+            background-color: var(--clr-accent);
+            color: var(--clr-white);
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .logout-button:hover {
+            background-color: color-mix(in srgb, var(--clr-accent) 80%, var(--clr-black) 20%);
+        }
+        .login-button {
+            background-color: var(--clr-primary);
+        }
+        .login-button:hover {
+             background-color: color-mix(in srgb, var(--clr-primary) 80%, var(--clr-black) 20%);
+        }
+        .tabla-sorteos { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em;}
+        .tabla-sorteos th, .tabla-sorteos td {
+            border: 1px solid var(--clr-dark-border);
+            padding: 10px 12px;
+            text-align: left;
+            color: var(--clr-dark-text-alt);
+        }
+        .tabla-sorteos th {
+            background-color: var(--clr-dark-bg-frame);
+            color: var(--clr-dark-text);
+            font-weight: 600;
+        }
+        .tabla-sorteos tr:nth-child(even) { background-color: var(--clr-dark-bg); }
+        .tabla-sorteos td .accion-btn {
+            padding: 6px 10px; margin-right: 5px; border-radius: 5px;
+            font-size: 0.9em; cursor: pointer; border: none; color: white;
+        }
+        .btn-editar { background-color: var(--clr-secondary); }
+        .btn-editar:hover { background-color: color-mix(in srgb, var(--clr-secondary) 80%, black); }
+        .btn-activar { background-color: var(--clr-primary); }
+        .btn-activar:hover { background-color: color-mix(in srgb, var(--clr-primary) 80%, black); }
+        .btn-activar[disabled] { background-color: #555; cursor: not-allowed; }
+        .sorteo-activo-row { background-color: color-mix(in srgb, var(--clr-primary) 20%, transparent) !important; }
+        .sorteo-activo-row td { color: var(--clr-dark-text) !important; font-weight: 500; }
+
+        #formGestionSorteo .form-group { margin-bottom: 15px; }
+        #formGestionSorteo button[type="submit"] { background-color: var(--clr-accent); color: var(--clr-white); }
+        #formGestionSorteo button[type="submit"]:hover { background-color: color-mix(in srgb, var(--clr-accent) 80%, black); }
+        #formGestionSorteo input[type="checkbox"] { width: auto; margin-right: 8px; vertical-align: middle;}
+        #formGestionSorteo label[for="sorteoActivo"] { display: inline-block; margin-bottom: 0; }
+
+        .status-container {
+            margin-top: 15px; padding: 12px; border-radius: var(--border-radius-medium);
+            text-align: center; font-weight: 500; line-height: 1.5;
+            min-height: 40px; /* Para que no salte tanto cuando aparece/desaparece texto */
+        }
+        .status-container.success {
+            background-color: rgba(44, 182, 125, 0.15); /* Usando --clr-primary con alfa */
+            border: 1px solid var(--clr-primary);
+            color: var(--clr-primary);
+        }
+        .status-container.error {
+            background-color: rgba(239, 69, 101, 0.15); /* Usando --clr-red con alfa */
+            border: 1px solid var(--clr-red);
+            color: var(--clr-red);
+        }
+        .whatsapp-action-link-admin {
+            display: inline-block; margin-top: 12px; padding: 10px 18px;
+            background-color: #25D366; color: white !important;
+            border-radius: 25px; text-decoration: none; font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .whatsapp-action-link-admin:hover { background-color: #1DAE54; transform: translateY(-1px); }
+        .whatsapp-action-link-admin i { margin-right: 8px; }
+    </style>
+</head>
+<body class="dark-theme">
+
+    <header class="site-header">
+        <img src="images/logo.png" alt="Logo del Sorteo" class="logo-header" style="max-height: 100px;">
+        <h1>Panel de Administración del Sorteo</h1>
+    </header>
+
+    <main class="admin-container">
+        <section id="loginSection" class="admin-section">
+            <h2>Iniciar Sesión como Administrador</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña de Admin:</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <button type="submit" class="admin-button login-button">Entrar</button>
+            </form>
+            <div id="loginStatusMessage" class="status-container" style="font-weight: 600;"></div>
+        </section>
+
+        <div id="adminContent" class="oculto">
+            <div class="logout-button-container">
+                <button id="logoutButton" class="logout-button"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+            </div>
+            <!-- === NUEVA SECCIÓN: DASHBOARD CON ESTADÍSTICAS === -->
+            <section class="admin-section">
+                <button id="toggleDashboardBtn" class="admin-button" type="button" style="margin-bottom: 15px;">
+                    <i class="fas fa-chart-line"></i> Mostrar/Ocultar Dashboard de Estadísticas
+                </button>
+                <div id="dashboardStats" style="display: none;">
+                    <h2><i class="fas fa-chart-line"></i> Dashboard de Estadísticas</h2>
+                    <div class="dashboard-grid">
+                        <div class="chart-container">
+                            <h3 style="text-align:center; margin-bottom: 15px;">Paquetes Más Populares</h3>
+                            <canvas id="paquetesChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3 style="text-align:center; margin-bottom: 15px;">Boletos por Día (Últimos 7 Días)</h3>
+                            <canvas id="diarioChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- ============================================= -->
+            <section class="admin-section">
+                <h2>Añadir Nuevos Boletos Digitales</h2>
+                <p style="font-size: 0.9em; color: var(--clr-dark-text-alt); margin-bottom:20px; padding: 10px; background-color: var(--clr-dark-bg); border-radius: var(--border-radius-medium); border: 1px solid var(--clr-dark-border);">
+                    Sorteo Actual: <strong id="infoSorteoActualParaParticipaciones" style="color: var(--clr-primary); display: block; margin-top: 5px;">Cargando...</strong>
+                </p>
+                <form id="addParticipantForm">
+                    <div class="form-group">
+                        <label for="participantId">ID del Participante (10 dígitos):</label>
+                        <input type="text" id="participantId" name="id_documento" required maxlength="10" pattern="\d{10}" title="Debe contener 10 dígitos numéricos" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="participantName">Nombre del Participante:</label>
+                        <input type="text" id="participantName" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="participantCity">Ciudad del Participante (Opcional):</label>
+                        <input type="text" id="participantCity" name="ciudad">
+                    </div>
+                    <div class="form-group">
+                        <label for="participantPhone">Número de Celular (10 dígitos, opcional):</label>
+                        <input type="text" id="participantPhone" name="celular" maxlength="10" pattern="\d{10}" title="Debe contener 10 dígitos numéricos si se ingresa">
+                    </div>
+                    <div class="form-group">
+                        <label for="participantEmail">Correo Electrónico del Participante (Opcional):</label>
+                        <input type="email" id="participantEmail" name="email" title="Ej: correo@dominio.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="packageChosen">Paquete Elegido (Opcional):</label>
+                        <select id="packageChosen" name="paquete_elegido">
+                            <option value="">-- Seleccionar Paquete (si aplica) --</option>
+                            <option value="Individual ($2 c/u)">Individual ($2 c/u)</option>
+                            <option value="Pack Básico (6 x $12)">Pack Básico (6 x $12)</option>
+                            <option value="Combo Ganador (15 x $28)">Pack Ahorro (15 x $28)</option>
+                            <option value="Fortuna MAX (30 x $55)">Pack Ahorro Pro (30 x $55)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="affiliateName">Nombre del Afiliado (Opcional):</label>
+                        <input type="text" id="affiliateName" name="nombre_afiliado">
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Cantidad de Participaciones (si no es por paquete):</label>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="500" required>
+                    </div>
+                    <button type="submit" class="admin-button">Añadir Participación(es)</button>
+                </form>
+                <div id="statusMessage" class="status-container"></div>
+            </section>
+
+            <section class="admin-section">
+                <h2>Lista de Participaciones del Sorteo Activo (<span id="currentCount">0</span>)</h2>
+                 <div class="loader-container oculto" id="loaderList">
+                     <div class="loader"></div>
+                 </div>
+                <ul id="participantList"></ul>
+            </section>
+
+            <section class="admin-section">
+                <h2>Gestionar Sorteos</h2>
+                <form id="formGestionSorteo">
+                    <input type="hidden" id="sorteoEditId" value="">
+                    <div class="form-group">
+                        <label for="nombrePremioDisplay">Nombre del Premio (para mostrar):</label>
+                        <input type="text" id="nombrePremioDisplay" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombreBaseArchivoGuia">Nombre Base Archivo Guía PDF (ej: iPhone_XX_Pro):</label>
+                        <input type="text" id="nombreBaseArchivoGuia" required placeholder="Ej: iPhone_17_Max">
+                        <small style="color: var(--clr-dark-text-alt); font-size:0.8em; display:block; margin-top:5px;">El archivo PDF deberá llamarse "MiniGuia_NOMBREBASE.pdf" y estar en la carpeta /guias.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcionPremio">Descripción Breve del Premio (opcional):</label>
+                        <input type="text" id="descripcionPremio">
+                    </div>
+                    <div class="form-group">
+                        <label for="metaParticipacionesSorteo">Meta de Participaciones:</label>
+                        <input type="number" id="metaParticipacionesSorteo" value="200" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="sorteoActivo">
+                        <label for="sorteoActivo">Marcar como Sorteo Activo (desactivará otros)</label>
+                    </div>
+                    <button type="submit" class="admin-button" id="btnGuardarSorteo">Guardar Sorteo</button>
+                    <button type="button" class="admin-button" id="btnCancelarEdicionSorteo" style="background-color: var(--clr-dark-text-alt); display:none;">Cancelar Edición</button>
+                </form>
+                <div id="statusGestionSorteo" class="status-container"></div>
+
+                <h3 style="margin-top: 30px; margin-bottom: 10px; color: var(--clr-primary);">Sorteos Configurados:</h3>
+                <div class="loader-container oculto" id="loaderListaSorteos">
+                    <div class="loader"></div>
+                </div>
+                <table class="tabla-sorteos">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Premio</th>
+                            <th>Guía Base</th>
+                            <th>Meta</th>
+                            <th>Status</th>
+                            <th>Acciones</th>
+                            <th>Historial</th> <!-- Nueva Columna -->                            
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyListaSorteos"></tbody>
+                </table>
+            </section>
+
+            <section class="admin-section opciones-section">
+                <h2>Opciones del Sorteo</h2>
+                
+                <p style="color: var(--clr-dark-text-alt); margin-bottom: 15px;">
+                    Una vez alcanzada la meta, usa este botón para iniciar la cuenta regresiva de 1 hora en la página principal.
+                </p>
+                <button id="btnIniciarCuentaRegresiva" class="admin-button boton-iniciar-sorteo">
+                    <i class="fas fa-hourglass-start"></i> Iniciar Cuenta Regresiva para Sorteo (1 Hora)
+                </button>
+                <div id="estadoCuentaRegresivaAdmin" class="status-container oculto"></div>
+                
+                <hr style="border-color: var(--clr-dark-border); margin: 30px 0;">
+
+                <p style="color: var(--clr-dark-text-alt); margin-bottom: 15px;">
+                    Usa este botón después de realizar un sorteo para marcarlo como "completado" y archivarlo.
+                </p>
+                <button id="btnFinalizarSorteo" class="admin-button boton-finalizar">
+                    <i class="fas fa-archive"></i> Finalizar y Archivar Sorteo Actual
+                </button>
+                <div id="finalizarStatusMessage" class="status-container"></div>
+                            <!-- === MODAL PARA HISTORIAL DE PARTICIPANTES === -->
+            <div id="historialModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal-btn" id="closeHistorialModal">&times;</span>
+                    <h3 id="historialModalTitle" style="color:var(--clr-primary); margin-bottom:15px;">Historial de Participantes</h3>
+                    <div class="loader-container oculto" id="loaderHistorial">
+                        <div class="loader"></div>
+                    </div>
+                    <ul id="historialParticipantesLista" style="list-style-type: decimal; padding-left: 20px;">
+                        <!-- La lista de participantes del sorteo seleccionado se cargará aquí -->
+                    </ul>
+                </div>
+            </div>
+            </section>
+
+    <!-- ========================================== -->
+        </div>
+    </main>
+    <footer class="site-footer">
+        <p>&copy; 2025 Panel de Administración MOVIL WIN</p>
+    </footer>
+
+    <script src="admin.js"></script>
+</body>
+</html>

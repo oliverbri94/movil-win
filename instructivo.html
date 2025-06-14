@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía para Afiliados - MOVIL WIN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #16161a; /* Fondo oscuro principal */
+            color: #e4e4e7; /* Texto principal claro */
+        }
+        .slide-container {
+            background-color: #242629; /* Fondo de tarjeta */
+            border: 1px solid #3a3f44; /* Borde sutil */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        .slide {
+            display: none; /* Ocultar slides por defecto */
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .slide.active {
+            display: block; /* Mostrar slide activo */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .nav-button {
+            background-color: #7f5af0; /* Púrpura */
+            color: white;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .nav-button:hover {
+            background-color: #6a44d6;
+            transform: translateY(-2px);
+        }
+        .nav-button:disabled {
+            background-color: #3a3f44;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background-color: #3a3f44;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%; /* Se actualizará con JS */
+            background-color: #2cb67d; /* Verde azulado */
+            border-radius: 4px;
+            transition: width 0.3s ease-out;
+        }
+        .slide ul { list-style: none; padding-left: 0; }
+        .slide ul li {
+            background-color: #2a2d30; padding: 12px 18px; margin-bottom: 10px;
+            border-radius: 8px; border-left: 4px solid #7f5af0; /* Púrpura */
+            font-size: 0.95em;
+        }
+         .slide ul li strong { color: #ff8906; /* Naranja */ }
+         .slide ol { padding-left: 20px; }
+         .slide ol li { margin-bottom: 10px; padding-left: 5px;}
+         .disclaimer-box {
+            background-color: rgba(255, 137, 6, 0.1); /* Fondo naranja muy sutil */
+            border: 1px solid #ff8906; /* Borde naranja */
+            color: #f0f0f0; /* Texto claro */
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.9em;
+         }
+         .disclaimer-box strong { color: #ff8906; }
+         .paquete-item.popular .etiqueta-popular { /* Ajuste para que no se corte con overflow:visible del padre */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+         }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
+
+    <div class="slide-container w-full max-w-2xl p-6 sm:p-8 rounded-xl shadow-2xl">
+        <div id="slide-content">
+            <div class="slide active">
+                <div class="text-center mb-6">
+                    <img src="images/logo.png" alt="Logo MOVIL WIN" class="mx-auto mb-4 w-32 h-auto sm:w-40">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">¡Bienvenido al Programa de Afiliados <span style="color: #ff8906;">MOVIL WIN</span>! 🚀📱</h1>
+                </div>
+                <p class="text-lg text-gray-300 mb-4">¡Qué alegría que te unas! En MOVIL WIN, estamos emocionados de ofrecer la oportunidad de ganar premios increíbles, como un <strong>Smartphone de Última Generación</strong>, y tú eres una pieza clave para que más personas conozcan esta oportunidad.</p>
+                <p class="text-gray-400">Esta guía te explicará todo lo que necesitas saber para ser un(a) Afiliado(a) estrella. ¡Vamos a ello!</p>
+            </div>
+
+            <div class="slide">
+                <h2 class="text-xl sm:text-2xl font-semibold text-center mb-6" style="color: #ff8906;">⚠️ Importante: Tu Rol Como Afiliado(a)</h2>
+                <div class="disclaimer-box">
+                    <p class="mb-3">Queremos ser súper transparentes contigo: Al unirte como Afiliado(a) de MOVIL WIN, estás participando en un programa para generar <strong>ingresos por comisión</strong> basados en las participaciones que se vendan gracias a tu referencia.</p>
+                    <ul class="list-disc list-inside space-y-1 text-sm">
+                        <li>Esto <strong>NO constituye una relación laboral</strong> (no hay salario fijo, beneficios de empleado, horarios, etc.).</li>
+                        <li>Tus ingresos provendrán exclusivamente de las comisiones generadas por las ventas que refieras.</li>
+                        <li>Actúas como un <strong>colaborador independiente</strong>, promocionando nuestros sorteos y guiando a los interesados a nuestro canal de venta oficial.</li>
+                    </ul>
+                    <p class="mt-3">Si tienes alguna duda sobre esto, ¡pregúntanos antes de empezar! Queremos que todo esté clarísimo.</p>
+                </div>
+                <p class="mt-4 text-gray-400 text-sm text-center">Continuando, aceptas que entiendes la naturaleza de esta colaboración.</p>
+            </div>
+
+            <div class="slide">
+                <h2 class="text-xl sm:text-2xl font-semibold text-center mb-6" style="color: #2cb67d;">🎯 Tu Misión Como Afiliado(a)</h2>
+                <ul class="space-y-3 text-gray-300">
+                    <li><i class="fas fa-bullhorn mr-2 text-purple-400"></i><strong>Promocionar el Sorteo:</strong> ¡Corre la voz! Habla con tus amigos, familiares, conocidos, y comparte en tus redes sociales sobre el increíble Smartphone que estamos sorteando.</li>
+                    <li><i class="fas fa-info-circle mr-2 text-purple-400"></i><strong>Explicar los Beneficios:</strong> Informa a los interesados sobre los diferentes paquetes de participaciones y cómo cada uno aumenta sus chances de ganar.</li>
+                    <li><i class="fab fa-whatsapp mr-2 text-green-400"></i><strong>Dirigir al Canal de Venta:</strong> Guía a las personas interesadas a nuestro WhatsApp oficial de MOVIL WIN para que puedan adquirir sus participaciones de forma segura y directa.</li>
+                </ul>
+            </div>
+
+            <div class="slide">
+                <h2 class="text-xl sm:text-2xl font-semibold text-center mb-6" style="color: #2cb67d;">💰 ¡Tus Ganancias! (Comisión del 10%)</h2>
+                <p class="text-lg text-gray-300 mb-4">¡Tu esfuerzo tiene recompensa! Por cada participación o paquete que se venda gracias a tu referencia y que sea confirmada, te llevarás una <strong>comisión del 10%</strong> sobre el valor de esa venta.</p>
+                <div class="bg-gray-700 p-4 rounded-lg text-sm">
+                    <p class="text-gray-300"><strong>Ejemplo de tus comisiones:</strong></p>
+                    <ul class="list-disc list-inside ml-4 text-gray-400">
+                        <li>Venta del "Pack Ahorro Pro" ($55): Tu comisión = $5.50</li>
+                        <li>Venta del "Pack Ahorro" ($28): Tu comisión = $2.80</li>
+                        <li>Venta del "Pack Básico" ($12): Tu comisión = $1.20</li>
+                    </ul>
+                </div>
+                <p class="mt-4 text-lg text-gray-300">¡Mientras más personas participen gracias a ti, más ganas! Nosotros nos encargamos de toda la logística del sorteo.</p>
+            </div>
+
+            <div class="slide">
+                <h2 class="text-xl sm:text-2xl font-semibold text-center mb-6" style="color: #2cb67d;">🎟️ Precios y Paquetes (Smartphone de Alta Gama)</h2>
+                <p class="text-center text-gray-400 mb-4">¡Recuerda que cada participación individual cuesta solo <strong>$2</strong>!</p>
+                <div class="space-y-4">
+                    <div class="p-4 rounded-lg border border-purple-500 bg-purple-900/30">
+                        <h3 class="font-semibold text-lg text-purple-300">Pack Básico</h3>
+                        <p class="text-2xl font-bold text-white">$12 <span class="text-sm text-gray-400">(6 Participaciones)</span></p>
+                        <p class="text-sm text-gray-400 italic">¡Una excelente forma de empezar a probar tu suerte!</p>
+                    </div>
+                    <div class="p-4 rounded-lg border border-purple-500 bg-purple-900/30">
+                        <h3 class="font-semibold text-lg text-purple-300">Pack Ahorro</h3>
+                        <p class="text-2xl font-bold text-white">$28 <span class="text-sm text-gray-400 line-through">$30</span> <span class="text-sm text-gray-400">(15 Participaciones)</span></p>
+                        <p class="text-sm text-gray-400 italic">¡Más chances, más ahorro! Ideal para aumentar tus posibilidades.</p>
+                    </div>
+                    <div class="p-4 rounded-lg border-2 border-orange-500 bg-orange-900/30 relative overflow-visible">
+                        <span class="etiqueta-popular">Mejor Oferta</span>
+                        <h3 class="font-semibold text-lg text-orange-300">Pack Ahorro Pro</h3>
+                        <p class="text-2xl font-bold text-white">$55 <span class="text-sm text-gray-400 line-through">$60</span> <span class="text-sm text-gray-400">(30 Participaciones)</span></p>
+                        <p class="text-sm text-gray-400 italic">¡El máximo de oportunidades con el mayor ahorro!</p>
+                    </div>
+                </div>
+                 <p class="mt-6 text-center text-gray-400">Los interesados pueden mencionar el paquete que elijan al contactarnos por WhatsApp.</p>
+            </div>
+
+            <div class="slide">
+                <h2 class="text-xl sm:text-2xl font-semibold text-center mb-6" style="color: #2cb67d;">📲 Proceso para que tus Referidos Participen</h2>
+                <p class="text-center text-gray-400 mb-4">Tu rol es clave para informar y motivar. La compra se finaliza en nuestro WhatsApp oficial.</p>
+                <ol class="space-y-3 text-gray-300">
+                    <li><i class="fas fa-comments mr-2 text-green-400"></i><strong>Explica y Entusiasma:</strong> Cuéntales sobre el increíble Smartphone y los paquetes disponibles. ¡Muestra tu emoción!</li>
+                    <li><i class="fas fa-link mr-2 text-blue-400"></i><strong>Comparte el Enlace Oficial:</strong> Proporciónales el enlace directo a nuestro WhatsApp de MOVIL WIN:
+                        <strong class="block mt-1 mb-1 break-all"><code>https://wa.me/593963135510?text=Hola%20MOVIL%20WIN%2C%20estoy%20interesado%2Fa%20en%20participar%20en%20el%20sorteo%20del%20smartphone.%20Vengo%20referido%2Fa%20por%20[TU NOMBRE AQUÍ].</code></strong>
+                        <span class="text-xs text-gray-500">(Asegúrate de que usen un enlace que te identifique si tenemos un sistema de rastreo, o pídeles que mencionen tu nombre).</span></li>
+                    <li><i class="fas fa-user-tag mr-2 text-orange-400"></i><strong>Una vez realizado el cierre de venta</strong> Informa al equipo que la venta es por ti <strong>"[Tu Nombre de Afiliado(a)]"</strong>. Así sabremos que la venta es gracias a ti.</li>
+                    <li><i class="fas fa-mobile-alt mr-2 text-purple-400"></i><strong>Nosotros Nos Encargamos:</strong> Una vez que nos contacten, nuestro equipo de MOVIL WIN los guiará para recopilar sus datos (Nombre, CI, Ciudad, Celular, Paquete) y completar el pago.</li>
+                    <li><i class="fas fa-check-double mr-2 text-green-400"></i><strong>Seguimiento de tu Comisión:</strong> Te informaremos sobre las ventas confirmadas que lleguen con tu referencia para que lleves control de tus comisiones. (Definiremos este proceso contigo).</li>
+                </ol>
+            </div>
+
+            <div class="slide">
+                <h2 class="text-xl sm:text-2xl font-semibold text-center mb-6" style="color: #2cb67d;">🏆 Estrategias para ser un(a) Afiliado(a) Estrella</h2>
+                <ul class="space-y-2 text-gray-300">
+                    <li><i class="fas fa-lightbulb mr-2 text-yellow-400"></i><strong>Conoce el Premio y los Paquetes:</strong> ¡La información es poder!</li>
+                    <li><i class="fas fa-share-square mr-2 text-blue-400"></i><strong>Usa tus Redes Sociales:</strong> Publica regularmente. Te daremos imágenes y textos sugeridos.</li>
+                    <li><i class="fas fa-comments mr-2 text-green-400"></i><strong>Mensajes Personalizados:</strong> Adapta tu mensaje a cada persona o grupo.</li>
+                    <li><i class="fas fa-users mr-2 text-teal-400"></i><strong>Grupos y Comunidades:</strong> Comparte en grupos donde creas que hay interés (con permiso).</li>
+                    <li><i class="fas fa-fire mr-2 text-red-400"></i><strong>Crea Urgencia (sutil):</strong> "¡La meta se está llenando!", "¡Últimos días para los paquetes!".</li>
+                    <li><i class="fas fa-user-check mr-2 text-purple-400"></i><strong>Sé Auténtico y Transparente:</strong> La confianza es clave.</li>
+                </ul>
+            </div>
+
+            <div class="slide">
+                <h2 class="text-xl sm:text-2xl font-semibold text-center mb-6" style="color: #2cb67d;">📌 Aspectos Importantes para Afiliados</h2>
+                 <ul class="space-y-3 text-gray-300">
+                    <li><i class="fas fa-headset mr-2 text-purple-400"></i><strong>Comunicación Constante:</strong> ¡Estamos aquí para tus dudas!</li>
+                    <li><i class="fas fa-handshake mr-2 text-green-400"></i><strong>Honestidad Siempre:</strong> Representa a MOVIL WIN con transparencia.</li>
+                    <li><i class="fas fa-clipboard-list mr-2 text-blue-400"></i><strong>Reporte de Referidos:</strong> Asegúrate que tus referidos mencionen tu nombre al contactarnos.</li>
+                    <li><i class="fas fa-smile-beam mr-2 text-yellow-400"></i><strong>¡Disfruta el Proceso!</strong> Tu entusiasmo es tu mejor herramienta.</li>
+                </ul>
+            </div>
+
+            <div class="slide">
+                <h2 class="text-xl sm:text-2xl font-semibold text-center mb-6" style="color: #2cb67d;">🎉 ¡A Crecer Juntos con MOVIL WIN!</h2>
+                <p class="text-lg text-gray-300 mb-4">¡Estamos muy contentos de que seas parte de nuestro Programa de Afiliados! Juntos llevaremos la emoción de nuestros sorteos a más personas.</p>
+                <p class="text-gray-400">Si tienes alguna pregunta antes de empezar, ¡no dudes en consultarnos!</p>
+                <div class="mt-6 text-center">
+                    <img src="images/logo.png" alt="Logo MOVIL WIN" class="mx-auto w-24 h-auto">
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar-container mt-4">
+            <div id="slideProgressBar" class="progress-bar-fill"></div>
+        </div>
+
+        <div class="flex justify-between mt-6">
+            <button id="prevButton" class="nav-button py-2 px-4 rounded-lg font-semibold shadow-md" disabled>
+                <i class="fas fa-arrow-left mr-2"></i> Anterior
+            </button>
+            <button id="nextButton" class="nav-button py-2 px-4 rounded-lg font-semibold shadow-md">
+                Siguiente <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevButton = document.getElementById('prevButton');
+        const nextButton = document.getElementById('nextButton');
+        const progressBar = document.getElementById('slideProgressBar');
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+
+        function updateSlideVisibility() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            prevButton.disabled = currentSlide === 0;
+            nextButton.disabled = currentSlide === totalSlides - 1;
+            const progressPercentage = totalSlides > 1 ? ((currentSlide) / (totalSlides - 1)) * 100 : 0;
+            progressBar.style.width = `${progressPercentage}%`;
+
+            if (currentSlide === totalSlides - 1) {
+                nextButton.innerHTML = 'Finalizar Guía <i class="fas fa-check ml-2"></i>';
+            } else {
+                nextButton.innerHTML = 'Siguiente <i class="fas fa-arrow-right ml-2"></i>';
+            }
+        }
+
+        prevButton.addEventListener('click', () => {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlideVisibility();
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlideVisibility();
+            } else {
+                alert("¡Guía completada! ¡Listo para empezar a promocionar como Afiliado(a) MOVIL WIN!");
+                // Opcional: resetear al primer slide o redirigir
+                // currentSlide = 0;
+                // updateSlideVisibility();
+            }
+        });
+        updateSlideVisibility(); // Inicializar
+    </script>
+
+</body>
+</html>

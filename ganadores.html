@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Ganadores - MOVIL WIN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-dark-bg': '#16161a',
+                        'custom-dark-bg-alt': '#242629',
+                        'custom-dark-bg-frame': '#1f1f23',
+                        'custom-primary': '#2cb67d',
+                        'custom-secondary': '#7f5af0',
+                        'custom-accent': '#ff8906',
+                        'custom-text-light': '#e4e4e7',
+                        'custom-text-alt': '#94a1b2',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .page-container { max-width: 1100px; margin: 40px auto; padding: 20px; }
+        .back-link { display: inline-block; margin-bottom: 30px; color: var(--clr-primary); text-decoration: none; font-weight: 600; transition: color 0.3s ease; }
+        .back-link:hover { color: var(--clr-accent); text-decoration: underline; }
+        .filtros-ganadores {
+            background-color: var(--clr-dark-bg-modulo);
+            padding: 20px;
+            border-radius: var(--border-radius-medium);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filtros-ganadores label { font-weight: 500; color: var(--clr-dark-text-alt); }
+        .filtros-ganadores select {
+            background-color: var(--clr-dark-bg); color: var(--clr-dark-text);
+            border: 1px solid var(--clr-dark-border); border-radius: 6px;
+            padding: 8px 12px; min-width: 150px;
+        }
+        .filtros-ganadores select:focus {
+            outline: none; border-color: var(--clr-primary);
+            box-shadow: 0 0 0 2px rgba(var(--clr-primary-rgb, 44, 182, 125), 0.5);
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <nav class="bg-custom-dark-bg-frame shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="index.html" class="flex items-center">
+                        <img src="images/logo.png" alt="Logo Movil Win" class="h-12 w-auto">
+                    </a>
+                </div>
+                <div class="flex items-center">
+                    <button id="mobileMenuButton" class="outline-none p-2 rounded-md hover:bg-custom-dark-bg-alt focus:bg-custom-dark-bg-alt transition-colors duration-300">
+                        <svg class="w-6 h-6 text-custom-text-alt hover:text-custom-primary"
+                            fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="fullScreenMenu" class="hidden fixed inset-0 bg-custom-dark-bg bg-opacity-95 backdrop-blur-sm z-40 flex flex-col items-center justify-center p-6 transition-opacity duration-300 ease-in-out">
+             <button id="closeMenuButton" class="absolute top-6 right-6 text-custom-text-alt hover:text-custom-primary text-4xl leading-none">&times;</button>
+            <img src="images/logo.png" alt="Logo Movil Win" class="h-20 w-auto mb-8">
+            <ul class="flex flex-col items-center space-y-6">
+                <li><a href="index.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Inicio</a></li>
+                <li><a href="faq.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Preguntas Frecuentes</a></li>
+                <li><a href="bases.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Bases y Condiciones</a></li>
+                <li><a href="ganadores.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Historial de Ganadores</a></li>
+            </ul>
+             <div class="social-links-footer mt-12 flex space-x-6">
+                <a href="https://wa.me/593963135510" target="_blank" rel="noopener noreferrer" aria-label="Contáctanos en WhatsApp" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
+                    <i class="fab fa-whatsapp fa-2x"></i>
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Facebook" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
+                    <i class="fab fa-facebook-f fa-2x"></i>
+                </a>
+                <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Instagram" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
+                    <i class="fab fa-instagram fa-2x"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+    <header class="site-header" style="padding-top: 20px; padding-bottom: 20px;">
+        <h1 class="main-title" style="font-family: 'Anton', sans-serif;font-weight: bold;font-size: clamp(2em, 5vw, 3em);">Historial de Ganadores</h1>
+        <h2 class="subtitle" style="font-size: clamp(1em, 2.5vw, 1.2em);">¡Ellos ya cumplieron su sueño con MOVIL WIN!</h2>
+    </header>
+
+    <main class="page-container">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver al Sorteo Principal</a>
+
+        <section class="content-section seccion-ganadores-anteriores">
+            <div class="filtros-ganadores">
+                <div>
+                    <label for="selectAnio">Año:</label>
+                    <select id="selectAnio">
+                        <option value="">Todos los Años</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="selectMes">Mes:</label>
+                    <select id="selectMes">
+                        <option value="">Todos los Meses</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="loader-container oculto" id="loaderTodosGanadores">
+                <div class="loader"></div>
+            </div>
+            <div class="lista-ganadores" id="listaTodosGanadores">
+            </div>
+            <p id="mensajeSinGanadores" class="text-center text-custom-text-alt mt-6 oculto">No hay ganadores para el periodo seleccionado.</p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2025 MOVIL WIN | Todos los derechos reservados.</p>
+        <div class="social-links-footer">
+            <a href="https://wa.me/593963135510" target="_blank" rel="noopener noreferrer" aria-label="Contáctanos en WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Instagram"><i class="fab fa-instagram"></i></a>
+        </div>
+    </footer>
+
+    <script>
+        // Script para el menú móvil (igual que en index.html y faq.html)
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const fullScreenMenu = document.getElementById('fullScreenMenu');
+        const closeMenuButton = document.getElementById('closeMenuButton');
+
+        function toggleFullScreenMenu() {
+            if (fullScreenMenu) {
+                const isVisible = fullScreenMenu.classList.contains('menu-visible');
+                if (isVisible) {
+                    fullScreenMenu.classList.remove('menu-visible');
+                    setTimeout(() => { fullScreenMenu.classList.add('hidden'); }, 300);
+                } else {
+                    fullScreenMenu.classList.remove('hidden');
+                    void fullScreenMenu.offsetWidth;
+                    fullScreenMenu.classList.add('menu-visible');
+                }
+            }
+        }
+        if (mobileMenuButton) mobileMenuButton.addEventListener('click', toggleFullScreenMenu);
+        if (closeMenuButton) closeMenuButton.addEventListener('click', toggleFullScreenMenu);
+         if (fullScreenMenu) {
+            const menuLinks = fullScreenMenu.querySelectorAll('ul a');
+            menuLinks.forEach(link => {
+                link.addEventListener('click', () => { /* No acción especial al navegar a otra página */ });
+            });
+        }
+
+        // Script para cargar y mostrar TODOS los ganadores y filtrarlos
+        const listaTodosGanadoresDiv = document.getElementById('listaTodosGanadores');
+        const loaderTodosGanadores = document.getElementById('loaderTodosGanadores');
+        const selectAnio = document.getElementById('selectAnio');
+        const selectMes = document.getElementById('selectMes');
+        const mensajeSinGanadores = document.getElementById('mensajeSinGanadores');
+
+        let todosLosGanadoresGlobal = [];
+        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+        function parsearFecha(fechaStr) {
+            if (!fechaStr) return null;
+            const partes = fechaStr.toLowerCase().split(' de ');
+            if (partes.length === 3) {
+                const dia = parseInt(partes[0]);
+                const mesStr = partes[1];
+                const anio = parseInt(partes[2]);
+                const mesIndex = meses.findIndex(m => m.toLowerCase() === mesStr);
+                if (!isNaN(dia) && mesIndex !== -1 && !isNaN(anio)) {
+                    return new Date(anio, mesIndex, dia);
+                }
+            }
+            console.warn("No se pudo parsear la fecha:", fechaStr);
+            return null;
+        }
+
+        function poblarFiltros() {
+            const anios = new Set();
+            todosLosGanadoresGlobal.forEach(ganador => {
+                const fecha = parsearFecha(ganador.fecha);
+                if (fecha) anios.add(fecha.getFullYear());
+            });
+            selectAnio.innerHTML = '<option value="">Todos los Años</option>';
+            Array.from(anios).sort((a,b) => b - a).forEach(anio => {
+                const option = document.createElement('option');
+                option.value = anio; option.textContent = anio;
+                selectAnio.appendChild(option);
+            });
+            actualizarFiltroMeses();
+        }
+
+        function actualizarFiltroMeses() {
+            const anioSeleccionado = selectAnio.value;
+            selectMes.innerHTML = '<option value="">Todos los Meses</option>';
+            if (anioSeleccionado && todosLosGanadoresGlobal.length > 0) {
+                 const mesesDelAnio = new Set();
+                 todosLosGanadoresGlobal.forEach(ganador => {
+                    const fecha = parsearFecha(ganador.fecha);
+                    if (fecha && fecha.getFullYear() == anioSeleccionado) {
+                        mesesDelAnio.add(fecha.getMonth());
+                    }
+                 });
+                Array.from(mesesDelAnio).sort((a,b) => a - b).forEach(mesIndex => {
+                    const option = document.createElement('option');
+                    option.value = mesIndex; option.textContent = meses[mesIndex];
+                    selectMes.appendChild(option);
+                });
+            } else if (!anioSeleccionado) {
+                const todosLosMesesUnicos = new Set();
+                 todosLosGanadoresGlobal.forEach(ganador => {
+                    const fecha = parsearFecha(ganador.fecha);
+                    if (fecha) todosLosMesesUnicos.add(fecha.getMonth());
+                 });
+                 Array.from(todosLosMesesUnicos).sort((a,b) => a - b).forEach(mesIndex => {
+                    const option = document.createElement('option');
+                    option.value = mesIndex; option.textContent = meses[mesIndex];
+                    selectMes.appendChild(option);
+                });
+            }
+             selectMes.disabled = !anioSeleccionado && todosLosGanadoresGlobal.length === 0;
+        }
+
+        function filtrarYMostrarGanadores() {
+            if (!listaTodosGanadoresDiv) return;
+            listaTodosGanadoresDiv.innerHTML = '';
+            mensajeSinGanadores.classList.add('oculto');
+            const anioSeleccionado = selectAnio.value;
+            const mesSeleccionado = selectMes.value;
+            const ganadoresFiltrados = todosLosGanadoresGlobal.filter(ganador => {
+                const fecha = parsearFecha(ganador.fecha);
+                if (!fecha) return false;
+                const anioCoincide = !anioSeleccionado || fecha.getFullYear() == anioSeleccionado;
+                const mesCoincide = (mesSeleccionado === "") || fecha.getMonth() == mesSeleccionado; // Comparar como número
+                return anioCoincide && mesCoincide;
+            });
+            if (ganadoresFiltrados.length === 0) {
+                mensajeSinGanadores.classList.remove('oculto');
+            } else {
+                ganadoresFiltrados.forEach(ganador => {
+                    const card = document.createElement('div');
+                    card.classList.add('ganador-card');
+                    card.innerHTML = `
+                        <img src="${ganador.imagenUrl || 'images/placeholder-ganador.png'}" alt="Foto de ${ganador.nombre}" class="ganador-foto" onerror="this.onerror=null; this.src='images/placeholder-ganador.png'; this.alt='Foto no disponible';">
+                        <div class="ganador-info">
+                            <h3 class="ganador-nombre">${ganador.nombre}</h3>
+                            <p class="ganador-ubicacion"><i class="fas fa-map-marker-alt"></i> ${ganador.ciudad || 'N/A'}</p>
+                            ${ganador.premio ? `<p class="ganador-premio">Premio: ${ganador.premio}</p>` : ''}
+                            ${ganador.fecha ? `<p class="ganador-fecha">Fecha: ${ganador.fecha}</p>` : ''}
+                        </div>
+                    `;
+                    listaTodosGanadoresDiv.appendChild(card);
+                });
+            }
+        }
+
+        async function cargarTodosLosGanadores() {
+            if (!listaTodosGanadoresDiv || !loaderTodosGanadores) return;
+            loaderTodosGanadores.classList.remove('oculto');
+            listaTodosGanadoresDiv.innerHTML = '';
+            mensajeSinGanadores.classList.add('oculto');
+            try {
+                const response = await fetch('/api/ganadores');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: response.statusText }));
+                    throw new Error(`Error del servidor [${response.status}]: ${errorData.error || response.statusText}`);
+                }
+                todosLosGanadoresGlobal = await response.json();
+                if (!Array.isArray(todosLosGanadoresGlobal)) { throw new Error("Respuesta inválida del servidor."); }
+                poblarFiltros();
+                filtrarYMostrarGanadores();
+            } catch (error) {
+                console.error("Error cargando el historial completo de ganadores:", error);
+                listaTodosGanadoresDiv.innerHTML = `<p style="text-align: center; color: var(--clr-red);">Error al cargar el historial: ${error.message}</p>`;
+            } finally {
+                loaderTodosGanadores.classList.add('oculto');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarTodosLosGanadores();
+            if(selectAnio) selectAnio.addEventListener('change', () => {
+                actualizarFiltroMeses();
+                filtrarYMostrarGanadores();
+            });
+            if(selectMes) selectMes.addEventListener('change', filtrarYMostrarGanadores);
+        });
+    </script>
+</body>
+</html>
