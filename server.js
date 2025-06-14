@@ -74,7 +74,6 @@ function cargarConfigSorteoActualDesdeDB(db) {
         });
     });
 }
-
 // 5. Middlewares de Express y Autenticación
 app.use(cors());
 app.use(express.static('.'));
@@ -185,16 +184,28 @@ app.get('/api/dashboard-stats', requireAdminLogin, async (req, res) => {
     try {
         const stats = {};
 
-        // 1. Obtener conteo de paquetes más populares
+        // 1. Obtener conteo de paquetes más populares (sin cambios)
         const sqlPaquetes = `SELECT paquete_elegido, COUNT(*) as count FROM participaciones WHERE paquete_elegido IS NOT NULL AND paquete_elegido != '' GROUP BY paquete_elegido ORDER BY count DESC`;
         stats.paquetesPopulares = await new Promise((resolve, reject) => {
             db.all(sqlPaquetes, [], (err, rows) => err ? reject(err) : resolve(rows));
         });
 
-        // 2. Obtener participaciones de los últimos 7 días
-        const sqlDiario = `SELECT strftime('%Y-%m-%d', DATETIME(orden_id / 1000, 'unixepoch', 'localtime')) as dia, COUNT(*) as count FROM participaciones GROUP BY dia ORDER BY dia DESC LIMIT 7`;
+        // 2. Obtener participaciones de los últimos 7 días USANDO LA NUEVA COLUMNA DE FECHA
+        const sqlDiario = `
+            SELECT 
+                strftime('%Y-%m-%d', fecha_creacion) as dia, 
+                COUNT(*) as count 
+            FROM 
+                participaciones 
+            WHERE 
+                fecha_creacion >= date('now', '-7 days')
+            GROUP BY 
+                dia 
+            ORDER BY 
+                dia ASC;
+        `;
         stats.participacionesDiarias = await new Promise((resolve, reject) => {
-            db.all(sqlDiario, [], (err, rows) => err ? reject(err) : resolve(rows.reverse())); // Revertir para que el gráfico muestre del más antiguo al más nuevo
+            db.all(sqlDiario, [], (err, rows) => err ? reject(err) : resolve(rows));
         });
 
         res.json({ success: true, stats });
@@ -203,7 +214,6 @@ app.get('/api/dashboard-stats', requireAdminLogin, async (req, res) => {
         res.status(500).json({ success: false, error: 'Error interno al obtener estadísticas.' });
     }
 });
-
 // GET /api/sorteo-participantes/:id_sorteo - Obtener participantes de un sorteo específico
 app.get('/api/sorteo-participantes/:id_sorteo', requireAdminLogin, (req, res) => {
     const { id_sorteo } = req.params;
@@ -474,7 +484,8 @@ const db = new sqlite3.Database(DB_FILE, (err) => {
         process.exit(1);
     }
     console.log(`Conectado a SQLite: ${DB_FILE}`);
-
+    
+    // <<<--- ESTRUCTURA DE TABLAS ACTUALIZADA ---<<<
     const createTablesSql = `
         CREATE TABLE IF NOT EXISTS sorteos_config ( 
             id_sorteo INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -482,11 +493,24 @@ const db = new sqlite3.Database(DB_FILE, (err) => {
             nombre_base_archivo_guia TEXT NOT NULL, 
             descripcion_premio TEXT, 
             imagen_url TEXT,
-            status_sorteo TEXT DEFAULT 'programado', -- <<<--- COLUMNA CORRECTA
+            tipo_media TEXT DEFAULT 'imagen',
+            status_sorteo TEXT DEFAULT 'programado',
             meta_participaciones INTEGER DEFAULT 200, 
             detalles_adicionales_premio TEXT 
         );
-        CREATE TABLE IF NOT EXISTS participaciones ( orden_id INTEGER PRIMARY KEY AUTOINCREMENT, id_documento TEXT NOT NULL, nombre TEXT NOT NULL, ciudad TEXT, celular TEXT, email TEXT, paquete_elegido TEXT, nombre_afiliado TEXT DEFAULT NULL, id_sorteo_config_fk INTEGER, FOREIGN KEY (id_sorteo_config_fk) REFERENCES sorteos_config(id_sorteo) );
+        CREATE TABLE IF NOT EXISTS participaciones ( 
+            orden_id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            id_documento TEXT NOT NULL, 
+            nombre TEXT NOT NULL, 
+            ciudad TEXT, 
+            celular TEXT, 
+            email TEXT, 
+            paquete_elegido TEXT, 
+            nombre_afiliado TEXT DEFAULT NULL, 
+            id_sorteo_config_fk INTEGER, 
+            fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP, -- <<<--- NUEVA COLUMNA DE FECHA
+            FOREIGN KEY (id_sorteo_config_fk) REFERENCES sorteos_config(id_sorteo) 
+        );
         CREATE TABLE IF NOT EXISTS datos_unicos_participantes ( id_documento TEXT PRIMARY KEY, nombre TEXT, ciudad TEXT, celular TEXT, email TEXT );
         CREATE TABLE IF NOT EXISTS ganadores (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT NOT NULL, ciudad TEXT, id_participante TEXT, orden_id_participacion INTEGER, imagenUrl TEXT, premio TEXT, fecha TEXT, id_sorteo_config_fk INTEGER, FOREIGN KEY (id_sorteo_config_fk) REFERENCES sorteos_config(id_sorteo) );
     `;
@@ -496,7 +520,7 @@ const db = new sqlite3.Database(DB_FILE, (err) => {
             console.error("Error creando tablas:", execErr.message);
             process.exit(1);
         } else {
-            console.log("Tablas verificadas/creadas.");
+            console.log("Tablas verificadas/creadas con la columna de fecha.");
             try {
                 await cargarConfigSorteoActualDesdeDB(db);
                 startServer(db);

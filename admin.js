@@ -52,6 +52,19 @@ const historialModalTitle = document.getElementById('historialModalTitle');
 const closeHistorialModalBtn = document.getElementById('closeHistorialModal');
 const historialParticipantesLista = document.getElementById('historialParticipantesLista');
 const loaderHistorial = document.getElementById('loaderHistorial');
+// --- CÓDIGO PARA EL BOTÓN DE CONTRAER LA LISTA ---
+
+// 1. Buscamos el botón y la lista en el documento
+const toggleButton = document.getElementById('toggleHistorialBtn');
+const listaHistorial = document.getElementById('historialParticipantesLista');
+
+// 2. Añadimos un "escuchador" de eventos al botón para cuando se haga clic
+toggleButton.addEventListener('click', () => {
+    // 3. Usamos classList.toggle para añadir o quitar la clase "oculto".
+    //    Si la lista tiene la clase "oculto", se la quita.
+    //    Si no la tiene, se la pone.
+    listaHistorial.classList.toggle('oculto');
+});
 document.getElementById('toggleDashboardBtn').addEventListener('click', function() {
     const stats = document.getElementById('dashboardStats');
     stats.style.display = (stats.style.display === 'none' || stats.style.display === '') ? 'block' : 'none';

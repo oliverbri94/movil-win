@@ -265,14 +265,17 @@
                             <!-- === MODAL PARA HISTORIAL DE PARTICIPANTES === -->
             <div id="historialModal" class="modal">
                 <div class="modal-content">
+
                     <span class="close-modal-btn" id="closeHistorialModal">&times;</span>
                     <h3 id="historialModalTitle" style="color:var(--clr-primary); margin-bottom:15px;">Historial de Participantes</h3>
+
+                    <button id="toggleHistorialBtn" class="btn-simple">Mostrar / Ocultar Lista</button>
                     <div class="loader-container oculto" id="loaderHistorial">
                         <div class="loader"></div>
                     </div>
-                    <ul id="historialParticipantesLista" style="list-style-type: decimal; padding-left: 20px;">
-                        <!-- La lista de participantes del sorteo seleccionado se cargará aquí -->
-                    </ul>
+                    <ul id="historialParticipantesLista" class="oculto" style="list-style-type: decimal; padding-left: 20px;">
+                        </ul>
+                    
                 </div>
             </div>
             </section>

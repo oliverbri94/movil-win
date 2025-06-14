@@ -199,7 +199,7 @@ async function generarSlidesDelCarrusel() {
                 </a>
                 <div class="progress-info-wrapper" style="${esProximo ? 'display: none;' : ''}">
                     <div class="progress-bar-wrapper">
-                        <div class="progress-bar-fill" style="width: ${percentage}%;">${Math.round(percentage)}%</div>
+                        <div class="progress-bar-fill" style="width: ${percentage}%;">${percentage.toFixed(2)}%</div>
                     </div>
                     <p class="motivational-text-integrated">${motivationalMessage}</p>
                 </div>
