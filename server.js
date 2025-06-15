@@ -12,8 +12,8 @@ const fs = require('fs');
 const app = express();
 const port = 3000;
 const DB_FILE = path.join(__dirname, 'sorteo.db');
-const ADMIN_PASSWORD_HASH = '$2b$10$smI5GakSdpfQbVemvbabOee2/yjU5lJ6hIgOwvWGCEMw994hu.NZe'; // <<<--- PEGA TU HASH AQUÍ
-const SESSION_SECRET = 'supercalifragilisticoespialidoso'; // ¡CAMBIA ESTO!
+const ADMIN_PASSWORD_HASH = '$2b$10$smI5GakSdpfQretertretrtetw994hu.NZe'; // <<<--- PEGA TU HASH AQUÍ
+const SESSION_SECRET = 'supeertertertertespialidoso'; // ¡CAMBIA ESTO!
 
 let SORTEO_ACTUAL_INFO = {
     id_sorteo: null,
@@ -32,7 +32,7 @@ const mailConfig = {
     secure: true, // true para 465 (SSL)
     auth: {
         user: 'ceo@movilwin.com', // Tu dirección de email Gmail
-        pass: 'wtlq knww arje imls' // <<<--- ¡REEMPLAZA ESTO CON TU CONTRASEÑA DE APLICACIÓN DE GMAIL!
+        pass: 'wtreterterterterterimls' // <<<--- ¡REEMPLAZA ESTO CON TU CONTRASEÑA DE APLICACIÓN DE GMAIL!
     },
     tls: {
         rejectUnauthorized: false // A veces necesario para localhost o ciertos entornos, pero en producción revisar
