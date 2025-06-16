@@ -20,7 +20,9 @@ let SORTEO_ACTUAL_INFO = {
     nombre_premio_display: "Smartphone de Última Generación (Por Defecto)",
     nombre_base_archivo_guia: "Smartphone_Generico",
     descripcion_premio: "Un increíble smartphone con la última tecnología.",
-    meta_participaciones: 200
+    meta_participaciones: 200;
+    status_sorteo: 'completado'
+
 };
 // ==============================================================
 // --- Configuración para envío de email con Nodemailer ---
