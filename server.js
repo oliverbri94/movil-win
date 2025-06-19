@@ -81,6 +81,11 @@ try {
 app.use(cors());
 app.use(express.static('.'));
 app.use(express.json());
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || "http://127.0.0.1:5500", // Permite pruebas locales
+  credentials: true
+};
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -756,15 +761,36 @@ const createTablesSql = `
     );
 `;
 
-    db.exec(createTablesSql, (execErr) => {
-        if (execErr) {
-            console.error("Error creando tablas:", execErr.message);
-            process.exit(1);
-        }
-        console.log("Tablas verificadas/creadas correctamente.");
-        app.listen(port, () => {
-            console.log(`Servidor corriendo en http://localhost:${port}`);
+    const { Pool } = require('pg');
+    let db;
+
+    if (process.env.DATABASE_URL) {
+        // --- Conexión para Producción (Render) ---
+        console.log("Detectado entorno de producción. Conectando a PostgreSQL...");
+        const dbClient = new Pool({
+            connectionString: process.env.DATABASE_URL,
+            ssl: { rejectUnauthorized: false }
         });
+        db = {
+            run: (sql, params = [], callback = () => {}) => dbClient.query(sql, params).then(res => callback.call({ changes: res.rowCount }, null)).catch(err => callback(err)),
+            get: (sql, params = [], callback) => dbClient.query(sql, params).then(res => callback(null, res.rows[0])).catch(err => callback(err, null)),
+            all: (sql, params = [], callback) => dbClient.query(sql, params).then(res => callback(null, res.rows)).catch(err => callback(err, null)),
+            prepare: (sql) => ({
+                run: (params = [], callback = () => {}) => dbClient.query(sql, params, (err, res) => callback(err, res?.rowCount)),
+                finalize: (callback = () => {}) => callback()
+            }),
+            serialize: (callback) => callback() // Simulación para mantener la estructura
+        };
+    } else {
+        // --- Conexión para Desarrollo (Tu Computadora) ---
+        console.log("Detectado entorno local. Conectando a SQLite...");
+        const sqlite3 = require('sqlite3').verbose();
+        db = new sqlite3.Database('./sorteo.db');
+    }
+
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Servidor corriendo en el puerto ${PORT}`);
     });
 <<<<<<< HEAD
 }
