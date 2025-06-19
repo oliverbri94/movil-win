@@ -78,11 +78,26 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
+// --- REEMPLAZA TU CONFIGURACIÓN DE SESIÓN CON ESTA ---
+
+// Esta línea es importante para que Render confíe en la conexión segura (HTTPS)
+app.set('trust proxy', 1); 
+
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, httpOnly: true, maxAge: 1000 * 60 * 60 * 2,sameSite: 'strict'} // 2 horas
+    cookie: { 
+        // secure: true es OBLIGATORIO para SameSite: 'none'
+        // Solo funcionará si tu backend en Render usa HTTPS (lo cual hace por defecto)
+        secure: true, 
+
+        httpOnly: true, 
+        maxAge: 1000 * 60 * 60 * 2, // 2 horas
+
+        // Permite que la cookie se envíe en peticiones de sitios cruzados
+        sameSite: 'none' 
+    }
 }));
 const helmet = require('helmet');
 app.use(helmet());
