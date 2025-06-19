@@ -2,93 +2,160 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Sorteo Exclusivo</title>
+    <title>Admin - Panel de administración</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <!-- <<<--- LIBRERÍA DE GRÁFICOS (CHART.JS) ---<<< -->
+    <script src="config.js"></script>
+    <script src="admin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .admin-container { max-width: 800px; margin: 30px auto; padding: 20px; }
-        .reiniciar-section { margin-top: 40px; padding-top: 30px; border-top: 1px solid var(--clr-dark-border); }
-        .boton-reiniciar { background-color: var(--clr-red); color: var(--clr-white); }
-        .boton-reiniciar:hover { background-color: color-mix(in srgb, var(--clr-red) 80%, var(--clr-black) 20%); }
-        .logout-button-container { text-align: right; margin-bottom: 20px; }
+        /* Estilos generales del panel de admin */
+        .admin-container { max-width: 100%; margin: 0 auto; padding: 0; }
+        .logout-button-container { text-align: right; margin-bottom: 20px; padding: 0 30px;}
         .logout-button {
-            background-color: var(--clr-accent);
-            color: var(--clr-white);
-            padding: 8px 15px;
-            border-radius: 6px;
-            font-size: 0.9em;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
+            background-color: var(--clr-accent); color: var(--clr-white);
+            padding: 8px 15px; border-radius: 6px; font-size: 0.9em;
+            font-weight: 500; cursor: pointer; border: none;
             transition: background-color 0.3s ease;
         }
-        .logout-button:hover {
-            background-color: color-mix(in srgb, var(--clr-accent) 80%, var(--clr-black) 20%);
-        }
-        .login-button {
-            background-color: var(--clr-primary);
-        }
-        .login-button:hover {
-             background-color: color-mix(in srgb, var(--clr-primary) 80%, var(--clr-black) 20%);
-        }
+        .logout-button:hover { background-color: color-mix(in srgb, var(--clr-accent) 80%, black); }
+        .login-button { background-color: var(--clr-primary); }
+        .login-button:hover { background-color: color-mix(in srgb, var(--clr-primary) 80%, black); }
+
+        /* Estilos para la tabla de gestión de sorteos */
         .tabla-sorteos { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em;}
         .tabla-sorteos th, .tabla-sorteos td {
-            border: 1px solid var(--clr-dark-border);
-            padding: 10px 12px;
-            text-align: left;
-            color: var(--clr-dark-text-alt);
+            border: 1px solid var(--clr-dark-border); padding: 10px 12px;
+            text-align: left; color: var(--clr-dark-text-alt); vertical-align: middle;
         }
         .tabla-sorteos th {
-            background-color: var(--clr-dark-bg-frame);
-            color: var(--clr-dark-text);
+            background-color: var(--clr-dark-bg-frame); color: var(--clr-dark-text);
             font-weight: 600;
         }
         .tabla-sorteos tr:nth-child(even) { background-color: var(--clr-dark-bg); }
         .tabla-sorteos td .accion-btn {
             padding: 6px 10px; margin-right: 5px; border-radius: 5px;
             font-size: 0.9em; cursor: pointer; border: none; color: white;
+            transition: transform 0.2s, background-color 0.2s;
         }
+        .tabla-sorteos td .accion-btn:hover { transform: scale(1.1); }
         .btn-editar { background-color: var(--clr-secondary); }
-        .btn-editar:hover { background-color: color-mix(in srgb, var(--clr-secondary) 80%, black); }
         .btn-activar { background-color: var(--clr-primary); }
-        .btn-activar:hover { background-color: color-mix(in srgb, var(--clr-primary) 80%, black); }
-        .btn-activar[disabled] { background-color: #555; cursor: not-allowed; }
+        .btn-desactivar { background-color: var(--clr-dark-text-alt); }
+        .btn-finalizar { background-color: var(--clr-red); }
+        .btn-historial { background-color: var(--clr-accent); }
+        
+        /* Estilos para filas y estados */
         .sorteo-activo-row { background-color: color-mix(in srgb, var(--clr-primary) 20%, transparent) !important; }
         .sorteo-activo-row td { color: var(--clr-dark-text) !important; font-weight: 500; }
+        .status-activo { color: var(--clr-green); font-weight: bold; }
+        .status-programado { color: var(--clr-dark-text-alt); }
+        .status-completado { color: var(--clr-red); font-style: italic; text-decoration: line-through; }
 
-        #formGestionSorteo .form-group { margin-bottom: 15px; }
-        #formGestionSorteo button[type="submit"] { background-color: var(--clr-accent); color: var(--clr-white); }
-        #formGestionSorteo button[type="submit"]:hover { background-color: color-mix(in srgb, var(--clr-accent) 80%, black); }
-        #formGestionSorteo input[type="checkbox"] { width: auto; margin-right: 8px; vertical-align: middle;}
-        #formGestionSorteo label[for="sorteoActivo"] { display: inline-block; margin-bottom: 0; }
+        /* Estilos para formularios y mensajes de estado */
+        .status-container { margin-top: 15px; padding: 12px; border-radius: var(--border-radius-medium); text-align: center; font-weight: 500; line-height: 1.5; min-height: 40px; }
+        .status-container.success { background-color: rgba(44, 182, 125, 0.15); border: 1px solid var(--clr-primary); color: var(--clr-primary); }
+        .status-container.error { background-color: rgba(239, 69, 101, 0.15); border: 1px solid var(--clr-red); color: var(--clr-red); }
 
-        .status-container {
-            margin-top: 15px; padding: 12px; border-radius: var(--border-radius-medium);
-            text-align: center; font-weight: 500; line-height: 1.5;
-            min-height: 40px; /* Para que no salte tanto cuando aparece/desaparece texto */
+        /* Dashboard y Gráficos */
+        .dashboard-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px; margin-bottom: 30px;
         }
-        .status-container.success {
-            background-color: rgba(44, 182, 125, 0.15); /* Usando --clr-primary con alfa */
-            border: 1px solid var(--clr-primary);
+        .chart-container {
+            background-color: var(--clr-dark-bg); padding: 20px;
+            border-radius: var(--border-radius-medium); border: 1px solid var(--clr-dark-border);
+        }
+        .oculto-flex { display: none !important; }
+
+        /* Modal para el historial */
+        .modal {
+            display: none; position: fixed; z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s;
+        }
+        .modal-content {
+            background-color: var(--clr-dark-bg-alt); margin: 5% auto;
+            padding: 25px; border: 1px solid var(--clr-dark-border);
+            width: 90%; max-width: 800px; border-radius: var(--border-radius-medium);
+            position: relative;
+        }
+        .close-modal-btn {
+            color: #aaa; float: right; font-size: 28px;
+            font-weight: bold; cursor: pointer;
+        }
+        .close-modal-btn:hover, .close-modal-btn:focus { color: var(--clr-white); }
+        #historialParticipantesLista { list-style-type: decimal; padding-left: 20px; max-height: 400px; overflow-y: auto; }
+        #historialParticipantesLista li { padding: 8px; border-bottom: 1px solid var(--clr-dark-border); }
+        #historialParticipantesLista li:last-child { border-bottom: none; }
+        .raffle-stats-container {
+            display: flex;
+            justify-content: space-around;
+            background-color: var(--clr-dark-bg);
+            padding: 15px;
+            border-radius: var(--border-radius-medium);
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--clr-dark-border);
+        }
+        .raffle-stats-container.oculto {
+            display: none;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-item span {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--clr-dark-text);
+            display: block;
+        }
+        .stat-item label {
+            font-size: 0.8em;
+            color: var(--clr-dark-text-alt);
+            text-transform: uppercase;
+        }
+        .stat-item.stat-remaining span {
             color: var(--clr-primary);
         }
-        .status-container.error {
-            background-color: rgba(239, 69, 101, 0.15); /* Usando --clr-red con alfa */
-            border: 1px solid var(--clr-red);
-            color: var(--clr-red);
+        .stat-card {
+            background-color: var(--clr-dark-bg-frame);
+            padding: 20px;
+            border-radius: var(--border-radius-medium);
+            text-align: center;
+            border: 1px solid var(--clr-dark-border);
         }
-        .whatsapp-action-link-admin {
-            display: inline-block; margin-top: 12px; padding: 10px 18px;
-            background-color: #25D366; color: white !important;
-            border-radius: 25px; text-decoration: none; font-weight: 600;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        .stat-card h3 {
+            font-size: 1em;
+            color: var(--clr-dark-text-alt);
+            margin-bottom: 10px;
+            font-weight: 500;
         }
-        .whatsapp-action-link-admin:hover { background-color: #1DAE54; transform: translateY(-1px); }
-        .whatsapp-action-link-admin i { margin-right: 8px; }
+        .stat-card .stat-value {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: var(--clr-primary);
+        }
+        .list-container {
+             background-color: var(--clr-dark-bg); padding: 20px;
+            border-radius: var(--border-radius-medium); border: 1px solid var(--clr-dark-border);
+        }
+        .list-container h3 { text-align:center; margin-bottom: 15px; }
+        .list-container ul { list-style: none; padding: 0; }
+        .list-container li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--clr-dark-border);
+        }
+        .list-container li:last-child { border-bottom: none; }
+        .list-container .item-name { font-weight: 500; }
+        .list-container .item-value { font-weight: 700; color: var(--clr-accent); }
+
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
     </style>
 </head>
 <body class="dark-theme">
@@ -99,7 +166,7 @@
     </header>
 
     <main class="admin-container">
-        <section id="loginSection" class="admin-section">
+        <section id="loginSection" class="admin-section" style="max-width: 500px; margin: 50px auto;">
             <h2>Iniciar Sesión como Administrador</h2>
             <form id="loginForm">
                 <div class="form-group">
@@ -108,181 +175,287 @@
                 </div>
                 <button type="submit" class="admin-button login-button">Entrar</button>
             </form>
-            <div id="loginStatusMessage" class="status-container" style="font-weight: 600;"></div>
+            <div id="loginStatusMessage" class="status-container oculto"></div>
         </section>
 
         <div id="adminContent" class="oculto">
+            
             <div class="logout-button-container">
                 <button id="logoutButton" class="logout-button"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
             </div>
-            <!-- === NUEVA SECCIÓN: DASHBOARD CON ESTADÍSTICAS === -->
-            <section class="admin-section">
-                <button id="toggleDashboardBtn" class="admin-button" type="button" style="margin-bottom: 15px;">
-                    <i class="fas fa-chart-line"></i> Mostrar/Ocultar Dashboard de Estadísticas
-                </button>
-                <div id="dashboardStats" style="display: none;">
-                    <h2><i class="fas fa-chart-line"></i> Dashboard de Estadísticas</h2>
-                    <div class="dashboard-grid">
-                        <div class="chart-container">
-                            <h3 style="text-align:center; margin-bottom: 15px;">Paquetes Más Populares</h3>
-                            <canvas id="paquetesChart"></canvas>
-                        </div>
-                        <div class="chart-container">
-                            <h3 style="text-align:center; margin-bottom: 15px;">Boletos por Día (Últimos 7 Días)</h3>
-                            <canvas id="diarioChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <!-- ============================================= -->
-            <section class="admin-section">
-                <h2>Añadir Nuevos Boletos Digitales</h2>
-                <p style="font-size: 0.9em; color: var(--clr-dark-text-alt); margin-bottom:20px; padding: 10px; background-color: var(--clr-dark-bg); border-radius: var(--border-radius-medium); border: 1px solid var(--clr-dark-border);">
-                    Sorteo Actual: <strong id="infoSorteoActualParaParticipaciones" style="color: var(--clr-primary); display: block; margin-top: 5px;">Cargando...</strong>
-                </p>
-                <form id="addParticipantForm">
-                    <div class="form-group">
-                        <label for="participantId">ID del Participante (10 dígitos):</label>
-                        <input type="text" id="participantId" name="id_documento" required maxlength="10" pattern="\d{10}" title="Debe contener 10 dígitos numéricos" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label for="participantName">Nombre del Participante:</label>
-                        <input type="text" id="participantName" name="nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="participantCity">Ciudad del Participante (Opcional):</label>
-                        <input type="text" id="participantCity" name="ciudad">
-                    </div>
-                    <div class="form-group">
-                        <label for="participantPhone">Número de Celular (10 dígitos, opcional):</label>
-                        <input type="text" id="participantPhone" name="celular" maxlength="10" pattern="\d{10}" title="Debe contener 10 dígitos numéricos si se ingresa">
-                    </div>
-                    <div class="form-group">
-                        <label for="participantEmail">Correo Electrónico del Participante (Opcional):</label>
-                        <input type="email" id="participantEmail" name="email" title="Ej: correo@dominio.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="packageChosen">Paquete Elegido (Opcional):</label>
-                        <select id="packageChosen" name="paquete_elegido">
-                            <option value="">-- Seleccionar Paquete (si aplica) --</option>
-                            <option value="Individual ($2 c/u)">Individual ($2 c/u)</option>
-                            <option value="Pack Básico (6 x $12)">Pack Básico (6 x $12)</option>
-                            <option value="Combo Ganador (15 x $28)">Pack Ahorro (15 x $28)</option>
-                            <option value="Fortuna MAX (30 x $55)">Pack Ahorro Pro (30 x $55)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="affiliateName">Nombre del Afiliado (Opcional):</label>
-                        <input type="text" id="affiliateName" name="nombre_afiliado">
-                    </div>
-                    <div class="form-group">
-                        <label for="quantity">Cantidad de Participaciones (si no es por paquete):</label>
-                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="500" required>
-                    </div>
-                    <button type="submit" class="admin-button">Añadir Participación(es)</button>
-                </form>
-                <div id="statusMessage" class="status-container"></div>
-            </section>
-
-            <section class="admin-section">
-                <h2>Lista de Participaciones del Sorteo Activo (<span id="currentCount">0</span>)</h2>
-                 <div class="loader-container oculto" id="loaderList">
-                     <div class="loader"></div>
-                 </div>
-                <ul id="participantList"></ul>
-            </section>
-
-            <section class="admin-section">
-                <h2>Gestionar Sorteos</h2>
-                <form id="formGestionSorteo">
-                    <input type="hidden" id="sorteoEditId" value="">
-                    <div class="form-group">
-                        <label for="nombrePremioDisplay">Nombre del Premio (para mostrar):</label>
-                        <input type="text" id="nombrePremioDisplay" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="nombreBaseArchivoGuia">Nombre Base Archivo Guía PDF (ej: iPhone_XX_Pro):</label>
-                        <input type="text" id="nombreBaseArchivoGuia" required placeholder="Ej: iPhone_17_Max">
-                        <small style="color: var(--clr-dark-text-alt); font-size:0.8em; display:block; margin-top:5px;">El archivo PDF deberá llamarse "MiniGuia_NOMBREBASE.pdf" y estar en la carpeta /guias.</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="descripcionPremio">Descripción Breve del Premio (opcional):</label>
-                        <input type="text" id="descripcionPremio">
-                    </div>
-                    <div class="form-group">
-                        <label for="metaParticipacionesSorteo">Meta de Participaciones:</label>
-                        <input type="number" id="metaParticipacionesSorteo" value="200" min="1" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="checkbox" id="sorteoActivo">
-                        <label for="sorteoActivo">Marcar como Sorteo Activo (desactivará otros)</label>
-                    </div>
-                    <button type="submit" class="admin-button" id="btnGuardarSorteo">Guardar Sorteo</button>
-                    <button type="button" class="admin-button" id="btnCancelarEdicionSorteo" style="background-color: var(--clr-dark-text-alt); display:none;">Cancelar Edición</button>
-                </form>
-                <div id="statusGestionSorteo" class="status-container"></div>
-
-                <h3 style="margin-top: 30px; margin-bottom: 10px; color: var(--clr-primary);">Sorteos Configurados:</h3>
-                <div class="loader-container oculto" id="loaderListaSorteos">
-                    <div class="loader"></div>
-                </div>
-                <table class="tabla-sorteos">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Premio</th>
-                            <th>Guía Base</th>
-                            <th>Meta</th>
-                            <th>Status</th>
-                            <th>Acciones</th>
-                            <th>Historial</th> <!-- Nueva Columna -->                            
-                        </tr>
-                    </thead>
-                    <tbody id="tbodyListaSorteos"></tbody>
-                </table>
-            </section>
-
-            <section class="admin-section opciones-section">
-                <h2>Opciones del Sorteo</h2>
-                
-                <p style="color: var(--clr-dark-text-alt); margin-bottom: 15px;">
-                    Una vez alcanzada la meta, usa este botón para iniciar la cuenta regresiva de 1 hora en la página principal.
-                </p>
-                <button id="btnIniciarCuentaRegresiva" class="admin-button boton-iniciar-sorteo">
-                    <i class="fas fa-hourglass-start"></i> Iniciar Cuenta Regresiva para Sorteo (1 Hora)
-                </button>
-                <div id="estadoCuentaRegresivaAdmin" class="status-container oculto"></div>
-                
-                <hr style="border-color: var(--clr-dark-border); margin: 30px 0;">
-
-                <p style="color: var(--clr-dark-text-alt); margin-bottom: 15px;">
-                    Usa este botón después de realizar un sorteo para marcarlo como "completado" y archivarlo.
-                </p>
-                <button id="btnFinalizarSorteo" class="admin-button boton-finalizar">
-                    <i class="fas fa-archive"></i> Finalizar y Archivar Sorteo Actual
-                </button>
-                <div id="finalizarStatusMessage" class="status-container"></div>
-                            <!-- === MODAL PARA HISTORIAL DE PARTICIPANTES === -->
-            <div id="historialModal" class="modal">
-                <div class="modal-content">
-
-                    <span class="close-modal-btn" id="closeHistorialModal">&times;</span>
-                    <h3 id="historialModalTitle" style="color:var(--clr-primary); margin-bottom:15px;">Historial de Participantes</h3>
-
-                    <button id="toggleHistorialBtn" class="btn-simple">Mostrar / Ocultar Lista</button>
-                    <div class="loader-container oculto" id="loaderHistorial">
-                        <div class="loader"></div>
-                    </div>
-                    <ul id="historialParticipantesLista" class="oculto" style="list-style-type: decimal; padding-left: 20px;">
+            
+            <div class="admin-layout-wrapper">
+                <aside class="admin-sidebar">
+                    <h2 class="sidebar-title">MOVIL WIN</h2>
+                    <nav id="adminSidebarNav" class="admin-sidebar-nav">
+                        <ul>
+                            <li><a href="#" class="active" data-target="page-dashboard"><i class="fas fa-chart-line fa-fw"></i> Inicio</a></li>
+                            <li><a href="#" data-target="page-participantes"><i class="fas fa-ticket-alt fa-fw"></i> Participantes</a></li>
+                            <li><a href="#" data-target="page-sorteos"><i class="fas fa-gift fa-fw"></i> Sorteos</a></li>
+                            <li><a href="#" data-target="page-ganadores"><i class="fas fa-trophy fa-fw"></i> Ganadores</a></li>
+                            <li><a href="#" data-target="page-afiliados"><i class="fas fa-users fa-fw"></i> Afiliados</a></li>
+                            <li><a href="#" data-target="page-calculadora"><i class="fas fa-calculator fa-fw"></i> Rentabilidad</a></li>
                         </ul>
+                    </nav>
+                </aside>
+                <div id="sidebarOverlay" class="sidebar-overlay"></div>
+                <main class="admin-main-content">
+                    <header class="admin-content-header">
+                        <button id="mobileSidebarToggle" class="nav-icon-btn">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h2 id="currentPageTitle">Inicio</h2>
+                    </header>
                     
-                </div>
-            </div>
-            </section>
+                    <div id="page-dashboard" class="admin-page active">
+                        <section class="admin-section">
+                            <h2><i class="fas fa-chart-line"></i> Dashboard de Estadísticas</h2>
+                            <div class="dashboard-grid">
+                                <div class="stat-card">
+                                    <h3><i class="fas fa-dollar-sign"></i> Ingresos Totales (Estimado)</h3>
+                                    <p id="totalRevenueStat" class="stat-value">$0</p>
+                                </div>
+                                <div class="list-container">
+                                    <h3><i class="fas fa-star"></i> Top 5 Afiliados</h3>
+                                    <ul id="topAffiliatesList"></ul>
+                                </div>
+                                <div class="chart-container">
+                                    <h3 style="text-align:center; margin-bottom: 15px;">Rendimiento de Sorteos Activos</h3>
+                                    <canvas id="rafflePerformanceChart"></canvas>
+                                </div>
+                                <div class="chart-container">
+                                    <h3 style="text-align:center; margin-bottom: 15px;">Paquetes Populares</h3>
+                                    <canvas id="paquetesChart"></canvas>
+                                </div>
+                                <div class="chart-container">
+                                    <h3 style="text-align:center; margin-bottom: 15px;">Boletos por Día (Últimos 7 Días)</h3>
+                                    <canvas id="diarioChart"></canvas>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
 
-    <!-- ========================================== -->
+                    <div id="page-participantes" class="admin-page">
+                        <section class="admin-section">
+                            <h2>Añadir Nuevos Boletos Digitales</h2>
+                            <p style="font-size: 0.9em; color: var(--clr-dark-text-alt); margin-bottom:20px; padding: 10px; background-color: var(--clr-dark-bg); border-radius: var(--border-radius-medium); border: 1px solid var(--clr-dark-border);">
+                                Sorteos Activos: <strong id="infoSorteoActualParaParticipaciones" style="color: var(--clr-primary); display: block; margin-top: 5px;">Cargando...</strong>
+                            </p>
+                            <form id="addParticipantForm" class="two-column-form">
+                                <div class="form-column">
+                                    <h4 class="form-column-title">Datos del Registro</h4>
+                                    <div class="form-group">
+                                        <label for="sorteoDestino">Asignar a Sorteo Activo:</label>
+                                        <select id="sorteoDestino" name="sorteo_id" required>
+                                            <option value="">-- Selecciona un sorteo activo --</option>
+                                        </select>
+                                    </div>
+                                    <div id="raffleStatsContainer" class="raffle-stats-container oculto">
+                                        <div class="stat-item"><span id="currentTickets">0</span><label>Boletos Registrados</label></div>
+                                        <div class="stat-item"><span id="ticketGoal">0</span><label>Meta del Sorteo</label></div>
+                                        <div class="stat-item stat-remaining"><span id="ticketsRemaining">0</span><label>Boletos Restantes</label></div>
+                                    </div>
+                                    <hr style="border-color:var(--clr-dark-border); margin: 20px 0;">
+                                    <div class="form-group">
+                                        <label for="participantId">Cédula del Participante (10 dígitos):</label>
+                                        <input type="text" id="participantId" name="id_documento" required maxlength="10" pattern="\d{10}" title="Debe contener 10 dígitos numéricos" autocomplete="off">
+                                    </div>
+                                    <div class="form-group"><label for="participantName">Nombre del Participante:</label><input type="text" id="participantName" name="nombre" required></div>
+                                    <div class="form-group"><label for="participantCity">Ciudad (Opcional):</label><input type="text" id="participantCity" name="ciudad"></div>
+                                    <div class="form-group"><label for="participantPhone">Celular (10 dígitos, opcional):</label><input type="text" id="participantPhone" name="celular" maxlength="10" pattern="\d{10}"></div>
+                                    <div class="form-group"><label for="participantEmail">Email (Opcional):</label><input type="email" id="participantEmail" name="email"></div>
+                                </div>
+
+                                <div class="form-column">
+                                    <h4 class="form-column-title">Detalles de Compra</h4>
+                                    <div class="form-group">
+                                        <label for="packageChosen">Paquete Elegido (Opcional):</label>
+                                        <select id="packageChosen" name="paquete_elegido">
+                                            <option value="">-- Seleccionar Paquete (si aplica) --</option>
+                                            <option value="Individual ($2 c/u)">Individual ($2 c/u)</option>
+                                            <option value="Pack Básico (5 x $10)">Pack Básico (5 x $10)</option>
+                                            <option value="Combo Ganador (15 x $28)">Pack Ahorro (15 x $28)</option>
+                                            <option value="Fortuna MAX (30 x $55)">Pack Ahorro Pro (30 x $55)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="quantity">Cantidad de Boletos Digitales:</label>
+                                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="500" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="affiliateSelect">Asignar a Afiliado (Opcional) <button type="button" id="quickAddAffiliateBtn" class="quick-add-btn" title="Añadir nuevo afiliado">+</button></label>
+                                        <select id="affiliateSelect" name="nombre_afiliado"><option value="">-- Ninguno --</option></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="checkbox" id="mantenerDatos" checked style="width: auto; margin-right: 10px;">
+                                        <label for="mantenerDatos">Mantener Sorteo y Afiliado para el próximo registro</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-full-width">
+                                    <button type="submit" class="admin-button">Añadir Participación(es)</button>
+                                </div>
+                            </form>
+                            <div id="statusMessage" class="status-container oculto"></div>
+                        </section>
+                        <section class="admin-section">
+                            <h2>Lista de Boletos de Sorteos Activos (<span id="currentCount">0</span>)</h2>
+                            <div class="loader-container oculto" id="loaderList"><div class="loader"></div></div>
+                            <ul id="participantList"></ul>
+                        </section>
+                    </div>
+
+                    <div id="page-sorteos" class="admin-page">
+                        <section class="admin-section">
+                            <h2>Gestionar Sorteos</h2>
+                            <form id="formGestionSorteo">
+                                <input type="hidden" id="sorteoEditId">
+                                <div class="form-group"><label for="nombrePremioDisplay">Nombre del Premio:</label><input type="text" id="nombrePremioDisplay" required></div>
+                                <div class="form-group"><label for="imagenUrlSorteo">URL de la Imagen o Video del Premio:</label><input type="text" id="imagenUrlSorteo" placeholder="https://ejemplo.com/imagen.jpg o /images/local.mp4"></div>
+                                <div class="form-group">
+                                    <label for="nombreBaseArchivoGuia">Nombre Base Archivo Guía:</label>
+                                    <input type="text" id="nombreBaseArchivoGuia" required>
+                                </div>                                <div class="form-group"><label for="metaParticipacionesSorteo">Meta de Boletos:</label><input type="number" id="metaParticipacionesSorteo" value="200" min="1" required></div>
+                                <div class="form-group"><input type="checkbox" id="sorteoActivo" style="width: auto; margin-right: 10px;"><label for="sorteoActivo">Marcar como Sorteo Activo</label></div>
+                                <button type="submit" class="admin-button" id="btnGuardarSorteo">Guardar Sorteo</button>
+                                <button type="button" class="admin-button" id="btnCancelarEdicionSorteo" style="display:none; background-color: var(--clr-dark-text-alt);">Cancelar Edición</button>
+                            </form>
+                            <div id="statusGestionSorteo" class="status-container oculto"></div>
+                            <h3 style="margin-top: 30px; margin-bottom: 10px;">Sorteos Configurados:</h3>
+                            <div class="loader-container oculto" id="loaderListaSorteos"><div class="loader"></div></div>
+                            <table class="tabla-sorteos">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Premio</th>
+                                        <th>Guía Base</th>
+                                        <th>Meta</th>
+                                        <th>Status</th>
+                                        <th>Acciones</th>
+                                        <th>Historial</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyListaSorteos"></tbody>
+                            </table>
+                        </section>
+                         <section class="admin-section">
+                            <h2>Opciones del Sorteo</h2>
+                            <div class="form-group">
+                                <label for="sorteoParaCuentaRegresiva">Iniciar Cuenta Regresiva para Sorteo:</label>
+                                <select id="sorteoParaCuentaRegresiva" required><option value="">-- Selecciona un sorteo activo --</option></select>
+                            </div>
+                            <button id="btnIniciarCuentaRegresiva" class="admin-button" style="background-color: var(--clr-secondary);">
+                                <i class="fas fa-hourglass-start"></i> Iniciar Cuenta Regresiva Global (1 min)
+                            </button>
+                            <div id="estadoCuentaRegresivaAdmin" class="status-container oculto"></div>
+                            <div id="finalizarStatusMessage" class="status-container oculto"></div>
+                        </section>
+                    </div>
+
+                    <div id="page-ganadores" class="admin-page">
+                        <section class="admin-section">
+                            <h2>Gestionar Fotos de Ganadores</h2>
+                            <p style="font-size: 0.9em; color: var(--clr-dark-text-alt); margin-bottom: 20px;">
+                                Aquí puedes añadir o actualizar la URL de la foto para cada ganador después de que el premio haya sido entregado.
+                            </p>
+                            <div id="statusGanadorMessage" class="status-container oculto"></div>
+                            <div class="loader-container oculto" id="loaderListaGanadoresAdmin"><div class="loader"></div></div>
+                            <table class="tabla-sorteos">
+                                <thead><tr><th>Nombre</th><th>Premio</th><th>Fecha</th><th>URL de Foto</th><th>Acción</th></tr></thead>
+                                <tbody id="tbodyListaGanadores"></tbody>
+                            </table>
+                        </section>
+                    </div>
+
+                    <div id="page-afiliados" class="admin-page">
+                         <section class="admin-section">
+                            <h2>Gestionar Afiliados</h2>
+                            <form id="addAffiliateForm">
+                                <div class="form-group"><label for="affiliateNameInput">Nombre Completo del Nuevo Afiliado:</label><input type="text" id="affiliateNameInput" required></div>
+                                <div class="form-group"><label for="affiliatePhoneInput">Teléfono (Opcional):</label><input type="text" id="affiliatePhoneInput"></div>
+                                <button type="submit" class="admin-button">Añadir Afiliado</button>
+                            </form>
+                            <div id="statusAffiliateMessage" class="status-container oculto"></div>
+                            <h3 style="margin-top: 30px; margin-bottom: 10px;">Afiliados Registrados:</h3>
+                            <div class="loader-container oculto" id="loaderListaAfiliados"><div class="loader"></div></div>
+                            <table class="tabla-sorteos">
+                                <thead><tr><th>ID</th><th>Nombre Completo</th><th>Teléfono</th></tr></thead>
+                                <tbody id="tbodyListaAfiliados"></tbody>
+                            </table>
+                        </section>
+                    </div>
+
+                    <div id="page-calculadora" class="admin-page">
+                        <section class="admin-section">
+                            <h2><i class="fas fa-calculator"></i> Calculadora de Rentabilidad del Sorteo</h2>
+                            <p style="font-size: 0.9em; color: var(--clr-dark-text-alt); margin-bottom: 25px;">
+                                Usa esta herramienta para simular la rentabilidad y establecer metas realistas antes de lanzar un sorteo. Los cambios se reflejan en tiempo real.
+                            </p>
+                            <div id="calculadoraForm">
+                                <div class="calculadora-grid">
+                                    <div class="calculadora-columna">
+                                        <h3><i class="fas fa-dollar-sign"></i> Costos y Comisiones</h3>
+                                        <div class="form-group"><label for="costoPremio">Costo del Premio (CP)</label><input type="number" id="costoPremio" value="1200" step="50"></div>
+                                        <div class="form-group"><label for="costoMarketing">Costos de Marketing (CM)</label><input type="number" id="costoMarketing" value="150" step="10"></div>
+                                        <div class="form-group"><label for="gananciaDeseada">Meta de Ganancia Neta (Opcional)</label><input type="number" id="gananciaDeseada" value="500" step="50"></div>
+                                        <div class="form-group"><label for="comisionAfiliado">Comisión de Afiliado (% CA)</label><input type="number" id="comisionAfiliado" value="20" placeholder="Ej: 20 para 20%"></div>
+                                        <div class="form-group"><label for="porcentajeVentasAfiliado">Ventas Estimadas por Afiliados (% PVA)</label><input type="number" id="porcentajeVentasAfiliado" value="40" placeholder="Ej: 40 para 40%"></div>
+                                        <div class="form-group"><label for="comisionPasarelaVariable">Comisión Pasarela Variable (% CVP)</label><input type="number" id="comisionPasarelaVariable" value="3.5" step="0.1"></div>
+                                        <div class="form-group"><label for="comisionPasarelaFija">Comisión Pasarela Fija ($ CFP)</label><input type="number" id="comisionPasarelaFija" value="0.35" step="0.01"></div>
+                                    </div>
+                                    <div class="calculadora-columna">
+                                        <h3><i class="fas fa-ticket-alt"></i> Precios y Mix de Ventas</h3>
+                                        <div class="form-group"><label for="precioBoletoIndividual">Precio Boleto Individual ($ PBI)</label><input type="number" id="precioBoletoIndividual" value="3" step="1"></div>
+                                        <p style="font-weight: 600; margin-bottom: 15px;">Mix de Ventas Estimado (% MV)</p>
+                                        <div class="form-group"><label for="mixVentasIndividual">% Transacciones Individuales</label><input type="number" id="mixVentasIndividual" value="10"></div>
+                                        <div class="form-group"><label for="mixVentasBasico">% Transacciones Pack Básico ($12)</label><input type="number" id="mixVentasBasico" value="30"></div>
+                                        <div class="form-group"><label for="mixVentasAhorro">% Transacciones Pack Ahorro ($28)</label><input type="number" id="mixVentasAhorro" value="40"></div>
+                                        <div class="form-group"><label for="mixVentasPro">% Transacciones Pack Ahorro Pro ($55)</label><input type="number" id="mixVentasPro" value="20"></div>
+                                    </div>
+                                </div>
+                                <div id="resultadoCalculadora" class="resultados-grid">
+                                    <div class="resultado-item"><label>Ingreso Promedio / Transacción</label><span id="resultadoIPT">$0.00</span></div>
+                                    <div class="resultado-item"><label>Margen Neto / Boleto</label><span id="resultadoMCNB">$0.00</span></div>
+                                    <div class="resultado-item highlight"><label>Punto de Equilibrio (Boletos)</label><span id="resultadoPEB">0</span></div>
+                                    <div class="resultado-item highlight"><label>Meta de Venta Recomendada</label><span id="resultadoMeta">0 Boletos</span></div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                </main>
+            </div>
         </div>
     </main>
+
+    <div id="historialModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal-btn" id="closeHistorialModal">&times;</span>
+            <h3 id="historialModalTitle" style="color:var(--clr-primary); margin-bottom:15px;">Historial de Participantes</h3>
+            <button id="toggleHistorialBtn" class="btn-simple">Mostrar / Ocultar Lista</button>
+            <div class="loader-container oculto" id="loaderHistorial"><div class="loader"></div></div>
+            <ul id="historialParticipantesLista" class="oculto"></ul>
+        </div>
+    </div>
+    <div id="quickAffiliateModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-modal-btn" id="closeAffiliateModal">&times;</span>
+            <h3 style="color:var(--clr-primary); margin-bottom:15px;">Añadir Nuevo Afiliado Rápidamente</h3>
+            <form id="quickAffiliateForm">
+                <div class="form-group">
+                    <label for="quickAffiliateName">Nombre Completo del Nuevo Afiliado:</label>
+                    <input type="text" id="quickAffiliateName" required>
+                </div>
+                <div class="form-group">
+                    <label for="quickAffiliatePhone">Teléfono (Opcional):</label>
+                    <input type="text" id="quickAffiliatePhone">
+                </div>
+                <button type="submit" class="admin-button">Guardar Afiliado</button>
+            </form>
+            <div id="quickAffiliateStatus" class="status-container oculto"></div>
+        </div>
+    </div>
+    
     <footer class="site-footer">
         <p>&copy; 2025 Panel de Administración MOVIL WIN</p>
     </footer>

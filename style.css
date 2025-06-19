@@ -8,6 +8,9 @@
     --clr-dark-text-alt: #94a1b2;
     --clr-dark-border: #3a3f44;
     --clr-dark-shadow: rgba(0, 0, 0, 0.3);
+    --clr-primary-rgb: 44, 182, 125;
+    --clr-secondary-rgb: 127, 90, 240;
+    --clr-accent-rgb: 255, 137, 6;
 
     /* Acentos Vibrantes */
     --clr-primary: #2cb67d;
@@ -30,10 +33,10 @@
     --clr-gold-frame-start: #D4AF37; /* Oro más oscuro */
     --clr-gold-frame-mid: #FFD700;   /* Oro brillante */
     --clr-gold-frame-end: #B8860B;   /* Sombra dorada */
-    --clr-gold-light: #FDEE88; /* Un amarillo muy pálido para el brillo máximo */
+    --clr-gold-light: #5a4e03; /* Un amarillo muy pálido para el brillo máximo */
     --clr-gold-mid: #E6A94E;   /* El tono dorado principal */
     --clr-gold-dark: #8A641B;  /* El tono oscuro para el biselado y la profundidad */
-    --clr-gold-shadow: #3b2a0e;/* La sombra más oscura */
+    --clr-gold-shadow: #3c3304;/* La sombra más oscura */
     --gold: #ffcd38;  /* Color dorado principal */
     --light-shadow: #77571d;
     --dark-shadow: #3e2904;
@@ -46,7 +49,11 @@
     --border-radius-large: 18px;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
+/* --- AÑADE ESTO A STYLE.CSS --- */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
 /* --- Estilos Base Tema Oscuro --- */
 body.dark-theme {
     font-family: var(--font-main);
@@ -60,14 +67,32 @@ body.dark-theme {
     padding-top: var(--navbar-height);
 }
 
-/* --- Navbar --- */
-#fullScreenMenu { opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s; }
-#fullScreenMenu.menu-visible { opacity: 1; visibility: visible; transition: opacity 0.3s ease-in-out; }
-#fullScreenMenu ul a { border-bottom: 1px solid var(--clr-dark-border); padding: 1rem 0; display: block; width: 100%; text-align: center; }
-#fullScreenMenu ul a:last-child { border-bottom: none; }
-#fullScreenMenu .social-links-footer a i { transition: transform 0.2s ease-in-out; }
-#fullScreenMenu .social-links-footer a:hover i { transform: scale(1.2); }
+/* --- Navbar (CORREGIDO Y MEJORADO) --- */
 
+/* Por defecto, el menú está invisible y ligeramente encogido para la animación. */
+/* Cuando el JavaScript añade la clase 'is-open', el menú se hace visible con una animación suave. */
+
+/* El resto de los estilos del menú no necesitan cambios */
+#fullScreenMenu ul a { 
+    border-bottom: 1px solid var(--clr-dark-border); 
+    padding: 1rem 0; 
+    display: block; 
+    width: 100%; 
+    text-align: center; 
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent; /* Preparamos el borde */
+}
+
+#fullScreenMenu ul a:last-child { 
+    border-bottom: none; 
+}
+
+#fullScreenMenu .social-links-footer a i { 
+    transition: transform 0.2s ease-in-out; 
+}
+#fullScreenMenu .social-links-footer a:hover i { 
+    transform: scale(1.2); 
+}
 /* --- Header --- */
 .site-header {
     background: linear-gradient(135deg, #1f2123 0%, #2a2d30 100%);
@@ -105,8 +130,14 @@ body.dark-theme {
 @media (min-width: 640px) { .site-main { padding: 50px 20px 30px 20px; } }
 
 .content-section {
-    width: 100%; max-width: 1100px; margin-bottom: 60px;
-    background-color: var(--clr-dark-bg-alt); border: 1px solid var(--clr-dark-border);
+    width: 100%; max-width: 1100px; margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    /* --- MODIFICACIONES --- */
+    background-color: rgba(36, 38, 41, 0.6); /* Hacemos el fondo semitransparente */
+    backdrop-filter: blur(12px); /* El efecto de desenfoque del fondo */
+    -webkit-backdrop-filter: blur(12px); /* Para compatibilidad con Safari */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Un borde más sutil */
     border-radius: var(--border-radius-large); box-shadow: 0 8px 25px var(--clr-dark-shadow);
     padding: 25px;
 }
@@ -194,8 +225,8 @@ body.dark-theme {
 }
 @media (min-width: 768px) {
     .prize-info-container {
-        text-align: left;
-        align-items: flex-start;
+        text-align: center;
+        align-items: center;
     }
 }
 
@@ -246,13 +277,28 @@ body.dark-theme {
     margin-top: 15px; margin-bottom: 5px; /* Ajustar márgenes */
     position: relative;
 }
+/* BLOQUE DE CÓDIGO ACTUALIZADO */
 .progress-bar-wrapper .progress-bar-fill {
-    height: 100%; width: 0%; background: var(--clr-energy-bar);
-    border-radius: 14px; transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.9em; font-weight: 700; color: var(--clr-white);
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
-    position: relative; overflow: hidden;
+    height: 100%;
+    width: 0%;
+    background: var(--clr-energy-bar-updated); /* Usando el gradiente actualizado */
+    border-radius: 14px;
+    transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* NUEVA REGLA PARA EL TEXTO SUPERPUESTO */
+.progress-bar-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--clr-white);
+    font-size: 0.9em;
+    font-weight: 700;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    pointer-events: none; /* Evita que el texto interfiera con clics */
 }
 .progress-bar-fill::after {
     content: ''; position: absolute; top: 0; left: -100%;
@@ -265,52 +311,9 @@ body.dark-theme {
     min-height: 1.5em; margin-bottom: 20px;
     transition: opacity 0.3s ease;
 }
-.top-participants-wrapper { width: 100%; margin-top: 15px; }
-.toggle-top-btn {
-    width: auto; padding: 8px 15px; background: rgba(0,0,0,0.2);
-    border: 1px solid var(--clr-dark-border); border-radius: var(--border-radius-medium);
-    color: var(--clr-dark-text); font-weight: 600; display: inline-flex;
-    gap: 8px; align-items: center; cursor: pointer; font-size: 0.9em;
-    transition: all 0.3s ease;
-}
-.toggle-top-btn:hover { color: var(--clr-white); background-color: var(--clr-primary); }
-.toggle-top-btn i.fa-crown { color: var(--clr-gold); }
-.toggle-top-btn .chevron {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.toggle-top-btn.active .chevron {
-    transform: rotate(180deg);
-}
-.toggle-top-btn.active .chevron {
-    transform: rotate(180deg);
-}
 
-.top-participants-list {
-    list-style: none; padding: 15px 0 0 0; /* Solo padding superior */
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease-out;
-}
-.top-participants-list.active { max-height: 300px; overflow-y: auto; }
-/* Estilos para los li de la lista top reutilizados de .lista-top-participantes */
 
-.top-participants-list li {
-    background-color: rgba(var(--clr-secondary-rgb), 0.05);
-    border-left: 4px solid var(--clr-dark-border);
-    padding: 10px 15px; margin-bottom: 8px; border-radius: 8px;
-    display: flex; justify-content: space-between; align-items: center;
-    gap: 10px; transition: all 0.2s ease-in-out;
-}
-.top-participants-list li:hover { transform: scale(1.02); background-color: rgba(var(--clr-secondary-rgb), 0.1); }
-.top-participants-list .top-posicion { font-size: 1.1em; font-weight: 700; color: var(--clr-dark-text-alt); width: 25px; }
-.top-participants-list .top-posicion .fa-medal { font-size: 1.2em; }
-.top-participants-list li.rank-1 .top-posicion .fa-medal { color: var(--clr-gold); }
-.top-participants-list li.rank-2 .top-posicion .fa-medal { color: var(--clr-silver); }
-.top-participants-list li.rank-3 .top-posicion .fa-medal { color: var(--clr-bronze); }
-.top-participants-list .top-info { display: flex; flex-direction: column; align-items: flex-start; flex-grow: 1; overflow: hidden; margin-right: 10px; }
-.top-participants-list .top-nombre { font-weight: 500; color: var(--clr-dark-text); text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; font-size: 1em; margin-bottom: 2px; }
-.top-participants-list .top-ci { font-size: 0.8em; color: var(--clr-dark-text-alt); text-align: left; white-space: nowrap; }
-.top-participants-list .top-cantidad { font-weight: 600; color: var(--clr-primary); font-size: 0.9em; background-color: transparent; padding: 0; min-width: auto; text-align: right; flex-shrink: 0; align-self: center; }
+
 
 .carousel-nav-btn {
     position: absolute;
@@ -347,18 +350,115 @@ body.dark-theme {
 
 /* === SECCIÓN CÓMO PARTICIPAR (REDISEÑADA) === */
 .como-participar-section { text-align: center; }
-.pasos-container-nuevo { display: flex; flex-direction: column; gap: 25px; margin-top: 20px; margin-bottom: 50px; }
-.paso-nuevo { display: flex; align-items: center; gap: 20px; background-color: var(--clr-dark-bg); padding: 20px; border-radius: var(--border-radius-medium); border: 1px solid var(--clr-dark-border); transition: transform 0.3s ease, box-shadow 0.3s ease; }
-.paso-nuevo:hover { transform: translateX(5px); box-shadow: 5px 5px 15px rgba(0,0,0,0.2); }
-.paso-icono-nuevo { font-size: 2.5em; color: var(--clr-primary); background-color: var(--clr-dark-bg-alt); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.paso-texto-nuevo { text-align: left; }
-.paso-texto-nuevo h3 { font-size: 1.2em; font-weight: 600; color: var(--clr-dark-text); margin-bottom: 5px; }
-.paso-texto-nuevo p { font-size: 0.95em; color: var(--clr-dark-text-alt); line-height: 1.6; }
+/* === ESTILOS MEJORADOS PARA LA SECCIÓN 'CÓMO PARTICIPAR' === */
+
+/* Contenedor principal de los pasos */
+.pasos-container-nuevo {
+    display: grid;
+    gap: 30px 60px; /* Espacio vertical y horizontal entre los pasos */
+    margin: 40px 0;
+    /* En móvil (por defecto), es una sola columna */
+    grid-template-columns: 1fr;
+}
+
+/* El paso individual */
+.paso-nuevo {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background-color: transparent; /* Hacemos el fondo transparente */
+    padding: 15px;
+    border-radius: var(--border-radius-medium);
+    border: none; /* Quitamos el borde individual */
+    position: relative; /* Necesario para posicionar las flechas conectoras */
+    transition: transform 0.3s ease;
+}
+
+.paso-nuevo:hover {
+    transform: translateY(-5px); /* Efecto de "levantarse" al pasar el cursor */
+}
+
+/* El círculo del icono */
+.paso-icono-nuevo {
+    font-size: 2.2em;
+    color: var(--clr-white);
+    background: linear-gradient(135deg, var(--clr-secondary), var(--clr-primary));
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(var(--clr-secondary-rgb, 127, 90, 240), 0.3);
+    transition: transform 0.3s ease;
+}
+
+/* Animación para el icono al pasar el cursor */
+.paso-nuevo:hover .paso-icono-nuevo {
+    transform: scale(1.1);
+}
+
+.paso-texto-nuevo h3 {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: var(--clr-primary);
+    margin-bottom: 5px;
+}
+
+.paso-texto-nuevo p {
+    font-size: 1em;
+    color: var(--clr-dark-text-alt);
+    line-height: 1.6;
+}
+/* --- AÑADE ESTO A STYLE.CSS --- */
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease-out, transform 0.6s ease-out;
+}
+
+.reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+/* --- ESTILOS PARA ESCRITORIO (PANTALLAS GRANDES) --- */
+@media (min-width: 992px) {
+    /* En escritorio, creamos 3 columnas para mostrar los pasos en horizontal */
+    .pasos-container-nuevo {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    /* La flecha conectora */
+    .paso-nuevo:not(:last-child)::after {
+        content: '\f061'; /* Código del icono de flecha de Font Awesome */
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        font-size: 2em;
+        color: var(--clr-dark-border);
+        position: absolute;
+        right: -45px;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0.7;
+    }
+}
 .contenedor-sorteo {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 25px;
+    text-align: center;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 25px;
+    background-color: rgba(36, 38, 41, 0.6); /* Igual que .como-participar-section/content-section */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-large);
+    box-shadow: 0 8px 25px var(--clr-dark-shadow);
 }
 
 .seccion-ganadores-anteriores, .seccion-top-participantes, .seccion-faq { max-width: 1200px; }
@@ -374,10 +474,10 @@ body.dark-theme {
 .contenedor-sorteo h2::after, .dashboard-columns-wrapper .info-block h2::after,
 /* Estilos SOLO para el subtítulo */
 .rueda-subtitulo {
-    font-size: 1.15em;
+    font-size: 1.10em;
     font-weight: bold;
     color: var(--clr-dark-text);
-    margin: -10px auto 22px auto;
+    margin: -5px auto 5px auto;
     text-align: center;
     max-width: 480px;
     letter-spacing: 0.5px;
@@ -450,68 +550,198 @@ body.dark-theme .admin-section h2::after { display: none; }
 .paquetes-titulo h3 { font-size: 1.8em; font-weight: 700; color: var(--clr-primary); margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 12px; }
 .paquetes-titulo h3 i { color: var(--clr-accent); font-size: 1.1em; animation: pulse-icon 2s infinite ease-in-out; }
 .paquetes-titulo p { font-size: 1.05em; color: var(--clr-dark-text-alt); }
-.paquetes-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-bottom: 30px; }
+.paquetes-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 40px; /* Un poco más de espacio */
+    margin-bottom: 30px;
+}
+
 .paquete-item {
-    background-color: var(--clr-dark-bg); border: 1px solid var(--clr-dark-border);
-    border-radius: var(--border-radius-medium); padding: 30px 25px;
-    display: flex; flex-direction: column; align-items: center; text-align: center;
+    background: linear-gradient(145deg, var(--clr-dark-bg-alt), var(--clr-dark-bg)); /* Fondo con gradiente sutil */
+    border: 1px solid var(--clr-dark-border);
+    border-radius: var(--border-radius-large); /* Bordes más redondeados */
+    padding: 30px 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
-    overflow: hidden;
+    position: relative; /* Necesario para efectos visuales */
+}
+.paquete-item-wrapper {
+    position: relative; /* Necesario para el resplandor */
+    overflow: hidden; /* El overflow ahora vive aquí */
+    border-radius: var(--border-radius-large); /* El redondeo también va aquí */
 }
 .paquete-item:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(var(--clr-accent-rgb, 255, 137, 6), 0.3);
 }
+
+/* Nuevo estilo para el icono */
+.paquete-icono {
+    font-size: 3em;
+    margin-bottom: 20px;
+    color: var(--clr-primary);
+    line-height: 1;
+}
+
+.paquete-item h4 {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--clr-dark-text); /* Color de texto estándar */
+    margin-bottom: 12px;
+}
+
+.paquete-precio {
+    font-size: 2.8em; /* Más grande */
+    font-weight: 800;
+    color: var(--clr-white);
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+.precio-original-tachado {
+    font-size: 0.6em;
+    color: var(--clr-dark-text-alt);
+    text-decoration: line-through;
+    margin-left: 10px;
+    font-weight: 400;
+}
+
+.paquete-cantidad {
+    font-size: 1.2em;
+    font-weight: 500;
+    color: var(--clr-dark-text);
+    margin-bottom: 18px;
+}
+
+.paquete-descripcion {
+    font-size: 0.95em;
+    color: var(--clr-dark-text-alt);
+    min-height: 3.5em;
+    margin-bottom: 25px;
+    flex-grow: 1;
+}
+
+/* --- Mejoras para el Paquete Popular --- */
 .paquete-item.popular {
-    border: 2px solid var(--clr-paquete-popular-border);
-    box-shadow: 0 0 25px 5px rgba(var(--clr-accent-rgb, 255, 137, 6), 0.35);
-    transform: scale(1.03);
-    overflow: visible;
+    border: 2px solid var(--clr-primary);
+    transform: translateY(-10px) scale(1.07);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 25px rgba(var(--clr-primary-rgb, 44, 182, 125), 0.5);
 }
+
 .paquete-item.popular:hover {
-    transform: translateY(-8px) scale(1.05);
+    transform: translateY(-10px) scale(1.07);
 }
+
+/* Efecto de resplandor "Aurora" para el paquete popular */
+.paquete-item-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(var(--clr-primary-rgb, 44, 182, 125), 0.25), transparent 60%);
+    animation: rotateGlow 10s linear infinite;
+}
+
+.paquete-item.popular .paquete-icono,
+.paquete-item.popular h4,
+.paquete-item.popular .paquete-precio {
+    color: var(--clr-primary); /* Resaltamos los textos clave con el color primario */
+}
+
 .etiqueta-popular {
     position: absolute;
     top: 15px;
-    right: -30px; /* Ajustar para que se vea bien con la rotación */
-    background-color: var(--clr-paquete-popular-border);
+    right: -35px;
+    background-color: var(--clr-primary);
     color: var(--clr-dark-bg);
     padding: 6px 40px;
-    font-size: 0.75em;
+    font-size: 0.8em;
     font-weight: 700;
     text-transform: uppercase;
     transform: rotate(45deg);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
     z-index: 10;
     line-height: 1.2;
 }
-.paquete-item h4 { font-size: 1.5em; font-weight: 700; color: var(--clr-primary); margin-bottom: 12px; }
-.paquete-item.popular h4 { color: var(--clr-paquete-popular-border); }
-.paquete-precio { font-size: 2.5em; font-weight: 800; color: var(--clr-white); margin-bottom: 8px; line-height: 1; }
-.precio-original-tachado { font-size: 0.6em; color: var(--clr-dark-text-alt); text-decoration: line-through; margin-left: 10px; font-weight: 400; }
-.paquete-cantidad { font-size: 1.2em; font-weight: 500; color: var(--clr-dark-text); margin-bottom: 18px; }
-.paquete-descripcion { font-size: 0.95em; color: var(--clr-dark-text-alt); min-height: 3.5em; margin-bottom: 25px; flex-grow: 1; }
+.placeholder-pending {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--clr-dark-bg);
+    color: var(--clr-dark-text-alt);
+    gap: 15px;
+}
+.placeholder-pending i {
+    font-size: 2.5em;
+    opacity: 0.7;
+}
+.placeholder-pending span {
+    font-weight: 600;
+    font-size: 0.9em;
+}
+/* --- Mejoras para los Botones --- */
 .boton-paquete {
-    display: inline-block; background-color: var(--clr-secondary); color: var(--clr-white);
-    padding: 12px 35px; border-radius: 50px; text-decoration: none; font-weight: 600;
-    font-size: 1.05em;
-    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* <<<--- TRANSICIÓN AÑADIDA/AJUSTADA */
-    margin-top: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    display: inline-flex; /* Cambiado a inline-flex para alinear el ícono */
+    align-items: center;
+    gap: 10px;
+    background-color: var(--clr-secondary);
+    color: var(--clr-white);
+    padding: 14px 35px; /* Un poco más grande */
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-top: auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    overflow: hidden; /* Para la animación del ícono */
+    position: relative;
+    border: none;
+    background: linear-gradient(45deg, var(--clr-secondary), var(--clr-accent));
+    background-size: 150% 150%;
+    transition: all 0.4s ease;
 }
-.paquete-item.popular .boton-paquete {
-    background-color: var(--clr-paquete-popular-border);
-    color: var(--clr-dark-bg);
-    font-weight: 700;
+
+/* Añadimos un ícono de flecha (oculto por defecto) */
+.boton-paquete::after {
+    content: '\f061'; /* Flecha derecha de Font Awesome */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    opacity: 0;
+    transform: translateX(-15px);
+    transition: all 0.3s ease;
 }
+
 .boton-paquete:hover {
+    background-position: right center; /* El gradiente se desplaza al pasar el ratón */
     background-color: color-mix(in srgb, var(--clr-secondary) 85%, black);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-    transform: scale(1.05); /* <<<--- EFECTO DE HOVER SUTIL */
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(var(--clr-secondary-rgb, 127, 90, 240), 0.4);
+    padding-right: 25px; /* Hacemos espacio para la flecha */
 }
+
+/* La flecha aparece al pasar el cursor */
+.boton-paquete:hover::after {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.paquete-item.popular .boton-paquete {
+    background: linear-gradient(45deg, var(--clr-primary), var(--clr-accent));
+    color: var(--clr-white);
+}
+
 .paquete-item.popular .boton-paquete:hover {
-    background-color: color-mix(in srgb, var(--clr-paquete-popular-border) 85%, black);
+    background-color: color-mix(in srgb, var(--clr-primary) 85%, black);
+    box-shadow: 0 6px 20px rgba(var(--clr-primary-rgb, 44, 182, 125), 0.4);
 }
 .boton-paquete:active {
     transform: scale(0.98); /* <<<--- EFECTO AL HACER CLIC */
@@ -593,32 +823,34 @@ body.dark-theme .admin-section h2::after { display: none; }
 }
 
 /* CAPA DE FRENTE (La cara brillante del video) */
+/* CAPA DE FRENTE (La cara brillante del video) */
 .titulo-dorado::before {
-    content: attr(data-text); /* Toma el texto del atributo data-text */
+    content: attr(data-text);
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
 
+    /* --- Propiedades para el relleno dorado (CRÍTICAS) --- */
     color: transparent;
-    
-    /* Degradado que simula el brillo metálico de la cara */
-    background-image: repeating-linear-gradient(90deg, var(--gold) 0%, var(--light-shadow) 23%, var(--gold) 31%);
+    background-image: repeating-linear-gradient(90deg, var(--gold) 0%, var(--light-shadow) 20%, var(--gold) 31%);
     -webkit-background-clip: text;
     background-clip: text;
-    
-    /* Animación sutil para el brillo */
-    animation: brillo-dorado 4s infinite linear;
+
+    /* --- Propiedad para la animación del brillo (CRÍTICA) --- */
+    animation: brillo-dorado 7s infinite linear;
     background-size: 200% auto;
 
-    /* Resetea la sombra de la capa base para que no se apile */
+    /* --- Propiedad para el borde negro --- */
+    /* Usaremos 1px para un borde más nítido. Puedes cambiarlo a 1.5px si lo prefieres. */
+    -webkit-text-stroke: 0.2px rgba(0, 0, 0, 0.991); 
+
+    /* --- Asegurarse de que no haya sombra de texto conflictiva --- */
     text-shadow: none;
 }
-
-
 .price-is-right-wheel-frame {
-    background: linear-gradient(5deg, var(--clr-gold-light), var(--clr-gold-dark));
+    background: linear-gradient(10deg, var(--clr-gold-light), var(--clr-gold-dark));
     padding: 15px; /* Padding interno para el marco */
     border-radius: 25px;
     max-width: 450px;
@@ -640,25 +872,105 @@ body.dark-theme .admin-section h2::after { display: none; }
     height: 420px; /* Altura fija para la rueda */
     position: relative;
     background-color: #111;
-    border-radius: 15px; /* Redondear las esquinas internas */
+    border-radius: 2px; /* Redondear las esquinas internas */
     overflow: hidden;
     border: 2px solid black;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
 }
 #priceWheelCanvas { display: block; width: 100%; height: 100%; }
-.clacker-pointer-front {
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
+.calculadora-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    margin-top: 20px;
+    border-top: 1px solid var(--clr-dark-border);
+    padding-top: 25px;
+}
+@media (min-width: 768px) {
+    .calculadora-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+    }
+}
+.calculadora-columna h3 {
+    font-size: 1.2em;
+    color: var(--clr-secondary);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--clr-dark-border);
+}
+.resultados-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: var(--clr-dark-bg);
+    border-radius: var(--border-radius-medium);
+    border: 1px solid var(--clr-dark-border);
+}
+.resultado-item {
+    text-align: center;
+}
+.resultado-item label {
     display: block;
+    font-size: 0.85em;
+    color: var(--clr-dark-text-alt);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+.resultado-item span {
+    display: block;
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--clr-dark-text);
+}
+.resultado-item.highlight span {
+    color: var(--clr-primary);
+    font-size: 2.2em;
+}
+
+/* --- REEMPLAZA TU REGLA ACTUAL CON ESTA --- */
+/* === ESTILOS DEFINITIVOS PARA EL CLACKER (MÉTODO DE 2 ELEMENTOS) === */
+
+/* 1. El contenedor principal que se posiciona en la rueda */
+.clacker-container {
     width: 50px;
     height: 40px;
+    position: absolute;
+    top: 50%;
+    right: -15px;
+    /* La corrección clave: El punto de origen de la transformación ahora es el centro */
+    transform-origin: center; 
+    /* El transform original se mantiene para posicionarlo correctamente */
+    transform: translateY(-50%);
+    z-index: 20;
+}
+
+/* 2. El elemento de atrás, que actúa como borde blanco */
+.clacker-border {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.783);
+    clip-path: polygon(0% 50%, 100% 0%, 100% 100%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1; /* Capa inferior */
+}
+
+/* 3. El elemento de encima, el clacker rojo */
+.clacker-top {
+    width: 90%; /* Un poco más pequeño que el borde (100% - 10% = borde de 5% por lado) */
+    height: 90%;
     background-color: var(--clr-clacker-red);
     clip-path: polygon(0% 50%, 100% 0%, 100% 100%);
     position: absolute;
-    right: 5px;
     top: 50%;
-    transform: translateY(-50%);
-    z-index: 20;
-    box-shadow: -3px 0px 7px rgba(0,0,0,0.5);
-    border-left: 3px solid color-mix(in srgb, var(--clr-clacker-red) 70%, black);
+    left: 50%;
+    transform: translate(-50%, -50%); /* Lo centramos perfectamente sobre el borde */
+    z-index: 2; /* Capa superior */
 }
 
 .clacker-settle-animation {
@@ -677,7 +989,117 @@ body.dark-theme .admin-section h2::after { display: none; }
 .resultado-area.activo { background-color: var(--clr-dark-bg-alt); border: 1px solid var(--clr-dark-border); box-shadow: 0 6px 20px var(--clr-dark-shadow); color: var(--clr-dark-text); padding: 25px; min-height: 90px; }
 .resultado-area .nombre-ganador { color: var(--clr-green); font-size: 1.6em; font-weight: 700; margin-bottom: 8px; }
 .resultado-area .id-ganador { color: var(--clr-dark-text-alt); font-size: 0.9em; }
+/* === ESTILOS PARA LA NUEVA BARRA DE NAVEGACIÓN === */
 
+/* El contenedor principal de la barra de navegación */
+.main-nav-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* Izquierda | Centro (automático) | Derecha */
+    align-items: center;
+    height: 4rem; /* 64px, igual que h-16 de Tailwind */
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1rem; /* 16px */
+}
+
+/* Contenedores de cada columna */
+.nav-left {
+    justify-self: start;
+}
+.nav-center {
+    justify-self: center;
+    /* Añadimos flex para tener control total sobre el centrado de lo que hay dentro */
+    display: flex;
+    align-items: center;
+}
+.nav-right {
+    justify-self: end;
+}
+
+/* Estilo para el logo en el centro */
+.nav-logo {
+    height: 3.5rem; /* 56px */
+    width: auto;
+    transition: transform 0.3s ease;
+    /* Le decimos explícitamente que se comporte como un bloque para evitar espacios extra */
+    display: block; 
+}
+.nav-logo:hover {
+    transform: scale(1.05);
+}
+
+/* Estilo unificado para los botones de íconos */
+.nav-icon-btn {
+    font-size: 2rem; 
+    color: var(--clr-dark-text-alt);
+    border-radius: 50%; 
+    transition: all 0.2s ease-in-out;
+
+
+    width: 3rem; 
+    height: 3rem; 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0; 
+}
+
+.nav-icon-btn:hover {
+    color: var(--clr-primary);
+    background-color: var(--clr-dark-bg-alt);
+}
+/* --- Estilos para los Paneles de Navegación del Carrusel --- */
+.prize-nav-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Espacio entre las pestañas */
+    padding: 0 15px; /* Padding a los lados del contenedor */
+    margin-bottom: 25px; /* Espacio entre las pestañas y el carrusel */
+    border-bottom: 1px solid var(--clr-dark-border); /* Línea divisoria */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Oculta la barra de scroll en Firefox */
+}
+/* Ocultar la barra de scroll visualmente pero mantener la funcionalidad */
+.prize-nav-container::-webkit-scrollbar {
+    display: none;
+}
+.prize-nav-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+.prize-nav-container::-webkit-scrollbar-thumb {
+    background-color: var(--clr-dark-border);
+    border-radius: 10px;
+}
+
+.prize-nav-panel {
+    position: relative;
+    flex-shrink: 0;
+    padding: 12px 5px; /* Padding vertical y un poco horizontal */
+    border: none;
+    border-bottom: 3px solid transparent; /* Borde inferior que se activará */
+    background-color: transparent;
+    color: var(--clr-dark-text-alt);
+    font-weight: 600;
+    font-size: 1em; /* Un poco más grande para mejor legibilidad */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    margin-bottom: -1px; /* Pequeño truco para que la pestaña se "siente" sobre la línea */
+}
+.prize-nav-panel:hover {
+    color: var(--clr-white);
+}
+
+.prize-nav-panel.active {
+    color: var(--clr-primary);
+    font-weight: 700;
+    border-bottom-color: var(--clr-primary); /* La línea indicadora de la pestaña activa */
+}
+
+nav.bg-custom-dark-bg-frame {
+    height: 4rem; /* 64px - La misma altura que la barra interior */
+}
 /* --- Secciones Próximo Premio, Ganadores, FAQ, Footer, Modales --- */
 .seccion-faq { text-align: left; }
 .seccion-faq h2 i { color: var(--clr-secondary); margin-right: 10px; }
@@ -765,6 +1187,14 @@ body.dark-theme .admin-section h2::after { display: none; }
         background-position: 200% 50%;
     }
 }
+@keyframes rotateGlow {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
 @keyframes gold-shine {
     0% { background-position: 100% 0; }
     100% { background-position: 0 0; }
@@ -848,7 +1278,86 @@ body.dark-theme .admin-section h2::after { display: none; }
     .banner-proximamente { font-size: 0.75em; padding: 4px 30px; right: -35px; top: 10px;}
     #fullScreenMenu ul a { font-size: 1.8rem; } /* Tailwind usa rem, no xl para font-size */
 }
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
 
+/* Contenedor principal del layout del admin */
+.admin-layout-wrapper {
+    display: flex;
+    align-items: flex-start;
+}
+
+/* Barra lateral (Sidebar) */
+.admin-sidebar {
+    width: 240px;
+    height: 100vh; /* Ocupa toda la altura de la ventana */
+    position: sticky; /* Se queda fija al hacer scroll */
+    top: 0;
+    background-color: var(--clr-dark-bg-alt);
+    border-right: 1px solid var(--clr-dark-border);
+    padding: 20px 0;
+    flex-shrink: 0; /* Evita que se encoja */
+}
+
+.sidebar-title {
+    font-family: 'Anton', sans-serif;
+    text-align: center;
+    font-size: 1.8em;
+    color: var(--clr-white);
+    padding: 0 20px 20px 20px;
+    letter-spacing: 1px;
+}
+
+.admin-sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-sidebar-nav a {
+    display: flex;
+    align-items: center;
+    padding: 15px 25px;
+    color: var(--clr-dark-text-alt);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent; /* Indicador visual */
+}
+
+.admin-sidebar-nav a:hover {
+    background-color: rgba(var(--clr-primary-rgb), 0.1);
+    color: var(--clr-primary);
+}
+
+.admin-sidebar-nav a.active {
+    background-color: rgba(var(--clr-primary-rgb), 0.15);
+    color: var(--clr-white);
+    font-weight: 600;
+    border-left-color: var(--clr-primary);
+}
+
+.admin-sidebar-nav a .fa-fw {
+    margin-right: 15px; /* Espacio entre el icono y el texto */
+    width: 20px; /* Ancho fijo para el icono */
+}
+
+/* Área de Contenido Principal */
+.admin-main-content {
+    flex-grow: 1; /* Ocupa el resto del espacio */
+    padding: 30px;
+    height: 100vh;
+    overflow-y: auto; /* Permite scroll solo en esta área */
+}
+
+/* Lógica de visibilidad de las páginas */
+.admin-page {
+    display: none; /* Por defecto, todas las páginas están ocultas */
+}
+
+.admin-page.active {
+    display: block; /* La página activa se muestra */
+}
 /* Estilos específicos para admin.html (si se usan en el mismo CSS) */
 body.dark-theme .admin-section {
     margin-bottom: 30px; max-width: 700px; margin-left: auto; margin-right: auto; padding: 25px 30px;
@@ -861,6 +1370,7 @@ body.dark-theme .form-group label { color: var(--clr-dark-text-alt); font-size: 
 body.dark-theme .form-group input[type="text"],
 body.dark-theme .form-group input[type="password"],
 body.dark-theme .form-group input[type="number"],
+body.dark-theme .form-group input[type="email"], 
 body.dark-theme .form-group select {
     background-color: #3a3a3c; border-color: var(--clr-dark-border); color: var(--clr-dark-text);
     padding: 10px 12px; font-size: 1em; border-radius: 8px; width: 100%; font-family: var(--font-main);
@@ -907,3 +1417,594 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     color: white !important;
 }
 
+
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
+
+/* --- ESTILOS RESPONSIVOS PARA EL PANEL DE ADMIN --- */
+
+/* 1. Estilos por defecto (Móvil) */
+
+.admin-content-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--clr-dark-border);
+}
+
+#currentPageTitle {
+    font-size: 1.5em;
+    color: var(--clr-white);
+    font-weight: 600;
+}
+
+.admin-sidebar {
+    position: fixed; /* Lo sacamos del flujo normal */
+    left: -260px; /* Lo escondemos fuera de la pantalla a la izquierda */
+    top: 0;
+    width: 250px; /* Ancho fijo para el menú deslizable */
+    z-index: 1010; /* Z-index alto para que aparezca por encima de todo */
+    transition: left 0.3s ease-in-out;
+    box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+}
+
+/* Clase que se añadirá con JS para mostrar el menú */
+.admin-sidebar.is-open {
+    left: 0;
+}
+
+.sidebar-overlay {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+}
+
+.sidebar-overlay.is-open {
+    display: block; /* Se muestra cuando el menú está abierto */
+}
+
+
+/* 2. Estilos para Escritorio (a partir de 992px) */
+/* En pantallas grandes, revertimos los estilos móviles y mostramos el layout de 2 columnas. */
+@media (min-width: 992px) {
+    /* Ocultamos el header y el botón de hamburguesa para móvil */
+    .admin-content-header {
+        display: none;
+    }
+
+    /* La barra lateral vuelve a su estado original, siempre visible */
+    .admin-sidebar {
+        position: sticky; /* Vuelve a ser pegajosa */
+        left: 0;
+        box-shadow: none;
+        z-index: auto;
+    }
+
+    /* La capa de superposición no es necesaria en escritorio */
+    .sidebar-overlay {
+        display: none !important;
+    }
+}
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
+.quick-add-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--clr-primary);
+    color: white;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: transform 0.2s ease;
+}
+.quick-add-btn:hover {
+    transform: scale(1.15);
+}
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
+
+/* Estilos para el layout del formulario en dos columnas */
+.form-column-title {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--clr-secondary);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--clr-dark-border);
+}
+
+.form-full-width {
+    grid-column: 1 / -1; /* Hace que este elemento ocupe todas las columnas */
+}
+
+/* Por defecto (móvil), es una sola columna */
+#addParticipantForm.two-column-form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* En pantallas grandes, usamos grid */
+@media (min-width: 768px) {
+    #addParticipantForm.two-column-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Dos columnas de igual tamaño */
+        gap: 0 40px; /* 0 de espacio vertical, 40px de espacio horizontal */
+        align-items: start;
+    }
+}
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
+
+.btn-copiar {
+    background-color: var(--clr-secondary); /* Un color diferente para la acción de copiar */
+}
+
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
+
+/* Contenedor de la imagen del premio necesita ser un punto de referencia */
+.prize-image-container {
+    position: relative;
+}
+
+/* Estilos para el contador como una capa superpuesta (overlay) */
+.countdown-overlay {
+    position: absolute; /* Se posiciona sobre el contenedor de la imagen */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75); /* Fondo oscuro semitransparente */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    opacity: 0; /* Oculto por defecto */
+    transition: opacity 0.4s ease;
+    pointer-events: none; /* No interfiere con el carrusel */
+}
+
+/* Cuando se le añade la clase 'oculto' con display:none no funciona la transición.
+   Usaremos una clase 'visible' para controlar la opacidad. */
+.countdown-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.countdown-overlay h3 {
+    font-size: 1.5em;
+    font-weight: 600;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.countdown-overlay #countdownTimer {
+    font-family: 'Anton', sans-serif;
+    font-size: 4.5em;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--clr-primary);
+    text-shadow: 0 0 15px rgba(var(--clr-primary-rgb), 0.7);
+}
+
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
+
+/* Estilos para el banner del contador regresivo */
+.top-countdown-banner {
+    /* Posicionamiento */
+    position: sticky;
+    top: 5rem; /* Se pega justo debajo de tu navbar de 5rem de alto */
+    z-index: 900;
+    width: 100%;
+
+    /* Estilos visuales */
+    background: linear-gradient(90deg, var(--clr-accent), var(--clr-secondary));
+    color: var(--clr-white);
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column; /* Apilado verticalmente en el estado grande */
+    align-items: center;
+    justify-content: center;
+
+    /* Propiedades que se animarán (estado grande) */
+    padding: 15px 10px;
+    min-height: 110px;
+
+    /* La magia de la animación suave */
+    transition: all 0.4s ease-in-out;
+}
+
+.top-countdown-banner #countdownTitle {
+    font-size: 1.3em;
+    font-weight: 600;
+    margin-bottom: 5px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+    transition: font-size 0.4s ease-in-out;
+}
+
+.top-countdown-banner #countdownTimer {
+    font-family: 'Anton', sans-serif;
+    font-size: 2.8em;
+    font-weight: 700;
+    line-height: 1.1;
+    transition: font-size 0.4s ease-in-out;
+}
+
+/* --- ESTADO ENCOGIDO: Cuando el usuario hace scroll --- */
+.top-countdown-banner.is-scrolled {
+    /* Se vuelve más pequeño */
+    min-height: auto;
+    padding: 8px 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+
+    /* Se alinea horizontalmente */
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.top-countdown-banner.is-scrolled #countdownTitle {
+    font-size: 1em; /* Texto más pequeño */
+    margin: 0;
+}
+
+.top-countdown-banner.is-scrolled #countdownTimer {
+    font-size: 1.5em; /* Contador más pequeño */
+}
+
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS (Y ELIMINA EL CSS ANTERIOR DE .top-list) --- */
+
+/* --- Estilos Mejorados para la Lista Top Participantes --- */
+.top-participants-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+.top-list-item {
+    display: grid;
+    /* Definimos 5 columnas: Ranking, Avatar, Detalles, Barra, Cantidad */
+    grid-template-columns: 30px 45px 1fr 50px;
+    gap: 15px;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background-color: var(--clr-dark-bg);
+    border-radius: var(--border-radius-medium);
+    border: 1px solid var(--clr-dark-border);
+}
+
+.top-list-item-empty {
+    text-align: center;
+    padding: 20px;
+    color: var(--clr-dark-text-alt);
+    background: transparent !important;
+    border: none !important;
+}
+
+.rank-icon {
+    font-size: 1.5em;
+    font-weight: 700;
+    text-align: center;
+    color: var(--clr-dark-text-alt);
+}
+.rank-1 .rank-icon, .rank-2 .rank-icon, .rank-3 .rank-icon {
+    font-size: 1.8em;
+}
+.rank-4 .rank-number, .rank-5 .rank-number {
+    font-size: 1.2em; /* Hacemos los números 4 y 5 un poco más pequeños */
+}
+
+
+.participant-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--clr-black);
+    font-size: 1.1em;
+}
+
+.participant-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow: hidden; /* Evita que el nombre se desborde */
+}
+
+.participant-name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.micro-progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background-color: var(--clr-dark-bg-frame);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.micro-progress-bar-fill {
+    height: 100%;
+    background: var(--clr-energy-bar-updated);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.ticket-count {
+    font-weight: 700;
+    font-size: 1.1em;
+    color: var(--clr-primary);
+    text-align: right;
+    white-space: nowrap;
+}
+
+
+.top-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--clr-dark-border);
+}
+
+.top-list-header span {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--clr-dark-text);
+}
+
+.top-list-header .fa-crown {
+    color: var(--clr-gold);
+    font-size: 1.3em;
+}
+
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
+
+/* --- Estilos de Urgencia para el Contador --- */
+
+/* 1. La animación de "pulso" para el estado crítico */
+@keyframes pulse-warning {
+    0% {
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3), 0 0 0 0 rgba(239, 69, 101, 0.7);
+    }
+    70% {
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3), 0 0 10px 15px rgba(239, 69, 101, 0);
+    }
+    100% {
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3), 0 0 0 0 rgba(239, 69, 101, 0);
+    }
+}
+
+/* 2. Estilo para el estado de "Urgencia" (menos de 30s) */
+.top-countdown-banner.is-urgent {
+    /* Cambiamos el gradiente a colores más cálidos y de alerta */
+    background: linear-gradient(90deg, var(--clr-accent), var(--clr-red));
+}
+
+/* 3. Estilo para el estado "Crítico" (menos de 10s) */
+.top-countdown-banner.is-critical {
+    /* Fondo rojo sólido y aplicamos la animación de pulso */
+    background: var(--clr-red);
+    animation: pulse-warning 1.5s infinite;
+}
+
+/* También hacemos que el texto del contador en estado crítico resalte más */
+.top-countdown-banner.is-critical #countdownTimer {
+    color: var(--clr-white);
+    text-shadow: 0 0 10px rgba(255,255,255,0.7);
+}
+
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
+
+/* --- Estilos de Urgencia para el Contador --- */
+
+/* 1. La animación de "pulso" para el estado crítico */
+@keyframes pulse-warning {
+    0% {
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3), 0 0 0 0 rgba(239, 69, 101, 0.7);
+    }
+    70% {
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3), 0 0 10px 15px rgba(239, 69, 101, 0);
+    }
+    100% {
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3), 0 0 0 0 rgba(239, 69, 101, 0);
+    }
+}
+
+/* 2. Estilo para el estado de "Urgencia" (menos de 30s) */
+.top-countdown-banner.is-urgent {
+    /* Cambiamos el gradiente a colores más cálidos y de alerta */
+    background: linear-gradient(90deg, var(--clr-accent), var(--clr-red));
+}
+
+/* 3. Estilo para el estado "Crítico" (menos de 10s) */
+.top-countdown-banner.is-critical {
+    /* Fondo rojo sólido y aplicamos la animación de pulso */
+    background: var(--clr-red);
+    animation: pulse-warning 1.5s infinite;
+}
+
+/* También hacemos que el texto del contador en estado crítico resalte más */
+.top-countdown-banner.is-critical #countdownTimer {
+    color: var(--clr-white);
+    text-shadow: 0 0 10px rgba(255,255,255,0.7);
+}
+
+
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
+.price-wheel-canvas {
+    /* Transición suave para cuando quitemos el desenfoque */
+    transition: filter 0.8s ease-out;
+}
+.price-wheel-canvas.is-spinning-fast {
+    /* El efecto de desenfoque. Puedes ajustar los píxeles. */
+    filter: blur(0.5px);
+}
+
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
+
+/* Animación que simula el "golpe" de la clavija */
+@keyframes clacker-hit {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    50% { transform: translateY(-50%) rotate(15deg); } /* Un pequeño giro hacia arriba */
+    100% { transform: translateY(-50%) rotate(0deg); }
+}
+/* 2. Nueva animación de "bamboleo" */
+@keyframes clacker-wobble {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  25% { transform: translateY(-50%) rotate(10deg); } /* Gira a la derecha */
+  75% { transform: translateY(-50%) rotate(-10deg); } /* Gira a la izquierda */
+  100% { transform: translateY(-50%) rotate(0deg); }
+}
+/* Clase que aplicaremos con JS para activar la animación */
+.clacker-container.hit {
+    animation: clacker-wobble 0.12s ease-in-out;
+}
+
+
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
+
+/* --- Estilos para el Panel de Ganador --- */
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.winner-card-container {
+    margin-top: 20px;
+    animation: fadeInSlideUp 0.6s ease-out forwards;
+}
+
+.winner-card {
+    max-width: 500px;
+    margin: 0 auto;
+    background: linear-gradient(145deg, var(--clr-dark-bg-alt), var(--clr-dark-bg));
+    border: 1px solid var(--clr-primary);
+    border-radius: var(--border-radius-large);
+    padding: 25px 30px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(var(--clr-primary-rgb), 0.4);
+}
+
+.winner-card h3 {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--clr-dark-text);
+    margin-bottom: 5px;
+}
+
+.winner-card .winner-prize {
+    font-size: 1.1em;
+    font-weight: 500;
+    color: var(--clr-dark-text-alt);
+    margin-bottom: 20px;
+}
+
+.winner-card .winner-name {
+    font-size: 2.5em;
+    font-weight: 800;
+    color: var(--clr-primary);
+    line-height: 1.1;
+    margin-bottom: 8px;
+}
+
+.winner-card .winner-id {
+    font-size: 1em;
+    color: var(--clr-dark-text-alt);
+    margin-bottom: 20px;
+}
+
+.winner-card .winner-contact-note {
+    font-size: 0.9em;
+    font-style: italic;
+    color: var(--clr-dark-text-alt);
+}
+
+/* --- AÑADE ESTO AL FINAL DE STYLE.CSS SI NO LO HAS HECHO ANTES --- */
+
+.mini-package-selector {
+    display: flex;
+    gap: 15px; /* Espacio entre botones */
+    width: 100%;
+    margin-top: 15px;
+    margin-bottom: 25px; /* Espacio antes de la barra de progreso */
+}
+
+.mini-package-btn {
+    flex: 1; /* Ocupan el mismo espacio */
+    padding: 12px 5px;
+    border-radius: var(--border-radius-medium);
+    border: 2px solid var(--clr-dark-border);
+    text-align: center;
+    text-decoration: none;
+    color: var(--clr-dark-text);
+    background-color: rgba(var(--clr-dark-bg-rgb), 0.5); /* Usando una variable que deberías definir en :root */
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.mini-package-btn:hover {
+    transform: translateY(-4px);
+    border-color: var(--clr-primary);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+}
+
+.mini-package-btn strong {
+    display: block;
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.mini-package-btn span {
+    font-size: 0.9em;
+    color: var(--clr-dark-text-alt);
+}
+
+.mini-package-btn.popular {
+    border-color: var(--clr-primary);
+    background-color: rgba(var(--clr-primary-rgb), 0.1);
+}
+
+.popular-tag {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--clr-primary);
+    color: white;
+    font-size: 0.7em;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 50px;
+    white-space: nowrap;
+}
+
+.all-packages strong {
+    color: var(--clr-accent);
+}

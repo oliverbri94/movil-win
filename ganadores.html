@@ -2,32 +2,26 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historial de Ganadores - MOVIL WIN</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>MOVIL WIN - Sorteo de Smartphones</title>
+
+    <!-- Hojas de Estilo y Fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'custom-dark-bg': '#16161a',
-                        'custom-dark-bg-alt': '#242629',
-                        'custom-dark-bg-frame': '#1f1f23',
-                        'custom-primary': '#2cb67d',
-                        'custom-secondary': '#7f5af0',
-                        'custom-accent': '#ff8906',
-                        'custom-text-light': '#e4e4e7',
-                        'custom-text-alt': '#94a1b2',
-                    }
-                }
-            }
-        }
-    </script>
+
+    <!-- Scripts de la cabecera (Head) -->
+    <script src="config.js"></script>
+    <script src="admin.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    
+    <!-- Archivo de configuración para los colores de Tailwind -->
+    <script src="tailwind-config.js"></script>
     <style>
         .page-container { max-width: 1100px; margin: 40px auto; padding: 20px; }
         .back-link { display: inline-block; margin-bottom: 30px; color: var(--clr-primary); text-decoration: none; font-weight: 600; transition: color 0.3s ease; }
@@ -52,37 +46,61 @@
             outline: none; border-color: var(--clr-primary);
             box-shadow: 0 0 0 2px rgba(var(--clr-primary-rgb, 44, 182, 125), 0.5);
         }
+        /* Pega este nuevo bloque dentro de la etiqueta <style> */
+        .placeholder-pending {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--clr-dark-bg);
+            color: var(--clr-dark-text-alt);
+            gap: 15px;
+            border-bottom: 1px solid var(--clr-dark-border);
+        }
+        .placeholder-pending i {
+            font-size: 2.5em;
+            opacity: 0.7;
+            color: var(--clr-secondary);
+        }
+        .placeholder-pending span {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body class="dark-theme">
-    <nav class="bg-custom-dark-bg-frame shadow-lg sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex-shrink-0">
-                    <a href="index.html" class="flex items-center">
-                        <img src="images/logo.png" alt="Logo Movil Win" class="h-12 w-auto">
-                    </a>
-                </div>
-                <div class="flex items-center">
-                    <button id="mobileMenuButton" class="outline-none p-2 rounded-md hover:bg-custom-dark-bg-alt focus:bg-custom-dark-bg-alt transition-colors duration-300">
-                        <svg class="w-6 h-6 text-custom-text-alt hover:text-custom-primary"
-                            fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
-                            <path d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                </div>
+    <nav class="bg-custom-dark-bg-frame shadow-lg fixed w-full top-0 z-50">
+        <div class="main-nav-grid">
+            <div class="nav-left">
+                <button id="mobileMenuButton" class="nav-icon-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
+
+            <div class="nav-center">
+                <a href="index.html">
+                    <img src="images/logo.png" alt="Logo Movil Win" class="nav-logo">
+                </a>
+            </div>
+
+            <div class="nav-right">
+                </div>
         </div>
+
         <div id="fullScreenMenu" class="hidden fixed inset-0 bg-custom-dark-bg bg-opacity-95 backdrop-blur-sm z-40 flex flex-col items-center justify-center p-6 transition-opacity duration-300 ease-in-out">
-             <button id="closeMenuButton" class="absolute top-6 right-6 text-custom-text-alt hover:text-custom-primary text-4xl leading-none">&times;</button>
+            <button id="closeMenuButton" class="absolute top-6 right-6 text-custom-text-alt hover:text-custom-primary text-4xl leading-none">&times;</button>
             <img src="images/logo.png" alt="Logo Movil Win" class="h-20 w-auto mb-8">
+            
             <ul class="flex flex-col items-center space-y-6">
                 <li><a href="index.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Inicio</a></li>
                 <li><a href="faq.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Preguntas Frecuentes</a></li>
                 <li><a href="bases.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Bases y Condiciones</a></li>
                 <li><a href="ganadores.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Historial de Ganadores</a></li>
             </ul>
-             <div class="social-links-footer mt-12 flex space-x-6">
+            
+            <div class="social-links-footer mt-12 flex space-x-6">
                 <a href="https://wa.me/593963135510" target="_blank" rel="noopener noreferrer" aria-label="Contáctanos en WhatsApp" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
                     <i class="fab fa-whatsapp fa-2x"></i>
                 </a>
@@ -139,32 +157,16 @@
 
     <script>
         // Script para el menú móvil (igual que en index.html y faq.html)
+        // --- INICIO: BLOQUE DE CÓDIGO MAESTRO PARA NAVEGACIÓN (COMPLETO) ---
+
+        // 1. DECLARACIÓN DE VARIABLES DEL MENÚ
         const mobileMenuButton = document.getElementById('mobileMenuButton');
         const fullScreenMenu = document.getElementById('fullScreenMenu');
         const closeMenuButton = document.getElementById('closeMenuButton');
+        const userLinksContainer = document.getElementById('user-session-links');
+        const userActionButton = document.getElementById('user-action-button');
 
-        function toggleFullScreenMenu() {
-            if (fullScreenMenu) {
-                const isVisible = fullScreenMenu.classList.contains('menu-visible');
-                if (isVisible) {
-                    fullScreenMenu.classList.remove('menu-visible');
-                    setTimeout(() => { fullScreenMenu.classList.add('hidden'); }, 300);
-                } else {
-                    fullScreenMenu.classList.remove('hidden');
-                    void fullScreenMenu.offsetWidth;
-                    fullScreenMenu.classList.add('menu-visible');
-                }
-            }
-        }
-        if (mobileMenuButton) mobileMenuButton.addEventListener('click', toggleFullScreenMenu);
-        if (closeMenuButton) closeMenuButton.addEventListener('click', toggleFullScreenMenu);
-         if (fullScreenMenu) {
-            const menuLinks = fullScreenMenu.querySelectorAll('ul a');
-            menuLinks.forEach(link => {
-                link.addEventListener('click', () => { /* No acción especial al navegar a otra página */ });
-            });
-        }
-
+        // --- FIN: BLOQUE DE CÓDIGO MAESTRO ---
         // Script para cargar y mostrar TODOS los ganadores y filtrarlos
         const listaTodosGanadoresDiv = document.getElementById('listaTodosGanadores');
         const loaderTodosGanadores = document.getElementById('loaderTodosGanadores');
@@ -241,23 +243,44 @@
             if (!listaTodosGanadoresDiv) return;
             listaTodosGanadoresDiv.innerHTML = '';
             mensajeSinGanadores.classList.add('oculto');
+
             const anioSeleccionado = selectAnio.value;
             const mesSeleccionado = selectMes.value;
+
             const ganadoresFiltrados = todosLosGanadoresGlobal.filter(ganador => {
                 const fecha = parsearFecha(ganador.fecha);
                 if (!fecha) return false;
                 const anioCoincide = !anioSeleccionado || fecha.getFullYear() == anioSeleccionado;
-                const mesCoincide = (mesSeleccionado === "") || fecha.getMonth() == mesSeleccionado; // Comparar como número
+                const mesCoincide = (mesSeleccionado === "") || fecha.getMonth() == mesSeleccionado;
                 return anioCoincide && mesCoincide;
             });
+
             if (ganadoresFiltrados.length === 0) {
                 mensajeSinGanadores.classList.remove('oculto');
             } else {
                 ganadoresFiltrados.forEach(ganador => {
                     const card = document.createElement('div');
                     card.classList.add('ganador-card');
+
+                    // --- INICIO DE LA LÓGICA MEJORADA ---
+                    let mediaHTML;
+                    // Si existe una URL de imagen y no está vacía...
+                    if (ganador.imagenUrl && ganador.imagenUrl.trim() !== '') {
+                        // ...muestra la imagen del ganador.
+                        mediaHTML = `<img src="${ganador.imagenUrl}" alt="Foto de ${ganador.nombre}" class="ganador-foto" onerror="this.onerror=null; this.src='images/placeholder-ganador.png';">`;
+                    } else {
+                        // ...de lo contrario, muestra el mensaje de "en proceso".
+                        mediaHTML = `
+                            <div class="placeholder-pending">
+                                <i class="fas fa-shipping-fast"></i>
+                                <span>Entrega de premio en proceso</span>
+                            </div>
+                        `;
+                    }
+                    // --- FIN DE LA LÓGICA MEJORADA ---
+
                     card.innerHTML = `
-                        <img src="${ganador.imagenUrl || 'images/placeholder-ganador.png'}" alt="Foto de ${ganador.nombre}" class="ganador-foto" onerror="this.onerror=null; this.src='images/placeholder-ganador.png'; this.alt='Foto no disponible';">
+                        ${mediaHTML}
                         <div class="ganador-info">
                             <h3 class="ganador-nombre">${ganador.nombre}</h3>
                             <p class="ganador-ubicacion"><i class="fas fa-map-marker-alt"></i> ${ganador.ciudad || 'N/A'}</p>
@@ -269,7 +292,7 @@
                 });
             }
         }
-
+        
         async function cargarTodosLosGanadores() {
             if (!listaTodosGanadoresDiv || !loaderTodosGanadores) return;
             loaderTodosGanadores.classList.remove('oculto');
@@ -294,6 +317,18 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            actualizarNavegacion();
+
+            const menuContainer = document.getElementById('fullScreenMenu');
+            if (menuContainer) {
+                menuContainer.addEventListener('click', async (e) => {
+                    if (e.target && e.target.id === 'logoutBtn') {
+                        e.preventDefault();
+                        await fetch('/api/auth/logout', { method: 'POST' });
+                        window.location.href = 'index.html';
+                    }
+                });
+            }
             cargarTodosLosGanadores();
             if(selectAnio) selectAnio.addEventListener('change', () => {
                 actualizarFiltroMeses();
@@ -302,5 +337,6 @@
             if(selectMes) selectMes.addEventListener('change', filtrarYMostrarGanadores);
         });
     </script>
+    <script src="script.js"></script>
 </body>
 </html>
