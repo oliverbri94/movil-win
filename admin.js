@@ -216,7 +216,9 @@ async function fetchAndDisplayAffiliates() {
     tbody.innerHTML = ''; // Limpia la tabla antes de llenarla
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`);
+        const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`,{
+            credentials: 'include' 
+        });
         if (!response.ok) {
             throw new Error(`Error del servidor: ${response.status}`);
         }
@@ -273,7 +275,9 @@ async function fetchAndDisplayWinnersForAdmin() {
     loader.classList.remove('oculto');
     tbody.innerHTML = '';
     try {
-        const response = await fetch(`${API_BASE_URL}/api/admin/ganadores`);
+        const response = await fetch(`${API_BASE_URL}/api/admin/ganadores`,{
+            credentials: 'include'
+        });
         const ganadores = await response.json();
 
         if (ganadores.length === 0) {
@@ -308,7 +312,9 @@ async function populateAffiliatesDropdown() {
     const select = document.getElementById('affiliateSelect');
     if (!select) return;
     try {
-        const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`);
+        const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`,{
+            credentials: 'include' // Asegúrate de incluir las credenciales para la sesión
+        });
         const afiliados = await response.json();
         
         select.innerHTML = '<option value="">-- Ninguno --</option>'; // Limpia y resetea
@@ -358,7 +364,9 @@ function showLoginUI() {
  */
 async function checkSessionStatus() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`);
+        const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`,{
+            credentials: 'include'
+        });
         if (response.ok) {
             console.log("Sesión activa detectada.");
             await showAdminUI();
@@ -387,7 +395,8 @@ async function handleLogin(event) {
         const response = await fetch(`${API_BASE_URL}/api/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password })
+            body: JSON.stringify({ password }),
+            credentials: 'include' // <<<--- AÑADE ESTO
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || `Error ${response.status}`);
@@ -430,7 +439,9 @@ async function fetchAndDisplayParticipants() {
     currentCountSpan.textContent = '...';
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/admin/participantes-activos`);
+        const response = await fetch(`${API_BASE_URL}/api/admin/participantes-activos`,{
+            credentials: 'include'
+        });
         if (response.status === 401) {
             showLoginUI();
             showGenericStatusMessage(loginStatusMessage, 'Sesión expirada. Inicia sesión de nuevo.', true);
@@ -532,7 +543,8 @@ async function handleAddParticipant(event) {
         const response = await fetch(`${API_BASE_URL}/api/admin/participantes`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            credentials: 'include'
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || `Error ${response.status}`);
@@ -598,7 +610,9 @@ async function cargarListaSorteos() {
     loaderListaSorteos.classList.remove('oculto');
     tbodyListaSorteos.innerHTML = '';
     try {
-        const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`);
+        const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`, {
+            credentials: 'include'
+        });
         if (!response.ok) throw new Error((await response.json()).error || 'Error de red');
         const sorteos = await response.json();
 
@@ -751,7 +765,8 @@ async function handleFinalizarSorteo(sorteoId) {
         const response = await fetch(`${API_BASE_URL}/api/admin/sorteos/finalizar`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sorteo_id: sorteoId })
+            body: JSON.stringify({ sorteo_id: sorteoId }),
+            credentials: 'include'
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error);
@@ -776,7 +791,9 @@ async function cargarDashboardStats() {
 
     try {
         // Hacemos una ÚNICA llamada a nuestra nueva y poderosa API
-        const response = await fetch(`${API_BASE_URL}/api/admin/dashboard-avanzado`);
+        const response = await fetch(`${API_BASE_URL}/api/admin/dashboard-avanzado`,{
+            credentials: 'include'
+        });
         if (!response.ok) throw new Error("No se pudieron cargar las estadísticas del dashboard.");
         
         const data = await response.json();
@@ -996,7 +1013,9 @@ async function fetchInfoSorteoActualParaAdmin() {
     if(sorteoParaCuentaRegresivaSelect) sorteoParaCuentaRegresivaSelect.innerHTML = '<option value="">-- Cargando... --</option>';
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`);
+        const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`,{
+            credentials: 'include'
+});
         if (!response.ok) throw new Error('No se pudo obtener la lista de sorteos.');
         
         // Guardamos los datos completos en nuestra variable global
@@ -1099,7 +1118,8 @@ const quantityInput = document.getElementById('quantity');
             const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
+                credentials: 'include'
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error);
@@ -1186,7 +1206,9 @@ const quantityInput = document.getElementById('quantity');
         if (target.classList.contains('btn-editar')) {
             showGenericStatusMessage(statusGestionSorteo, `Cargando datos del sorteo ID ${sorteoId}...`);
             try {
-                const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`);
+                const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`, {
+                    credentials: 'include'
+                });
                 const sorteos = await response.json();
                 if (!response.ok) throw new Error(sorteos.error || "Error cargando sorteo");
                 const sorteoAEditar = sorteos.find(s => s.id_sorteo == sorteoId);
@@ -1313,7 +1335,8 @@ if(quickAffiliateForm) {
             const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
+                credentials: 'include'
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error);
