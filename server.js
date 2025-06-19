@@ -1,14 +1,59 @@
 // 1. Importar librerías necesarias
 const express = require('express');
-const path = require('path');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
+const helmet = require('helmet');
 const session = require('express-session');
+const path = require('path');
+const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
+
+const app = express();
+const port = 3000;
+const DB_FILE = path.join(__dirname, 'sorteo.db');
+const ADMIN_PASSWORD_HASH = '$2b$10$smI5GakSdpfQretertretrtetw994hu.NZe'; // <<<--- PEGA TU HASH AQUÍ
+const SESSION_SECRET = 'supeertertertertespialidoso'; // ¡CAMBIA ESTO!
+
+// Esta línea es importante para que Render confíe en la conexión segura (HTTPS)
+app.set('trust proxy', 1); 
+app.use(helmet());
+
+
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || "http://127.0.0.1:5500", // Permite pruebas locales
+  credentials: true
+};
+app.use(cors(corsOptions));
+
+app.options('*', cors(corsOptions));
+
+app.use(express.urlencoded({ extended: true }));
+// 4. Middlewares y Autenticación
+app.use(cors());
+app.use(express.static('.'));
+app.use(express.json());
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        // secure: true es OBLIGATORIO para SameSite: 'none'
+        // Solo funcionará si tu backend en Render usa HTTPS (lo cual hace por defecto)
+        secure: true, 
+
+        httpOnly: true, 
+        maxAge: 1000 * 60 * 60 * 2, // 2 horas
+
+        // Permite que la cookie se envíe en peticiones de sitios cruzados
+        sameSite: 'none' 
+    }
+}));
+
+
+
 
 
 
@@ -21,11 +66,6 @@ const loginLimiter = rateLimit({
     legacyHeaders: false, // Deshabilita cabeceras antiguas
     message: { error: 'Demasiados intentos de inicio de sesión. Por favor, inténtelo de nuevo en 15 minutos.' }
 });
-const app = express();
-const port = 3000;
-const DB_FILE = path.join(__dirname, 'sorteo.db');
-const ADMIN_PASSWORD_HASH = '$2b$10$smI5GakSdpfQretertretrtetw994hu.NZe'; // <<<--- PEGA TU HASH AQUÍ
-const SESSION_SECRET = 'supeertertertertespialidoso'; // ¡CAMBIA ESTO!
 
 let SORTEO_ACTUAL_INFO = {
     id_sorteo: null,
@@ -68,39 +108,8 @@ try {
     transporter = null;
 }
 
-// 4. Middlewares y Autenticación
-app.use(cors());
-app.use(express.static('.'));
-app.use(express.json());
-const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://127.0.0.1:5500", // Permite pruebas locales
-  credentials: true
-};
-app.use(cors(corsOptions));
-app.use(express.urlencoded({ extended: true }));
-// --- REEMPLAZA TU CONFIGURACIÓN DE SESIÓN CON ESTA ---
 
-// Esta línea es importante para que Render confíe en la conexión segura (HTTPS)
-app.set('trust proxy', 1); 
 
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-        // secure: true es OBLIGATORIO para SameSite: 'none'
-        // Solo funcionará si tu backend en Render usa HTTPS (lo cual hace por defecto)
-        secure: true, 
-
-        httpOnly: true, 
-        maxAge: 1000 * 60 * 60 * 2, // 2 horas
-
-        // Permite que la cookie se envíe en peticiones de sitios cruzados
-        sameSite: 'none' 
-    }
-}));
-const helmet = require('helmet');
-app.use(helmet());
 
 function requireAdminLogin(req, res, next) {
     if (req.session && req.session.isAdmin) {
