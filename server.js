@@ -32,11 +32,7 @@ let SORTEO_ACTUAL_INFO = {
     nombre_premio_display: "Smartphone de Última Generación (Por Defecto)",
     nombre_base_archivo_guia: "Smartphone_Generico",
     descripcion_premio: "Un increíble smartphone con la última tecnología.",
-<<<<<<< HEAD
-    meta_participaciones: 200;
-=======
     meta_participaciones: 200,
->>>>>>> feb8190 (Preparación para despliegue decoupled)
     status_sorteo: 'completado'
 
 };
@@ -49,13 +45,8 @@ const mailConfig = {
     port: 465,
     secure: true,
     auth: {
-<<<<<<< HEAD
-        user: 'ceo@movilwin.com', // Tu dirección de email Gmail
-        pass: 'wtreterterterterterimls' // <<<--- ¡REEMPLAZA ESTO CON TU CONTRASEÑA DE APLICACIÓN DE GMAIL!
-=======
         user: process.env.EMAIL_USER, // Tu dirección de email Gmail
         pass: process.env.EMAIL_PASS // <<<--- ¡REEMPLAZA ESTO CON TU CONTRASEÑA DE APLICACIÓN DE GMAIL!
->>>>>>> feb8190 (Preparación para despliegue decoupled)
     },
     tls: {
         rejectUnauthorized: false
@@ -792,8 +783,4 @@ const createTablesSql = `
     app.listen(PORT, () => {
         console.log(`Servidor corriendo en el puerto ${PORT}`);
     });
-<<<<<<< HEAD
-}
-=======
 });
->>>>>>> feb8190 (Preparación para despliegue decoupled)
