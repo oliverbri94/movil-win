@@ -216,7 +216,7 @@ async function fetchAndDisplayAffiliates() {
     tbody.innerHTML = ''; // Limpia la tabla antes de llenarla
 
     try {
-        const response = await fetch('${API_BASE_URL}/api/admin/afiliados');
+        const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`);
         if (!response.ok) {
             throw new Error(`Error del servidor: ${response.status}`);
         }
@@ -273,7 +273,7 @@ async function fetchAndDisplayWinnersForAdmin() {
     loader.classList.remove('oculto');
     tbody.innerHTML = '';
     try {
-        const response = await fetch('${API_BASE_URL}/api/admin/ganadores');
+        const response = await fetch(`${API_BASE_URL}/api/admin/ganadores`);
         const ganadores = await response.json();
 
         if (ganadores.length === 0) {
@@ -308,7 +308,7 @@ async function populateAffiliatesDropdown() {
     const select = document.getElementById('affiliateSelect');
     if (!select) return;
     try {
-        const response = await fetch('${API_BASE_URL}/api/admin/afiliados');
+        const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`);
         const afiliados = await response.json();
         
         select.innerHTML = '<option value="">-- Ninguno --</option>'; // Limpia y resetea
@@ -358,7 +358,7 @@ function showLoginUI() {
  */
 async function checkSessionStatus() {
     try {
-        const response = await fetch('${API_BASE_URL}/api/admin/sorteos');
+        const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`);
         if (response.ok) {
             console.log("Sesión activa detectada.");
             await showAdminUI();
@@ -384,7 +384,7 @@ async function handleLogin(event) {
     }
     showGenericStatusMessage(loginStatusMessage, 'Iniciando sesión...');
     try {
-        const response = await fetch('${API_BASE_URL}/api/login', {
+        const response = await fetch(`${API_BASE_URL}/api/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ password })
@@ -405,7 +405,7 @@ async function handleLogin(event) {
 async function handleLogout() {
     showGenericStatusMessage(loginStatusMessage, 'Cerrando sesión...');
     try {
-        await fetch('${API_BASE_URL}/api/logout', { method: 'POST' });
+        await fetch(`${API_BASE_URL}/api/logout`, { method: 'POST' });
     } catch (error) {
         console.error("Error al cerrar sesión:", error);
     } finally {
@@ -430,7 +430,7 @@ async function fetchAndDisplayParticipants() {
     currentCountSpan.textContent = '...';
 
     try {
-        const response = await fetch('${API_BASE_URL}/api/admin/participantes-activos');
+        const response = await fetch(`${API_BASE_URL}/api/admin/participantes-activos`);
         if (response.status === 401) {
             showLoginUI();
             showGenericStatusMessage(loginStatusMessage, 'Sesión expirada. Inicia sesión de nuevo.', true);
@@ -529,7 +529,7 @@ async function handleAddParticipant(event) {
 
     try {
         // ... (El bloque try/catch se mantiene igual)
-        const response = await fetch('${API_BASE_URL}/api/admin/participantes', {
+        const response = await fetch(`${API_BASE_URL}/api/admin/participantes`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -598,7 +598,7 @@ async function cargarListaSorteos() {
     loaderListaSorteos.classList.remove('oculto');
     tbodyListaSorteos.innerHTML = '';
     try {
-        const response = await fetch('${API_BASE_URL}/api/admin/sorteos');
+        const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`);
         if (!response.ok) throw new Error((await response.json()).error || 'Error de red');
         const sorteos = await response.json();
 
@@ -748,7 +748,7 @@ async function handleFinalizarSorteo(sorteoId) {
 
     showGenericStatusMessage(finalizarStatusMessage, 'Finalizando sorteo...');
     try {
-        const response = await fetch('${API_BASE_URL}/api/admin/sorteos/finalizar', {
+        const response = await fetch(`${API_BASE_URL}/api/admin/sorteos/finalizar`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sorteo_id: sorteoId })
@@ -776,7 +776,7 @@ async function cargarDashboardStats() {
 
     try {
         // Hacemos una ÚNICA llamada a nuestra nueva y poderosa API
-        const response = await fetch('${API_BASE_URL}/api/admin/dashboard-avanzado');
+        const response = await fetch(`${API_BASE_URL}/api/admin/dashboard-avanzado`);
         if (!response.ok) throw new Error("No se pudieron cargar las estadísticas del dashboard.");
         
         const data = await response.json();
@@ -996,7 +996,7 @@ async function fetchInfoSorteoActualParaAdmin() {
     if(sorteoParaCuentaRegresivaSelect) sorteoParaCuentaRegresivaSelect.innerHTML = '<option value="">-- Cargando... --</option>';
 
     try {
-        const response = await fetch('${API_BASE_URL}/api/admin/sorteos');
+        const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`);
         if (!response.ok) throw new Error('No se pudo obtener la lista de sorteos.');
         
         // Guardamos los datos completos en nuestra variable global
@@ -1096,7 +1096,7 @@ const quantityInput = document.getElementById('quantity');
         };
 
         try {
-            const response = await fetch('${API_BASE_URL}/api/admin/afiliados', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -1186,7 +1186,7 @@ const quantityInput = document.getElementById('quantity');
         if (target.classList.contains('btn-editar')) {
             showGenericStatusMessage(statusGestionSorteo, `Cargando datos del sorteo ID ${sorteoId}...`);
             try {
-                const response = await fetch('${API_BASE_URL}/api/admin/sorteos');
+                const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`);
                 const sorteos = await response.json();
                 if (!response.ok) throw new Error(sorteos.error || "Error cargando sorteo");
                 const sorteoAEditar = sorteos.find(s => s.id_sorteo == sorteoId);
@@ -1310,7 +1310,7 @@ if(quickAffiliateForm) {
         const payload = { nombre_completo: nameInput.value, telefono: phoneInput.value };
 
         try {
-            const response = await fetch('${API_BASE_URL}/api/admin/afiliados', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

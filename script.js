@@ -272,7 +272,7 @@ function initializeRafflePage() {
 
         try {
             const sorteoActual = sorteosDisponibles[premioActualIndex];
-            const response = await fetch('${API_BASE_URL}/api/admin/realizar-sorteo', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/realizar-sorteo`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sorteo_id: sorteoActual.id_sorteo, premio_actual: sorteoActual.nombre_premio_display })
@@ -644,7 +644,7 @@ function initializeRafflePage() {
         
     async function cargarSorteosVisibles() {
         try {
-            const response = await fetch('${API_BASE_URL}/api/sorteos-visibles');
+            const response = await fetch(`${API_BASE_URL}/api/sorteos-visibles`);
             if (!response.ok) throw new Error('No se pudo obtener la lista de sorteos.');
             const data = await response.json();
             
@@ -675,7 +675,7 @@ function initializeRafflePage() {
         if (!listaGanadoresDiv) return;
         loaderGanadores.classList.remove('oculto');
         try {
-            const response = await fetch('${API_BASE_URL}/api/ultimos-ganadores');
+            const response = await fetch(`${API_BASE_URL}/api/ultimos-ganadores`);
             const ganadores = await response.json();
             listaGanadoresDiv.innerHTML = '';
             if (ganadores.length === 0) {
