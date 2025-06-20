@@ -827,8 +827,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     function renderPaquetesChart(data) {
-        if (paquetesChartInstance) paquetesChartInstance.destroy();
-        const ctx = paquetesChartCanvas.getContext('2d');
+        const canvasId = 'paquetesChart';
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        // Forma robusta de destruir el gráfico anterior
+        const existingChart = Chart.getChart(canvasId);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+
+        const ctx = canvas.getContext('2d');
         paquetesChartInstance = new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -845,9 +854,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+
     function renderDiarioChart(data) {
-        if (diarioChartInstance) diarioChartInstance.destroy();
-        const ctx = diarioChartCanvas.getContext('2d');
+        const canvasId = 'diarioChart';
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        // Forma robusta de destruir el gráfico anterior
+        const existingChart = Chart.getChart(canvasId);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+
+        const ctx = canvas.getContext('2d');
         diarioChartInstance = new Chart(ctx, {
             type: 'line',
             data: {
@@ -867,7 +886,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
     function renderRevenue(totalRevenue) {
         const revenueElement = document.getElementById('totalRevenueStat');
         if (revenueElement) {
@@ -876,7 +894,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // CÓDIGO CORREGIDO
     function renderRafflePerformanceChart(data) {
         const canvasId = 'rafflePerformanceChart';
         const canvas = document.getElementById(canvasId);
@@ -888,9 +905,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             existingChart.destroy();
         }
 
-        // Ahora creamos el nuevo gráfico de forma segura
         const ctx = canvas.getContext('2d');
-        rafflePerformanceChartInstance = new Chart(ctx, { // Mantenemos la asignación a tu variable global
+        rafflePerformanceChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: data.map(s => s.nombre_premio_display.substring(0, 20) + '...'),
