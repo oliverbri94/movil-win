@@ -11,33 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- PEGA ESTO DENTRO DE document.addEventListener('DOMContentLoaded', ...) ---
 // Pega esta nueva función al principio de script.js
 
-/**
- * Dibuja texto en un canvas, dividiéndolo en múltiples líneas si excede el ancho máximo.
- * @param {CanvasRenderingContext2D} context El contexto del canvas (ctx).
- * @param {string} text El texto a dibujar.
- * @param {number} x La coordenada X.
- * @param {number} y La coordenada Y.
- * @param {number} maxWidth El ancho máximo permitido para el texto.
- * @param {number} lineHeight La altura de cada línea.
- */
-function wrapText(context, text, x, y, maxWidth, lineHeight) {
-    const words = text.split(' ');
-    let line = '';
 
-    for (let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + ' ';
-        const metrics = context.measureText(testLine);
-        const testWidth = metrics.width;
-        if (testWidth > maxWidth && n > 0) {
-            context.fillText(line, x, y);
-            line = words[n] + ' ';
-            y += lineHeight;
-        } else {
-            line = testLine;
-        }
-    }
-    context.fillText(line, x, y);
-}
 const topCountdownBanner = document.getElementById('topCountdownBanner');
 
 if (topCountdownBanner) {
@@ -123,6 +97,33 @@ function stringToHslColor(str) {
     const h = hash % 360;
     // Usamos saturación y luminosidad fijas para una paleta de colores pastel agradable
     return `hsl(${h}, 60%, 75%)`;
+}
+/**
+ * Dibuja texto en un canvas, dividiéndolo en múltiples líneas si excede el ancho máximo.
+ * @param {CanvasRenderingContext2D} context El contexto del canvas (ctx).
+ * @param {string} text El texto a dibujar.
+ * @param {number} x La coordenada X.
+ * @param {number} y La coordenada Y.
+ * @param {number} maxWidth El ancho máximo permitido para el texto.
+ * @param {number} lineHeight La altura de cada línea.
+ */
+function wrapText(context, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+
+    for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = context.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+            context.fillText(line, x, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+        } else {
+            line = testLine;
+        }
+    }
+    context.fillText(line, x, y);
 }
 function initializeRafflePage() {
     // 1. ESTADO Y VARIABLES COMPARTIDAS DEL SORTEO
