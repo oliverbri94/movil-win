@@ -1,9 +1,8 @@
 // =================================================================
-// ARCHIVO SERVER.JS - VERSIÓN FINAL, ORDENADA Y CORREGIDA
+// ARCHIVO SERVER.JS - ESTRUCTURA FINAL Y CORREGIDA
 // =================================================================
 
 // --- 1. IMPORTACIONES ---
-// Todas las librerías que necesitamos al principio.
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -16,60 +15,48 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 const { Pool } = require('pg');
+const pgSession = require('connect-pg-simple')(session);
 
 // --- 2. CONFIGURACIÓN INICIAL DE LA APP ---
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH
-const SESSION_SECRET = process.env.SESSION_SECRET
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
+const SESSION_SECRET = process.env.SESSION_SECRET;
 
 // --- 3. CONFIGURACIÓN DE MIDDLEWARES (EL ORDEN ES CRÍTICO) ---
-// Confianza en el proxy de Render para HTTPS y cookies seguras
+
+// Confianza en el proxy de Render y seguridad básica
 app.set('trust proxy', 1);
-// Cabeceras de seguridad básicas
 app.use(helmet());
 
-// Configuración de CORS. DEBE IR ANTES DE LAS RUTAS.
-const corsOptions = {
-    origin: 'https://movilwin.com', // URL escrita directamente
-    credentials: true
-};
-app.use(cors(corsOptions));
-
-// Parsers para poder leer el body de las peticiones
+// Parsers para leer el body de las peticiones
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuración de la Sesión. DEBE IR ANTES DE LAS RUTAS QUE LA USAN.
-app.use(session({
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-        secure: process.env.NODE_ENV === 'production', // true en producción
-        httpOnly: true, 
-        maxAge: 1000 * 60 * 60 * 2, // 2 horas
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
-    }
-}));
-
-// Servidor de archivos estáticos para el frontend (si decides volver a un modelo monolítico)
-// Lo dejamos aquí por si acaso, no interfiere.
-app.use(express.static('.'));
-
-
-// --- 4. CONEXIÓN A LA BASE DE DATOS (LÓGICA CONDICIONAL) ---
+// --- 4. LÓGICA CONDICIONAL DE DB Y SESIÓN ---
+// Declaramos las variables aquí para que sean accesibles en todo el archivo
 let db;
-if (process.env.DATABASE_URL) {
-    // --- Conexión para Producción (Render con PostgreSQL) ---
+let sessionStore = new session.MemoryStore(); // Usamos un store de memoria por defecto
+
+// Verificamos si estamos en producción (en Render)
+if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
     console.log("Detectado entorno de producción. Conectando a PostgreSQL...");
+
+    // 1. CREAMOS LA CONEXIÓN A LA BASE DE DATOS PRIMERO
     const dbClient = new Pool({
         connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized: false }
     });
-    // Capa de compatibilidad para usar la misma sintaxis de sqlite
+
+    // 2. CREAMOS EL ALMACÉN DE SESIONES USANDO ESA CONEXIÓN
+    sessionStore = new pgSession({
+        pool : dbClient,
+        tableName : 'user_sessions'
+    });
+
+    // 3. Creamos la capa de compatibilidad para las consultas
     db = {
-        run: (sql, params = [], callback = () => {}) => dbClient.query(sql, params).then(res => callback.call({ changes: res.rowCount, lastID: res.rows[0]?.id || res.rows[0]?.id_sorteo || null }, null)).catch(err => callback(err)),
+        run: (sql, params = [], callback = () => {}) => dbClient.query(sql, params).then(res => callback.call({ changes: res.rowCount, lastID: res.rows[0]?.id_sorteo || res.rows[0]?.id_afiliado || null }, null)).catch(err => callback(err)),
         get: (sql, params = [], callback) => dbClient.query(sql, params).then(res => callback(null, res.rows[0])).catch(err => callback(err, null)),
         all: (sql, params = [], callback) => dbClient.query(sql, params).then(res => callback(null, res.rows)).catch(err => callback(err, null)),
         prepare: (sql) => ({
@@ -79,7 +66,7 @@ if (process.env.DATABASE_URL) {
         serialize: (callback) => callback()
     };
 } else {
-    // --- Conexión para Desarrollo (Tu PC con SQLite) ---
+    // --- Lógica para Desarrollo (Tu PC con SQLite) ---
     console.log("Detectado entorno local. Conectando a SQLite...");
     const DB_FILE = path.join(__dirname, 'sorteo.db');
     db = new sqlite3.Database(DB_FILE, (err) => {
@@ -87,6 +74,34 @@ if (process.env.DATABASE_URL) {
         console.log(`Conectado a SQLite: ${DB_FILE}`);
     });
 }
+
+// --- 5. CONFIGURACIÓN DE SESIÓN Y CORS (USANDO EL STORE YA CREADO) ---
+
+// Ahora configuramos la sesión, que usará 'sessionStore' (ya sea el de memoria o el de PostgreSQL)
+app.use(session({
+    store: sessionStore,
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true, 
+        maxAge: 1000 * 60 * 60 * 2, // 2 horas
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    }
+}));
+
+// Y finalmente, la configuración de CORS, que necesita que la sesión ya esté configurada.
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || "http://127.0.0.1:5500",
+    credentials: true
+};
+app.use(cors(corsOptions));
+
+// Servidor de archivos estáticos (no interfiere)
+app.use(express.static('.'));
+
+
 
 // --- 5. LÓGICA DE LA APLICACIÓN (MIDDLEWARES DE RUTA Y RUTAS DE API) ---
 
