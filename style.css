@@ -1242,15 +1242,7 @@ nav.bg-custom-dark-bg-frame {
     .progreso-sorteo p, .como-participar-section .cta-integrada p, .seccion-top-participantes p, .seccion-proximo-premio .proximo-premio-texto p { font-size: 0.9em; }
     .boton-cta { font-size: 1em; padding: 10px 25px; }
     .contenedor-sorteo { max-width: 100%; }
-    .sorteo-frame {
-        /* Se colapsa el elemento para que sea completamente invisible */
-        padding: 0;
-        margin: 0;
-        border: none;
-        height: 0;
-        overflow: hidden;
-        background-color: transparent;
-    }    
+
     .wheel-2d-canvas-container { max-width: 280px; height: 280px; } /* Ajuste para móviles */
     .clacker-pointer-front { width: 35px; height: 28px; right: 2px; } /* Ajuste para móviles */
     .boton-girar { width: 90%; padding: 10px 20px; font-size: 1em; margin-top: 20px;}
