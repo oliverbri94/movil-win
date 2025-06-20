@@ -1,4 +1,12 @@
-// 1. Importar librerías necesarias
+JavaScript
+
+// =================================================================
+// ARCHIVO SERVER.JS - VERSIÓN FINAL, ORDENADA Y CORREGIDA
+// =================================================================
+
+// --- 1. IMPORTACIONES ---
+// Todas las librerías que necesitamos al principio.
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -9,62 +17,95 @@ const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+const { Pool } = require('pg');
 
+// --- 2. CONFIGURACIÓN INICIAL DE LA APP ---
 const app = express();
-const port = 3000;
-const DB_FILE = path.join(__dirname, 'sorteo.db');
-const ADMIN_PASSWORD_HASH = '$2b$10$smI5GakSdpfQretertretrtetw994hu.NZe'; // <<<--- PEGA TU HASH AQUÍ
-const SESSION_SECRET = 'supeertertertertespialidoso'; // ¡CAMBIA ESTO!
+const PORT = process.env.PORT || 3000;
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH
+const SESSION_SECRET = process.env.SESSION_SECRET
 
-// Esta línea es importante para que Render confíe en la conexión segura (HTTPS)
-app.set('trust proxy', 1); 
+// --- 3. CONFIGURACIÓN DE MIDDLEWARES (EL ORDEN ES CRÍTICO) ---
+// Confianza en el proxy de Render para HTTPS y cookies seguras
+app.set('trust proxy', 1);
+// Cabeceras de seguridad básicas
 app.use(helmet());
 
-
+// Configuración de CORS. DEBE IR ANTES DE LAS RUTAS.
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://127.0.0.1:5500", // Permite pruebas locales
-  credentials: true
+    origin: process.env.FRONTEND_URL || "http://127.0.0.1:5500",
+    credentials: true
 };
 app.use(cors(corsOptions));
 
-//app.options('*', cors(corsOptions));
-
-app.use(express.urlencoded({ extended: true }));
-// 4. Middlewares y Autenticación
-app.use(cors());
-app.use(express.static('.'));
+// Parsers para poder leer el body de las peticiones
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Configuración de la Sesión. DEBE IR ANTES DE LAS RUTAS QUE LA USAN.
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        // secure: true es OBLIGATORIO para SameSite: 'none'
-        // Solo funcionará si tu backend en Render usa HTTPS (lo cual hace por defecto)
-        secure: true, 
-
+        secure: process.env.NODE_ENV === 'production', // true en producción
         httpOnly: true, 
         maxAge: 1000 * 60 * 60 * 2, // 2 horas
-
-        // Permite que la cookie se envíe en peticiones de sitios cruzados
-        sameSite: 'none' 
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     }
 }));
 
+// Servidor de archivos estáticos para el frontend (si decides volver a un modelo monolítico)
+// Lo dejamos aquí por si acaso, no interfiere.
+app.use(express.static('.'));
 
 
+// --- 4. CONEXIÓN A LA BASE DE DATOS (LÓGICA CONDICIONAL) ---
+let db;
+if (process.env.DATABASE_URL) {
+    // --- Conexión para Producción (Render con PostgreSQL) ---
+    console.log("Detectado entorno de producción. Conectando a PostgreSQL...");
+    const dbClient = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+    });
+    // Capa de compatibilidad para usar la misma sintaxis de sqlite
+    db = {
+        run: (sql, params = [], callback = () => {}) => dbClient.query(sql, params).then(res => callback.call({ changes: res.rowCount, lastID: res.rows[0]?.id || res.rows[0]?.id_sorteo || null }, null)).catch(err => callback(err)),
+        get: (sql, params = [], callback) => dbClient.query(sql, params).then(res => callback(null, res.rows[0])).catch(err => callback(err, null)),
+        all: (sql, params = [], callback) => dbClient.query(sql, params).then(res => callback(null, res.rows)).catch(err => callback(err, null)),
+        prepare: (sql) => ({
+            run: (params = [], callback = () => {}) => dbClient.query(sql, params, (err, res) => callback(err, res?.rowCount)),
+            finalize: (callback = () => {}) => callback()
+        }),
+        serialize: (callback) => callback()
+    };
+} else {
+    // --- Conexión para Desarrollo (Tu PC con SQLite) ---
+    console.log("Detectado entorno local. Conectando a SQLite...");
+    const DB_FILE = path.join(__dirname, 'sorteo.db');
+    db = new sqlite3.Database(DB_FILE, (err) => {
+        if (err) return console.error("Error al conectar con SQLite:", err.message);
+        console.log(`Conectado a SQLite: ${DB_FILE}`);
+    });
+}
 
+// --- 5. LÓGICA DE LA APLICACIÓN (MIDDLEWARES DE RUTA Y RUTAS DE API) ---
 
+// Middleware de autenticación
+function requireAdminLogin(req, res, next) {
+    if (req.session && req.session.isAdmin) {
+        next();
+    } else {
+        res.status(401).json({ error: 'Acceso no autorizado.' });
+    }
+}
 
-// 2. Configuración Inicial y Variables Globales
-// Configuración del limitador de peticiones para el login
+// Limitador de peticiones para el login
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // Ventana de tiempo: 15 minutos
-    max: 10, // Máximo de 10 intentos de login por IP dentro de la ventana de tiempo
-    standardHeaders: true, // Envía información del límite en las cabeceras de la respuesta
-    legacyHeaders: false, // Deshabilita cabeceras antiguas
-    message: { error: 'Demasiados intentos de inicio de sesión. Por favor, inténtelo de nuevo en 15 minutos.' }
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { error: 'Demasiados intentos de inicio de sesión.' }
 });
 
 let SORTEO_ACTUAL_INFO = {
@@ -122,16 +163,24 @@ function requireAdminLogin(req, res, next) {
 // --- RUTAS PÚBLICAS DE LA API ---
 // =============================
 
-app.get('/api/sorteos-visibles', (req, res) => {
-    const sql = `
-        SELECT s.*, (SELECT COUNT(*) FROM participaciones p WHERE p.id_sorteo_config_fk = s.id_sorteo) as participantes_actuales
-        FROM sorteos_config s WHERE s.status_sorteo != 'completado'
-        ORDER BY CASE s.status_sorteo WHEN 'activo' THEN 1 WHEN 'programado' THEN 2 ELSE 3 END, s.id_sorteo DESC;
-    `;
-    db.all(sql, [], (err, rows) => {
-        if (err) return res.status(500).json({ success: false, error: "Error interno." });
+app.get('/api/sorteos-visibles', async (req, res) => {
+    try {
+        const sql = `
+            SELECT s.*, (SELECT COUNT(*) FROM participaciones p WHERE p.id_sorteo_config_fk = s.id_sorteo) as participantes_actuales
+            FROM sorteos_config s WHERE s.status_sorteo != 'completado'
+            ORDER BY CASE s.status_sorteo WHEN 'activo' THEN 1 WHEN 'programado' THEN 2 ELSE 3 END, s.id_sorteo DESC;
+        `;
+        const rows = await new Promise((resolve, reject) => {
+            db.all(sql, [], (err, rows) => {
+                if (err) return reject(new Error("Error al consultar sorteos visibles en la BD."));
+                resolve(rows);
+            });
+        });
         res.json({ success: true, sorteos: rows });
-    });
+    } catch (error) {
+        console.error("Error en GET /api/sorteos-visibles:", error);
+        res.status(500).json({ success: false, error: "Error interno del servidor." });
+    }
 });
 
 app.get('/api/participantes', (req, res) => {
@@ -172,42 +221,41 @@ app.get('/api/participante-datos/:id_documento', (req, res) => {
     });
 });
 
-// **ENDPOINT CORREGIDO / AÑADIDO**
-app.get('/api/top-participantes', (req, res) => {
-    const sorteoIdQuery = req.query.sorteoId;
-    if (!sorteoIdQuery) {
-        return res.status(400).json({ error: 'Se requiere un ID de sorteo.' });
-    }
-    const limit = 5; // Devolver el top 5
-    const sql = `
-        SELECT 
-            nombre, 
-            id_documento, 
-            COUNT(*) as total_participaciones 
-        FROM 
-            participaciones 
-        WHERE 
-            id_sorteo_config_fk = ? 
-        GROUP BY 
-            id_documento, nombre 
-        ORDER BY 
-            total_participaciones DESC, 
-            MIN(orden_id) ASC -- Tie-breaker: el primero en entrar gana
-        LIMIT ?`;
-    db.all(sql, [sorteoIdQuery, limit], (err, rows) => {
-        if (err) { 
-            console.error("Error fetching top participants:", err.message);
-            return res.status(500).json({ error: 'Error interno del servidor.' }); 
+app.get('/api/top-participantes', async (req, res) => {
+    try {
+        const sorteoIdQuery = req.query.sorteoId;
+        if (!sorteoIdQuery) {
+            return res.status(400).json({ error: 'Se requiere un ID de sorteo.' });
         }
-        // El frontend espera 'name' y 'id'
+        
+        const limit = 5;
+        const sql = `
+            SELECT nombre, id_documento, COUNT(*) as total_participaciones 
+            FROM participaciones 
+            WHERE id_sorteo_config_fk = $1 
+            GROUP BY id_documento, nombre 
+            ORDER BY total_participaciones DESC, MIN(orden_id) ASC 
+            LIMIT $2`;
+        const params = [sorteoIdQuery, limit];
+
+        const rows = await new Promise((resolve, reject) => {
+            db.all(sql, params, (err, rows) => {
+                if (err) return reject(new Error("Error al consultar top participantes en la BD."));
+                resolve(rows);
+            });
+        });
+
         res.json(rows.map(row => ({ 
             name: row.nombre, 
             id: row.id_documento, 
             total_participaciones: row.total_participaciones 
         })));
-    });
-});
 
+    } catch (error) {
+        console.error("Error en GET /api/top-participantes:", error);
+        res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+});
 
 
 app.get('/api/ganadores', (req, res) => {
@@ -269,41 +317,68 @@ app.get('/api/admin/sorteos', requireAdminLogin, (req, res) => {
         }
     });
 });
-app.post('/api/admin/sorteos', requireAdminLogin, (req, res) => {
-    // Añadimos 'imagen_url' a la lista de variables
-    const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, activo } = req.body;
-    if (!nombre_premio_display || !nombre_base_archivo_guia || !meta_participaciones) {
-        return res.status(400).json({ error: "Nombre, guía y meta son requeridos." });
-    }
-    const statusInicial = activo ? 'activo' : 'programado';
-    // Actualizamos la consulta SQL para incluir la nueva columna
-    const sql = `INSERT INTO sorteos_config (nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, status_sorteo) VALUES (?, ?, ?, ?, ?)`;
-    db.run(sql, [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, statusInicial], async function(err) {
-        if (err) return res.status(500).json({ error: "Error DB al añadir."});
-        const nuevoSorteoId = this.lastID;
-        if (activo) {
-            // ... El resto de la función se queda igual ...
-        } else {
-            res.status(201).json({ message: "Sorteo añadido.", id_sorteo: nuevoSorteoId });
-        }
-    });
+// --- REEMPLAZA LA RUTA DE AÑADIR SORTEO CON ESTA VERSIÓN ---
+
+app.post('/api/admin/sorteos', requireAdminLogin, async (req, res) => {
+    try {
+        const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, activo } = req.body;
+        if (!nombre_premio_display || !nombre_base_archivo_guia || !meta_participaciones) {
+            return res.status(400).json({ error: "Nombre, guía y meta son requeridos." });
+        }
+        
+        const statusInicial = activo ? 'activo' : 'programado';
+        const sql = `INSERT INTO sorteos_config (nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, status_sorteo) VALUES ($1, $2, $3, $4, $5) RETURNING id_sorteo`;
+        const params = [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, statusInicial];
+
+        // "Envolvemos" la consulta en una Promesa para poder usar await
+        const result = await new Promise((resolve, reject) => {
+            // La función de callback ya no es 'async'
+            db.get(sql, params, function(err, row) {
+                if (err) return reject(err);
+                // 'this' en sqlite3 contiene lastID, pero en pg el ID se retorna con RETURNING
+                // Usamos row para obtener el ID devuelto por PostgreSQL
+                resolve(row); 
+            });
+        });
+
+        // Este código solo se ejecuta DESPUÉS de que la base de datos haya terminado con éxito.
+        console.log("Sorteo añadido con éxito. ID:", result.id_sorteo);
+        res.status(201).json({ message: "Sorteo añadido con éxito.", id_sorteo: result.id_sorteo });
+
+    } catch (error) {
+        console.error("Error al añadir sorteo:", error);
+        res.status(500).json({ error: "Error en la base de datos al añadir el sorteo." });
+    }
 });
 
-app.put('/api/admin/sorteos/:id_sorteo', requireAdminLogin, (req, res) => {
-    const { id_sorteo } = req.params;
-    // Añadimos 'imagen_url' a la lista de variables
-    const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones } = req.body;
-    if (!nombre_premio_display || !nombre_base_archivo_guia || !meta_participaciones) {
-        return res.status(400).json({ error: "Nombre, guía y meta son requeridos." });
-    }
-    // Actualizamos la consulta SQL para incluir la nueva columna
-    const sql = `UPDATE sorteos_config SET nombre_premio_display = ?, imagen_url = ?, nombre_base_archivo_guia = ?, meta_participaciones = ? WHERE id_sorteo = ?`;
-    db.run(sql, [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, id_sorteo], async function(err) {
-        if (err) { return res.status(500).json({ error: "Error al editar." }); }
-        if (this.changes === 0) return res.status(404).json({ error: "Sorteo no encontrado."});
-        // La lógica de recargar la config ya no es necesaria aquí
-        res.json({ message: "Sorteo actualizado." });
-    });
+app.put('/api/admin/sorteos/:id_sorteo', requireAdminLogin, async (req, res) => {
+    try {
+        const { id_sorteo } = req.params;
+        const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones } = req.body;
+
+        if (!nombre_premio_display || !nombre_base_archivo_guia || !meta_participaciones) {
+            return res.status(400).json({ error: "Nombre, guía y meta son requeridos." });
+        }
+
+        const sql = `UPDATE sorteos_config SET nombre_premio_display = $1, imagen_url = $2, nombre_base_archivo_guia = $3, meta_participaciones = $4 WHERE id_sorteo = $5`;
+        const params = [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, id_sorteo];
+
+        const result = await new Promise((resolve, reject) => {
+            db.run(sql, params, function(err) {
+                if (err) return reject(new Error("Error al actualizar sorteo en la BD."));
+                resolve(this); // 'this' contiene .changes
+            });
+        });
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: "Sorteo no encontrado." });
+        }
+        res.json({ message: "Sorteo actualizado exitosamente." });
+
+    } catch (error) {
+        console.error(`Error en PUT /api/admin/sorteos/${req.params.id_sorteo}:`, error);
+        res.status(500).json({ error: "Error interno al editar el sorteo." });
+    }
 });
 
 app.put('/api/admin/sorteos/activar/:id_sorteo', requireAdminLogin, (req, res) => {
@@ -357,22 +432,35 @@ app.get('/api/admin/afiliados', requireAdminLogin, (req, res) => {
 });
 
 // AÑADIR UN NUEVO AFILIADO
-app.post('/api/admin/afiliados', requireAdminLogin, (req, res) => {
-    const { nombre_completo, telefono } = req.body;
-    if (!nombre_completo) {
-        return res.status(400).json({ error: "El nombre completo es requerido." });
-    }
-    const sql = "INSERT INTO afiliados (nombre_completo, telefono) VALUES (?, ?)";
-    db.run(sql, [nombre_completo.trim(), telefono], function(err) {
-        if (err) {
-            // El código de error 'SQLITE_CONSTRAINT' usualmente significa que el nombre ya existe (por la regla UNIQUE)
-            if (err.code === 'SQLITE_CONSTRAINT') {
-                return res.status(409).json({ error: `El afiliado '${nombre_completo}' ya existe.` });
-            }
-            return res.status(500).json({ error: "Error al guardar el afiliado." });
+app.post('/api/admin/afiliados', requireAdminLogin, async (req, res) => {
+    try {
+        const { nombre_completo, telefono } = req.body;
+        if (!nombre_completo) {
+            return res.status(400).json({ error: "El nombre completo es requerido." });
         }
-        res.status(201).json({ message: "Afiliado añadido con éxito.", id: this.lastID });
-    });
+
+        // En PostgreSQL, se usa RETURNING para obtener el ID del nuevo registro.
+        const sql = "INSERT INTO afiliados (nombre_completo, telefono) VALUES ($1, $2) RETURNING id_afiliado";
+        const params = [nombre_completo.trim(), telefono];
+
+        const result = await new Promise((resolve, reject) => {
+            // Usamos db.get para poder recibir la fila devuelta por RETURNING
+            db.get(sql, params, function(err, row) {
+                if (err) return reject(err);
+                resolve(row);
+            });
+        });
+
+        res.status(201).json({ message: "Afiliado añadido con éxito.", id: result.id_afiliado });
+
+    } catch (error) {
+        // El código de error para una violación de restricción 'UNIQUE' en PostgreSQL es '23505'
+        if (error.code === '23505') {
+            return res.status(409).json({ error: `El afiliado '${req.body.nombre_completo}' ya existe.` });
+        }
+        console.error("Error en POST /api/admin/afiliados:", error);
+        res.status(500).json({ error: "Error al guardar el afiliado." });
+    }
 });
 // CRUD de Participantes
 app.get('/api/admin/participantes-activos', requireAdminLogin, (req, res) => {
@@ -541,18 +629,34 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
 });
 
 
-app.delete('/api/admin/participaciones/:orden_id', requireAdminLogin, (req, res) => {
-    const { orden_id } = req.params;
-    const ordenIdNum = parseInt(orden_id, 10);
-    if (isNaN(ordenIdNum)) { return res.status(400).json({ error: 'ID de orden inválido.' }); }
-    const sql = "DELETE FROM participaciones WHERE orden_id = ?";
-    db.run(sql, [ordenIdNum], function(err) {
-        if (err) { return res.status(500).json({ error: 'Error interno al eliminar.' }); }
-        if (this.changes === 0) { return res.status(404).json({ error: `Participación ${ordenIdNum} no encontrada.` }); }
-        res.json({ message: `Participación (Orden ID: ${ordenIdNum}) eliminada.` });
-    });
-});
+app.delete('/api/admin/participaciones/:orden_id', requireAdminLogin, async (req, res) => {
+    try {
+        const { orden_id } = req.params;
+        const ordenIdNum = parseInt(orden_id, 10);
+        if (isNaN(ordenIdNum)) {
+            return res.status(400).json({ error: 'ID de orden inválido.' });
+        }
+        
+        const sql = "DELETE FROM participaciones WHERE orden_id = $1";
+        const params = [ordenIdNum];
 
+        const result = await new Promise((resolve, reject) => {
+            db.run(sql, params, function(err) {
+                if (err) return reject(new Error("Error al eliminar participación de la BD."));
+                resolve(this); // 'this' contiene .changes
+            });
+        });
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: `Participación ${ordenIdNum} no encontrada.` });
+        }
+        res.json({ message: `Participación (Orden ID: ${ordenIdNum}) eliminada.` });
+
+    } catch (error) {
+        console.error(`Error en DELETE /api/admin/participaciones/${req.params.orden_id}:`, error);
+        res.status(500).json({ error: "Error interno al eliminar la participación." });
+    }
+});
 // Otras rutas de admin
 
 // REEMPLAZA TU RUTA EXISTENTE CON ESTA VERSIÓN FINAL Y COMPLETA
@@ -715,96 +819,8 @@ app.get('/faq.html', (req, res) => { res.sendFile(path.join(__dirname, 'faq.html
 app.get('/bases.html', (req, res) => { res.sendFile(path.join(__dirname, 'bases.html')); });
 app.get('/ganadores.html', (req, res) => { res.sendFile(path.join(__dirname, 'ganadores.html')); });
 
-// --- Inicialización DB y Servidor ---
-const db = new sqlite3.Database(DB_FILE, (err) => {
-    if (err) {
-        console.error("Error al conectar con SQLite:", err.message);
-        process.exit(1);
-    }
-    console.log(`Conectado a SQLite: ${DB_FILE}`);
-const createTablesSql = `
-    CREATE TABLE IF NOT EXISTS sorteos_config (
-        id_sorteo INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre_premio_display TEXT NOT NULL,
-        nombre_base_archivo_guia TEXT NOT NULL,
-        descripcion_premio TEXT,
-        status_sorteo TEXT DEFAULT 'programado',
-        meta_participaciones INTEGER DEFAULT 200,
-        imagen_url TEXT
-    );
 
-    CREATE TABLE IF NOT EXISTS participaciones (
-        orden_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_documento TEXT NOT NULL,
-        nombre TEXT NOT NULL,
-        ciudad TEXT,
-        celular TEXT,
-        email TEXT,
-        paquete_elegido TEXT,
-        nombre_afiliado TEXT,
-        id_sorteo_config_fk INTEGER,
-        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (id_sorteo_config_fk) REFERENCES sorteos_config(id_sorteo)
-    );
-
-    CREATE TABLE IF NOT EXISTS datos_unicos_participantes (
-        id_documento TEXT PRIMARY KEY,
-        nombre TEXT,
-        ciudad TEXT,
-        celular TEXT,
-        email TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS ganadores (
-        id INTEGER PRIMARY KEY,
-        nombre TEXT NOT NULL,
-        ciudad TEXT,
-        id_participante TEXT,
-        orden_id_participacion INTEGER,
-        imagenUrl TEXT,
-        premio TEXT,
-        fecha TEXT,
-        id_sorteo_config_fk INTEGER,
-        FOREIGN KEY (id_sorteo_config_fk) REFERENCES sorteos_config(id_sorteo)
-    );
-
-    CREATE TABLE IF NOT EXISTS afiliados (
-        id_afiliado INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre_completo TEXT NOT NULL UNIQUE,
-        telefono TEXT,
-        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-`;
-
-    const { Pool } = require('pg');
-    let db;
-
-    if (process.env.DATABASE_URL) {
-        // --- Conexión para Producción (Render) ---
-        console.log("Detectado entorno de producción. Conectando a PostgreSQL...");
-        const dbClient = new Pool({
-            connectionString: process.env.DATABASE_URL,
-            ssl: { rejectUnauthorized: false }
-        });
-        db = {
-            run: (sql, params = [], callback = () => {}) => dbClient.query(sql, params).then(res => callback.call({ changes: res.rowCount }, null)).catch(err => callback(err)),
-            get: (sql, params = [], callback) => dbClient.query(sql, params).then(res => callback(null, res.rows[0])).catch(err => callback(err, null)),
-            all: (sql, params = [], callback) => dbClient.query(sql, params).then(res => callback(null, res.rows)).catch(err => callback(err, null)),
-            prepare: (sql) => ({
-                run: (params = [], callback = () => {}) => dbClient.query(sql, params, (err, res) => callback(err, res?.rowCount)),
-                finalize: (callback = () => {}) => callback()
-            }),
-            serialize: (callback) => callback() // Simulación para mantener la estructura
-        };
-    } else {
-        // --- Conexión para Desarrollo (Tu Computadora) ---
-        console.log("Detectado entorno local. Conectando a SQLite...");
-        const sqlite3 = require('sqlite3').verbose();
-        db = new sqlite3.Database('./sorteo.db');
-    }
-
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-        console.log(`Servidor corriendo en el puerto ${PORT}`);
-    });
+// --- 6. ARRANQUE DEL SERVIDOR ---
+app.listen(PORT, () => {
+    console.log(`Servidor iniciado y escuchando en el puerto ${PORT}`);
 });
