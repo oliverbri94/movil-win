@@ -92,11 +92,45 @@ app.use(session({
 }));
 
 // Y finalmente, la configuración de CORS, que necesita que la sesión ya esté configurada.
+const whitelist = [process.env.FRONTEND_URL, 'https://movilwin.com', 'http://127.0.0.1:5500'];
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || "http://127.0.0.1:5500",
-    credentials: true
+    origin: function (origin, callback) {
+        // La variable 'origin' es la URL que está haciendo la petición (tu frontend)
+        console.log(`CORS Check: Petición recibida desde el origen: ${origin}`);
+        
+        // `!origin` es para permitir peticiones sin origen (como las de herramientas tipo Postman/Curl)
+        if (whitelist.indexOf(origin) !== -1 || !origin) {
+            console.log(`   -> Origen PERMITIDO por la whitelist de CORS.`);
+            callback(null, true);
+        } else {
+            console.error(`   -> Origen RECHAZADO por la whitelist de CORS: ${origin}`);
+            callback(new Error('No permitido por CORS'));
+        }
+    },
+    credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    optionsSuccessStatus: 204 // Para peticiones pre-flight de OPTIONS
 };
 app.use(cors(corsOptions));
+
+// Parsers para poder leer el body de las peticiones
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
+// Configuración de la Sesión (usando el session store que ya definimos)
+app.use(session({
+    store: sessionStore, // Asegúrate de que la variable sessionStore esté definida arriba
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true, 
+        maxAge: 1000 * 60 * 60 * 2,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    }
+}));
 
 // Servidor de archivos estáticos (no interfiere)
 app.use(express.static('.'));
