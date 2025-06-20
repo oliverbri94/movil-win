@@ -31,7 +31,7 @@ app.use(helmet());
 
 // Configuración de CORS. DEBE IR ANTES DE LAS RUTAS.
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || "http://127.0.0.1:5500",
+    origin: 'https://movilwin.com', // URL escrita directamente
     credentials: true
 };
 app.use(cors(corsOptions));
