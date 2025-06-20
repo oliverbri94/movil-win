@@ -711,7 +711,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         showGenericStatusMessage(statusGestionSorteo, editandoSorteo ? 'Actualizando sorteo...' : 'Guardando nuevo sorteo...');
         try {
-            const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), credentials: 'include' });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || `Error ${response.status}`);
             
