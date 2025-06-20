@@ -424,6 +424,8 @@ function initializeRafflePage() {
 
     // --- Funciones de Carga de Datos y Construcción de UI ---
     
+// Pega esta función completa en script.js, reemplazando la versión anterior.
+
     async function generarSlidesDelCarrusel() {
         if (!prizeCarouselTrack) return;
         prizeCarouselTrack.innerHTML = '';
@@ -450,9 +452,7 @@ function initializeRafflePage() {
                         ${renderMedia(sorteo)}
                     </div>
                     <div class="prize-info-container">
-
                         <h2 class="prize-title">${sorteo.nombre_premio_display}</h2>
-
                         <div class="mini-package-selector" style="${esProximo ? 'display: none;' : ''}">
                             <a href="https://wa.me/593963135510?text=Hola%2C%20quiero%20comprar%201%20boleto%20individual%20por%20%242." target="_blank" class="mini-package-btn">
                                 <strong>1 Boleto</strong>
@@ -468,7 +468,6 @@ function initializeRafflePage() {
                                 <span><i class="fas fa-arrow-down"></i></span>
                             </a>
                         </div>
-
                         <div class="progress-info-wrapper" style="${esProximo ? 'display: none;' : ''}">
                             <div class="progress-bar-wrapper">
                                 <div class="progress-bar-fill" style="width: ${percentage.toFixed(2)}%;"></div>
@@ -476,7 +475,6 @@ function initializeRafflePage() {
                             </div>
                             <p class="motivational-text-integrated">${motivationalMessage}</p>
                         </div>
-
                         <div class="top-participants-wrapper" style="${esProximo ? 'display: none;' : ''}">
                             <div class="top-list-header">
                                 <i class="fas fa-crown"></i>
@@ -487,10 +485,21 @@ function initializeRafflePage() {
                         </div>
                     </div>
                 </div>
-
+                
                 ${!esProximo ? `
                 <div class="contenedor-sorteo content-section">
-                    </div>` : ''}
+                    <h2 class="titulo-dorado" data-text="¡A GIRAR!">¡A GIRAR!</h2>
+                    <p class="rueda-subtitulo">¡Mucha Suerte a Todos los Participantes!</p>
+                    <div class="price-is-right-wheel-frame">
+                        <div class="wheel-price-is-right-container">
+                            <canvas class="price-wheel-canvas"></canvas>
+                        </div>
+                        <div class="clacker-container">
+                            <div class="clacker-border"></div>
+                            <div class="clacker-top"></div>
+                        </div>
+                    </div>
+                </div>` : ''}
             `;
             
             prizeCarouselTrack.appendChild(slideWrapper);
