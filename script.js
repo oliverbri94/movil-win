@@ -529,7 +529,8 @@ function initializeRafflePage() {
         listElement.innerHTML = '';
 
         try {
-            const response = await fetch(`/api/top-participantes?sorteoId=${sorteoId}`);
+            // CORRECTO
+            const response = await fetch(`${API_BASE_URL}/api/top-participantes?sorteoId=${sorteoId}`);
             if (!response.ok) throw new Error('No se pudo cargar la lista.');
 
             const top = await response.json();
@@ -625,7 +626,8 @@ function initializeRafflePage() {
                 wheelCanvas.height = wheelHeight;
             }
             try {
-                const response = await fetch(`/api/participantes?sorteoId=${sorteoActual.id_sorteo}`);
+                // CORRECTO
+                const response = await fetch(`${API_BASE_URL}/api/participantes?sorteoId=${sorteoActual.id_sorteo}`);
                 participantes = await response.json() || [];
                 currentYOffset = 0;
                 addWheelEventListeners(wheelCanvas);
