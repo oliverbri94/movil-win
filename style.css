@@ -1848,7 +1848,7 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 }
 
 .mini-package-btn.popular {
-    border-color: var(--clr-primary);
+    border-color: white;
     background-color: rgba(var(--clr-primary-rgb), 0.1);
 }
 
