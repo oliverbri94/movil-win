@@ -1971,14 +1971,6 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     }
 }
 
-/* En style.css */
-.dashboard-grid {
-    display: grid;
-    /* El cambio está aquí 👇 */
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    margin-bottom: 30px;
-}
 
 /* --- ESTILOS PARA TABLAS RESPONSIVAS --- */
 @media (max-width: 768px) {
@@ -2021,5 +2013,70 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
         color: var(--clr-dark-text);
         text-transform: uppercase;
         font-size: 0.9em;
+    }
+}
+
+/* ================================================= */
+/* --- CÓDIGO DE CORRECCIÓN PARA PANEL DE ADMIN --- */
+/* ================================================= */
+
+/* --- 1. ESTILOS PARA LA NAVEGACIÓN DEL MENÚ LATERAL --- */
+
+/* Quita los puntos de la lista y el espaciado por defecto */
+.admin-sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Estilo para cada enlace del menú */
+.admin-sidebar-nav a {
+    display: flex;
+    align-items: center;
+    padding: 15px 25px;
+    color: var(--clr-dark-text-alt);
+    text-decoration: none; /* Quita el subrayado azul */
+    font-weight: 500;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent; /* Indicador visual para el enlace activo */
+}
+
+/* Efecto al pasar el cursor sobre un enlace */
+.admin-sidebar-nav a:hover {
+    background-color: rgba(44, 182, 125, 0.1); /* Tono verde muy sutil */
+    color: var(--clr-primary);
+}
+
+/* Estilo para el enlace que está activo (la página actual) */
+.admin-sidebar-nav a.active {
+    background-color: rgba(44, 182, 125, 0.15);
+    color: var(--clr-white);
+    font-weight: 600;
+    border-left-color: var(--clr-primary);
+}
+
+/* Alineación y espaciado para los iconos */
+.admin-sidebar-nav a .fa-fw {
+    margin-right: 15px;
+    width: 20px; /* Ancho fijo para alinear los textos */
+}
+
+
+/* --- 2. CORRECCIÓN PARA EL DESBORDAMIENTO DEL DASHBOARD EN MÓVILES --- */
+
+/* Estilo base del grid del dashboard */
+.dashboard-grid {
+    display: grid;
+    /* En pantallas grandes, intenta poner tantos elementos de 320px como quepan */
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+/* Media Query específica para celulares */
+@media (max-width: 420px) {
+    .dashboard-grid {
+        /* En pantallas muy pequeñas, forzamos a que sea siempre una sola columna */
+        grid-template-columns: 1fr;
     }
 }

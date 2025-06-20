@@ -202,13 +202,40 @@ function initializeRafflePage() {
 
         if (!participantesDelSorteo || participantesDelSorteo.length === 0) {
             wheelCtx.clearRect(0, 0, wheelWidth, wheelHeight);
-            wheelCtx.fillStyle = "#555";
+            const centerX = wheelWidth / 2;
+            const centerY = wheelHeight / 2;
+
+            // 1. Dibuja un fondo con un gradiente sutil
+            const gradient = wheelCtx.createRadialGradient(centerX, centerY, 5, centerX, centerY, wheelWidth / 1.5);
+            gradient.addColorStop(0, 'rgba(44, 182, 125, 0.1)'); // Color primario tenue en el centro
+            gradient.addColorStop(1, 'rgba(36, 38, 41, 0)'); // Se desvanece
+            wheelCtx.fillStyle = gradient;
+            wheelCtx.fillRect(0, 0, wheelWidth, wheelHeight);
+
+            // 2. Dibuja un icono grande de boleto como marca de agua
+            wheelCtx.font = "900 120px 'Font Awesome 6 Free'"; // Usa la fuente de los iconos
+            wheelCtx.fillStyle = "rgba(255, 255, 255, 0.05)"; // Color muy sutil
             wheelCtx.textAlign = "center";
-            wheelCtx.font = "bold 20px Poppins, sans-serif";
-            wheelCtx.fillText("No hay participantes", wheelWidth / 2, wheelHeight / 2);
+            wheelCtx.textBaseline = "middle";
+            wheelCtx.fillText('\uf3ff', centerX, centerY); // Código Unicode del icono de boleto
+
+            // 3. Escribe el texto principal
+            wheelCtx.fillStyle = "rgba(255, 255, 255, 0.8)";
+            wheelCtx.font = "bold 22px Poppins, sans-serif";
+            wheelCtx.shadowColor = 'black';
+            wheelCtx.shadowBlur = 5;
+            wheelCtx.fillText("¡TU NOMBRE PODRÍA ESTAR AQUÍ!", centerX, centerY + 80);
+
+            // 4. Escribe el llamado a la acción
+            wheelCtx.fillStyle = "var(--clr-primary)"; // Usa tu color primario
+            wheelCtx.font = "500 16px Poppins, sans-serif";
+            wheelCtx.shadowBlur = 0; // Quita la sombra para este texto
+            wheelCtx.fillText("¡Compra tu boleto y sé el primero!", centerX, centerY + 110);
+
+            // Resetea la línea base del texto para no afectar otros dibujos
+            wheelCtx.textBaseline = "alphabetic"; 
             return;
         }
-        
         wheelCtx.clearRect(0, 0, wheelWidth, wheelHeight);
         
         const startIndex = Math.floor(yOffsetToDraw / SEGMENT_HEIGHT_FRONT);
@@ -488,7 +515,7 @@ function initializeRafflePage() {
                 
                 ${!esProximo ? `
                 <div class="contenedor-sorteo content-section">
-                    <h2 class="titulo-dorado" data-text="¡A GIRAR!">¡A GIRAR!</h2>
+                    <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
                     <p class="rueda-subtitulo">¡Mucha Suerte a Todos los Participantes!</p>
                     <div class="price-is-right-wheel-frame">
                         <div class="wheel-price-is-right-container">
