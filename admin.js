@@ -603,7 +603,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         button.textContent = '...';
 
         try {
-            const response = await fetch(`/api/admin/participaciones/${ordenId}`, { method: 'DELETE' });
+            const response = await fetch(`${API_BASE_URL}/api/admin/participaciones/${ordenId}`, { method: 'DELETE', credentials: 'include' });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || `Error ${response.status}`);
             
@@ -720,7 +720,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             showGenericStatusMessage(statusGestionSorteo, "Nombre del premio, nombre base de guía y meta válida son requeridos.", true);
             return;
         }
-        const url = editandoSorteo && id ? `/api/admin/sorteos/${id}` : '/api/admin/sorteos';
+        const url = editandoSorteo && id ? `${API_BASE_URL}/api/admin/sorteos/${id}` : `${API_BASE_URL}/api/admin/sorteos`;
         const method = editandoSorteo && id ? 'PUT' : 'POST';
 
         showGenericStatusMessage(statusGestionSorteo, editandoSorteo ? 'Actualizando sorteo...' : 'Guardando nuevo sorteo...');
@@ -750,7 +750,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         showGenericStatusMessage(statusGestionSorteo, 'Cambiando estado...');
         try {
-            const response = await fetch(`/api/admin/sorteos/activar/${sorteoId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/sorteos/activar/${sorteoId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ activar })
@@ -1106,7 +1106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         historialModalTitle.textContent = `Historial de Participantes: ${premioNombre}`;
 
         try {
-            const response = await fetch(`/api/sorteo-participantes/${sorteoId}`);
+            const response = await fetch(`${API_BASE_URL}/api/admin/sorteo-participantes/${sorteoId}`, {credentials: 'include'});
             if (!response.ok) throw new Error("Error al obtener el historial.");
             const participantesHistorial = await response.json();
             if (participantesHistorial.length === 0) {
@@ -1279,7 +1279,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (newUrl !== null) { 
             try {
-                const response = await fetch(`/api/admin/ganadores/${winnerId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/admin/ganadores/${winnerId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ imagenUrl: newUrl.trim() })
