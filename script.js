@@ -9,7 +9,35 @@
 document.addEventListener('DOMContentLoaded', () => {
 
 // --- PEGA ESTO DENTRO DE document.addEventListener('DOMContentLoaded', ...) ---
+// Pega esta nueva función al principio de script.js
 
+/**
+ * Dibuja texto en un canvas, dividiéndolo en múltiples líneas si excede el ancho máximo.
+ * @param {CanvasRenderingContext2D} context El contexto del canvas (ctx).
+ * @param {string} text El texto a dibujar.
+ * @param {number} x La coordenada X.
+ * @param {number} y La coordenada Y.
+ * @param {number} maxWidth El ancho máximo permitido para el texto.
+ * @param {number} lineHeight La altura de cada línea.
+ */
+function wrapText(context, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+
+    for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = context.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+            context.fillText(line, x, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+        } else {
+            line = testLine;
+        }
+    }
+    context.fillText(line, x, y);
+}
 const topCountdownBanner = document.getElementById('topCountdownBanner');
 
 if (topCountdownBanner) {
@@ -205,35 +233,44 @@ function initializeRafflePage() {
             const centerX = wheelWidth / 2;
             const centerY = wheelHeight / 2;
 
-            // 1. Dibuja un fondo con un gradiente sutil
+            // 1. Dibuja el fondo (sin cambios)
             const gradient = wheelCtx.createRadialGradient(centerX, centerY, 5, centerX, centerY, wheelWidth / 1.5);
-            gradient.addColorStop(0, 'rgba(44, 182, 125, 0.1)'); // Color primario tenue en el centro
-            gradient.addColorStop(1, 'rgba(36, 38, 41, 0)'); // Se desvanece
+            gradient.addColorStop(0, 'rgba(44, 182, 125, 0.1)');
+            gradient.addColorStop(1, 'rgba(36, 38, 41, 0)');
             wheelCtx.fillStyle = gradient;
             wheelCtx.fillRect(0, 0, wheelWidth, wheelHeight);
 
-            // 2. Dibuja un icono grande de boleto como marca de agua
-            wheelCtx.font = "900 120px 'Font Awesome 6 Free'"; // Usa la fuente de los iconos
-            wheelCtx.fillStyle = "rgba(255, 255, 255, 0.05)"; // Color muy sutil
+            // 2. Dibuja el icono de boleto (sin cambios)
+            wheelCtx.font = "900 120px 'Font Awesome 6 Free'";
+            wheelCtx.fillStyle = "rgba(255, 255, 255, 0.05)";
             wheelCtx.textAlign = "center";
             wheelCtx.textBaseline = "middle";
-            wheelCtx.fillText('\uf3ff', centerX, centerY); // Código Unicode del icono de boleto
+            wheelCtx.fillText('\uf3ff', centerX, centerY);
 
-            // 3. Escribe el texto principal
+            // --- INICIO DE LA LÓGICA DE TEXTO RESPONSIVO ---
+
+            // 3. Calcula tamaños de fuente dinámicos basados en el ancho de la rueda
+            const mainFontSize = Math.max(16, Math.min(22, wheelWidth / 15)); // Tamaño entre 16px y 22px
+            const subFontSize = Math.max(12, Math.min(16, wheelWidth / 20)); // Tamaño entre 12px y 16px
+            const lineHeight = mainFontSize * 1.2;
+
+            // 4. Escribe el texto principal usando la nueva función wrapText
             wheelCtx.fillStyle = "rgba(255, 255, 255, 0.8)";
-            wheelCtx.font = "bold 22px Poppins, sans-serif";
+            wheelCtx.font = `bold ${mainFontSize}px Poppins, sans-serif`;
             wheelCtx.shadowColor = 'black';
             wheelCtx.shadowBlur = 5;
-            wheelCtx.fillText("¡TU NOMBRE PODRÍA ESTAR AQUÍ!", centerX, centerY + 80);
+            // Usamos la nueva función para que el texto se divida si es necesario
+            wrapText(wheelCtx, "¡TU NOMBRE PODRÍA ESTAR AQUÍ!", centerX, centerY + 80, wheelWidth * 0.9, lineHeight);
 
-            // 4. Escribe el llamado a la acción
-            wheelCtx.fillStyle = "var(--clr-primary)"; // Usa tu color primario
-            wheelCtx.font = "500 16px Poppins, sans-serif";
-            wheelCtx.shadowBlur = 0; // Quita la sombra para este texto
-            wheelCtx.fillText("¡Compra tu boleto y sé el primero!", centerX, centerY + 110);
-
-            // Resetea la línea base del texto para no afectar otros dibujos
-            wheelCtx.textBaseline = "alphabetic"; 
+            // 5. Escribe el llamado a la acción
+            wheelCtx.fillStyle = "var(--clr-primary)";
+            wheelCtx.font = `500 ${subFontSize}px Poppins, sans-serif`;
+            wheelCtx.shadowBlur = 0;
+            wheelCtx.fillText("¡Compra tu boleto y sé el primero!", centerX, centerY + 120);
+            
+            // --- FIN DE LA LÓGICA DE TEXTO RESPONSIVO ---
+            
+            wheelCtx.textBaseline = "alphabetic";
             return;
         }
         wheelCtx.clearRect(0, 0, wheelWidth, wheelHeight);
