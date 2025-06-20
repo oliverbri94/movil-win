@@ -1844,11 +1844,11 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 .mini-package-btn span {
     font-size: 0.9em;
-    color: var(--clr-dark-text-alt);
+    color: white;
 }
 
 .mini-package-btn.popular {
-    border-color: white;
+    border-color: var(--clr-primary);
     background-color: rgba(var(--clr-primary-rgb), 0.1);
 }
 

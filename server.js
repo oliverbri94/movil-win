@@ -240,30 +240,33 @@ app.get('/api/sorteos-visibles', async (req, res) => {
     }
 });
 
+// CÓDIGO CORREGIDO
 app.get('/api/participantes', (req, res) => {
     const sorteoIdQuery = req.query.sorteoId;
     if (!sorteoIdQuery) {
-        // Si no se especifica un sorteo, no es un error, simplemente no hay nada que mostrar.
-        return res.json([]); 
+        return res.json([]);
     }
-    const sql = `SELECT orden_id, id_documento, nombre FROM participaciones WHERE id_sorteo_config_fk = ? ORDER BY orden_id DESC`;
+    // Corregimos la sintaxis de la consulta para PostgreSQL
+    const sql = `SELECT orden_id, id_documento, nombre FROM participaciones WHERE id_sorteo_config_fk = $1 ORDER BY orden_id DESC`;
+    
     db.all(sql, [sorteoIdQuery], (err, rows) => {
-        if (err) { 
+        if (err) {
             console.error("Error fetching public participants:", err.message);
-            return res.status(500).json({ error: 'Error interno del servidor.' }); 
+            return res.status(500).json({ error: 'Error interno del servidor.' });
         }
-        // El frontend espera un formato específico ('name', 'id')
         res.json(rows.map(row => ({ orden_id: row.orden_id, name: row.nombre, id: row.id_documento })));
     });
 });
 
-// NUEVA RUTA: Para autocompletar datos de participante
+// CÓDIGO CORREGIDO
 app.get('/api/participante-datos/:id_documento', (req, res) => {
     const { id_documento } = req.params;
     if (!id_documento || !/^\d{10}$/.test(id_documento)) {
         return res.status(400).json({ success: false, error: 'Cédula inválida.' });
     }
-    const sql = "SELECT nombre, ciudad, celular, email FROM datos_unicos_participantes WHERE id_documento = ?";
+    // Corregimos la sintaxis de la consulta para PostgreSQL
+    const sql = "SELECT nombre, ciudad, celular, email FROM datos_unicos_participantes WHERE id_documento = $1";
+    
     db.get(sql, [id_documento], (err, row) => {
         if (err) {
             console.error("Error buscando datos de participante:", err.message);
@@ -272,12 +275,10 @@ app.get('/api/participante-datos/:id_documento', (req, res) => {
         if (row) {
             res.json({ success: true, data: row });
         } else {
-            // Es normal no encontrarlo si es nuevo, así que no devolvemos un error 404.
             res.json({ success: false, error: 'Participante no encontrado.' });
         }
     });
 });
-
 app.get('/api/top-participantes', async (req, res) => {
     try {
         const sorteoIdQuery = req.query.sorteoId;
