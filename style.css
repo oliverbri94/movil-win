@@ -1036,8 +1036,8 @@ body.dark-theme .admin-section h2::after { display: none; }
     transition: all 0.2s ease-in-out;
 
 
-    width: 3rem; 
-    height: 3rem; 
+    width: 2rem; 
+    height: 2rem; 
     display: inline-flex;
     align-items: center;
     justify-content: center;

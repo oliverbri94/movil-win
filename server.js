@@ -161,6 +161,16 @@ function requireAdminLogin(req, res, next) {
 // --- RUTAS PÚBLICAS DE LA API ---
 // =============================
 
+// --- AÑADE ESTA RUTA TEMPORAL PARA DEPURAR ---
+app.get('/debug-cors', (req, res) => {
+    console.log("Accediendo a la ruta de depuración de CORS.");
+    res.json({
+        mensaje: "Variables de entorno leídas por el servidor",
+        origin_configurado: process.env.FRONTEND_URL || "No se encontró FRONTEND_URL",
+        node_env: process.env.NODE_ENV,
+        session_secret_existe: !!process.env.SESSION_SECRET
+    });
+});
 app.get('/api/sorteos-visibles', async (req, res) => {
     try {
         const sql = `
