@@ -1,3 +1,4 @@
 node_modules/
 .env
 sorteo.db
+generar_hash.js

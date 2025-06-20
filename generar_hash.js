@@ -3,7 +3,7 @@
     const saltRounds = 10;
 
     // IMPORTANTE: Reemplaza esto con la contraseña que deseas usar.
-    const miContrasenaAdmin = 'Carlosraul23';
+    const miContrasenaAdmin = 'Carlosraul23@';
 
     if (miContrasenaAdmin === 'tu_contraseña_real_aqui' || !miContrasenaAdmin) {
         console.error("POR FAVOR, edita este archivo y establece una contraseña real en 'miContrasenaAdmin'.");
