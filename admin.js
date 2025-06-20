@@ -876,16 +876,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // CÓDIGO CORREGIDO
     function renderRafflePerformanceChart(data) {
-        const canvas = document.getElementById('rafflePerformanceChart');
+        const canvasId = 'rafflePerformanceChart';
+        const canvas = document.getElementById(canvasId);
         if (!canvas) return;
-        if (rafflePerformanceChartInstance) rafflePerformanceChartInstance.destroy();
 
+        // Forma robusta de destruir el gráfico anterior
+        const existingChart = Chart.getChart(canvasId);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+
+        // Ahora creamos el nuevo gráfico de forma segura
         const ctx = canvas.getContext('2d');
-        rafflePerformanceChartInstance = new Chart(ctx, {
+        rafflePerformanceChartInstance = new Chart(ctx, { // Mantenemos la asignación a tu variable global
             type: 'bar',
             data: {
-                labels: data.map(s => s.nombre_premio_display.substring(0, 20) + '...'), // Acorta nombres largos
+                labels: data.map(s => s.nombre_premio_display.substring(0, 20) + '...'),
                 datasets: [{
                     label: 'Boletos Registrados',
                     data: data.map(s => s.participantes_actuales),
@@ -895,17 +903,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }]
             },
             options: {
-                indexAxis: 'y', // Hace el gráfico de barras horizontales
+                indexAxis: 'y',
                 responsive: true,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { ticks: { color: '#94a1b2' }, grid: { color: '#3a3f44' } }, 
-                    y: { ticks: { color: '#94a1b2' }, grid: { color: '#3a3f44' } } 
+                    x: { ticks: { color: '#94a1b2' }, grid: { color: '#3a3f44' } },
+                    y: { ticks: { color: '#94a1b2' }, grid: { color: '#3a3f44' } }
                 }
             }
         });
     }
-
     function renderTopAffiliatesList(data) {
         const listElement = document.getElementById('topAffiliatesList');
         if (!listElement) return;
