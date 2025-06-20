@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const finalizarStatusMessage = document.getElementById('finalizarStatusMessage');
 
     // Dashboard y Gráficos
+    const toggleDashboardBtn = document.getElementById('toggleDashboardBtn'); // <<<--- AÑADE ESTA LÍNEA
     const dashboardStatsDiv = document.getElementById('dashboardStats');
     const paquetesChartCanvas = document.getElementById('paquetesChart');
     const diarioChartCanvas = document.getElementById('diarioChart');
