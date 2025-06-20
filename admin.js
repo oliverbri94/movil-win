@@ -739,7 +739,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch(`${API_BASE_URL}/api/admin/sorteos/activar/${sorteoId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ activar })
+                body: JSON.stringify({ activar }),
+                credentials: 'include' // <-- ¡ESTA LÍNEA RESUELVE EL PROBLEMA!
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error);
