@@ -1978,3 +1978,56 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
         display: block;
     }
 }
+
+/* En style.css */
+.dashboard-grid {
+    display: grid;
+    /* El cambio está aquí 👇 */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+/* --- ESTILOS PARA TABLAS RESPONSIVAS --- */
+@media (max-width: 768px) {
+    .tabla-sorteos {
+        border: none;
+    }
+
+    .tabla-sorteos thead {
+        /* Ocultamos los encabezados de la tabla en móvil */
+        display: none;
+    }
+
+    .tabla-sorteos tr {
+        /* Cada fila se convierte en una "tarjeta" */
+        display: block;
+        border: 1px solid var(--clr-dark-border);
+        border-radius: var(--border-radius-medium);
+        margin-bottom: 20px;
+        box-shadow: 0 4px 10px var(--clr-dark-shadow);
+    }
+
+    .tabla-sorteos td {
+        /* Las celdas se apilan verticalmente */
+        display: block;
+        text-align: right; /* Alineamos el contenido a la derecha */
+        padding: 12px 15px;
+        border-bottom: 1px solid var(--clr-dark-border);
+        position: relative;
+    }
+    
+    .tabla-sorteos td:last-child {
+        border-bottom: none;
+    }
+
+    /* Usamos el pseudo-elemento ::before para mostrar el encabezado de cada celda */
+    .tabla-sorteos td::before {
+        content: attr(data-label); /* Obtenemos el texto del atributo data-label */
+        float: left; /* Lo alineamos a la izquierda */
+        font-weight: 600;
+        color: var(--clr-dark-text);
+        text-transform: uppercase;
+        font-size: 0.9em;
+    }
+}
