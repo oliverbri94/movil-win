@@ -21,7 +21,9 @@
     "helmet": "^8.1.0",
     "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.3",
-    "pg": "^8.16.1",
+    "pg": "^8.16.1"
+  },
+  "devDependencies": {
     "sqlite3": "^5.1.7"
   }
 }
