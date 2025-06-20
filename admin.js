@@ -220,6 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     /**
      * Obtiene y muestra la lista de afiliados en la tabla de gestión.
      */
+    // admin.js
     async function fetchAndDisplayAffiliates() {
         const loader = document.getElementById('loaderListaAfiliados');
         const tbody = document.getElementById('tbodyListaAfiliados');
@@ -227,43 +228,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("No se encontraron los elementos de la tabla de afiliados.");
             return;
         }
-
         loader.classList.remove('oculto');
-        tbody.innerHTML = ''; // Limpia la tabla antes de llenarla
-
+        tbody.innerHTML = ''; 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`,{
-                credentials: 'include' 
-            });
+            const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`,{ credentials: 'include' });
             if (!response.ok) {
                 throw new Error(`Error del servidor: ${response.status}`);
             }
             const afiliados = await response.json();
-
             if (afiliados.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4">No hay afiliados registrados.</td></tr>';
             } else {
-                // TU NÚMERO DE WHATSAPP (Asegúrate de que sea correcto y no incluya el "+")
                 const tuNumeroWhatsApp = '593963135510';
-
                 afiliados.forEach(af => {
                     const tr = document.createElement('tr');
-
-                    // 1. Crear el mensaje pre-escrito para el enlace
                     const mensaje = `Hola MOVIL WIN, quiero participar en el sorteo. Mi afiliado es ${af.nombre_completo}.`;
-                    
-                    // 2. Codificar el mensaje para que funcione correctamente en una URL
                     const mensajeCodificado = encodeURIComponent(mensaje);
-
-                    // 3. Construir el enlace completo de WhatsApp
                     const enlaceAfiliado = `https://wa.me/${tuNumeroWhatsApp}?text=${mensajeCodificado}`;
-                    
-                    // 4. Crear el HTML para la fila de la tabla, incluyendo la nueva celda con el enlace y el botón
+                    // HTML con los atributos data-label añadidos 👇
                     tr.innerHTML = `
-                        <td>${af.id_afiliado}</td>
-                        <td>${af.nombre_completo}</td>
-                        <td>${af.telefono || 'N/A'}</td>
-                        <td>
+                        <td data-label="ID">${af.id_afiliado}</td>
+                        <td data-label="Nombre">${af.nombre_completo}</td>
+                        <td data-label="Teléfono">${af.telefono || 'N/A'}</td>
+                        <td data-label="Enlace">
                             <a href="${enlaceAfiliado}" target="_blank" title="Abrir enlace en WhatsApp" style="margin-right: 10px; color: var(--clr-primary); font-weight: 500;">Probar</a>
                             <button class="accion-btn btn-copiar" data-link="${enlaceAfiliado}" title="Copiar enlace">
                                 <i class="fas fa-copy"></i>
@@ -283,6 +270,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     /**
      * Obtiene y muestra la lista de ganadores en el panel de admin.
      */
+    // admin.js
     async function fetchAndDisplayWinnersForAdmin() {
         const loader = document.getElementById('loaderListaGanadoresAdmin');
         const tbody = document.getElementById('tbodyListaGanadores');
@@ -291,9 +279,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loader.classList.remove('oculto');
         tbody.innerHTML = '';
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/ganadores`,{
-                credentials: 'include'
-            });
+            const response = await fetch(`${API_BASE_URL}/api/admin/ganadores`,{ credentials: 'include' });
             const ganadores = await response.json();
 
             if (ganadores.length === 0) {
@@ -301,12 +287,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 ganadores.forEach(g => {
                     const tr = document.createElement('tr');
+                    // HTML con los atributos data-label añadidos 👇
                     tr.innerHTML = `
-                        <td>${g.nombre}</td>
-                        <td>${g.premio}</td>
-                        <td>${g.fecha}</td>
-                        <td class="winner-image-url">${g.imagenUrl || 'No asignada'}</td>
-                        <td>
+                        <td data-label="Nombre">${g.nombre}</td>
+                        <td data-label="Premio">${g.premio}</td>
+                        <td data-label="Fecha">${g.fecha}</td>
+                        <td data-label="URL de Foto" class="winner-image-url">${g.imagenUrl || 'No asignada'}</td>
+                        <td data-label="Acción">
                             <button class="accion-btn btn-editar" data-id="${g.id}" data-current-url="${g.imagenUrl || ''}" title="Editar Foto">
                                 <i class="fas fa-camera"></i>
                             </button>
@@ -626,9 +613,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loaderListaSorteos.classList.remove('oculto');
         tbodyListaSorteos.innerHTML = '';
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`, {
-                credentials: 'include'
-            });
+            const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`, { credentials: 'include' });
             if (!response.ok) throw new Error((await response.json()).error || 'Error de red');
             const sorteos = await response.json();
 
@@ -638,13 +623,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 sorteos.forEach(sorteo => {
                     const tr = document.createElement('tr');
                     tr.className = sorteo.status_sorteo === 'activo' ? 'sorteo-activo-row' : '';
+                    // HTML con los atributos data-label añadidos 👇
                     tr.innerHTML = `
-                        <td>${sorteo.id_sorteo}</td>
-                        <td>${sorteo.nombre_premio_display}</td>
-                        <td>${sorteo.nombre_base_archivo_guia}</td>
-                        <td>${sorteo.meta_participaciones}</td>
-                        <td><span class="status-${sorteo.status_sorteo}">${sorteo.status_sorteo}</span></td>
-                        <td>
+                        <td data-label="ID">${sorteo.id_sorteo}</td>
+                        <td data-label="Premio">${sorteo.nombre_premio_display}</td>
+                        <td data-label="Guía Base">${sorteo.nombre_base_archivo_guia}</td>
+                        <td data-label="Meta">${sorteo.meta_participaciones}</td>
+                        <td data-label="Status"><span class="status-${sorteo.status_sorteo}">${sorteo.status_sorteo}</span></td>
+                        <td data-label="Acciones">
                             <button class="accion-btn btn-editar" data-id="${sorteo.id_sorteo}" title="Editar Sorteo"><i class="fas fa-edit"></i></button>
                             <button class="accion-btn ${sorteo.status_sorteo === 'activo' ? 'btn-desactivar' : 'btn-activar'}" data-id="${sorteo.id_sorteo}" data-status="${sorteo.status_sorteo}" title="${sorteo.status_sorteo === 'activo' ? 'Desactivar' : 'Activar'}">
                                 <i class="fas ${sorteo.status_sorteo === 'activo' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
@@ -653,7 +639,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <i class="fas fa-archive"></i>
                             </button>
                         </td>
-                        <td>
+                        <td data-label="Historial">
                             <button class="accion-btn btn-historial" data-id="${sorteo.id_sorteo}" data-premio="${sorteo.nombre_premio_display}" title="Ver Historial" ${sorteo.status_sorteo === 'programado' ? 'disabled' : ''}>
                                 <i class="fas fa-history"></i>
                             </button>

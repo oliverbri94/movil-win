@@ -1280,75 +1280,9 @@ nav.bg-custom-dark-bg-frame {
 }
 /* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
 
-/* Contenedor principal del layout del admin */
-.admin-layout-wrapper {
-    display: flex;
-    align-items: flex-start;
-}
 
-/* Barra lateral (Sidebar) */
-.admin-sidebar {
-    width: 240px;
-    height: 100vh; /* Ocupa toda la altura de la ventana */
-    position: sticky; /* Se queda fija al hacer scroll */
-    top: 0;
-    background-color: var(--clr-dark-bg-alt);
-    border-right: 1px solid var(--clr-dark-border);
-    padding: 20px 0;
-    flex-shrink: 0; /* Evita que se encoja */
-}
 
-.sidebar-title {
-    font-family: 'Anton', sans-serif;
-    text-align: center;
-    font-size: 1.8em;
-    color: var(--clr-white);
-    padding: 0 20px 20px 20px;
-    letter-spacing: 1px;
-}
 
-.admin-sidebar-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.admin-sidebar-nav a {
-    display: flex;
-    align-items: center;
-    padding: 15px 25px;
-    color: var(--clr-dark-text-alt);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 1em;
-    transition: all 0.3s ease;
-    border-left: 4px solid transparent; /* Indicador visual */
-}
-
-.admin-sidebar-nav a:hover {
-    background-color: rgba(var(--clr-primary-rgb), 0.1);
-    color: var(--clr-primary);
-}
-
-.admin-sidebar-nav a.active {
-    background-color: rgba(var(--clr-primary-rgb), 0.15);
-    color: var(--clr-white);
-    font-weight: 600;
-    border-left-color: var(--clr-primary);
-}
-
-.admin-sidebar-nav a .fa-fw {
-    margin-right: 15px; /* Espacio entre el icono y el texto */
-    width: 20px; /* Ancho fijo para el icono */
-}
-
-/* Área de Contenido Principal */
-.admin-main-content {
-    flex-grow: 1; /* Ocupa el resto del espacio */
-    padding: 30px;
-    height: 100vh;
-    overflow-y: auto; /* Permite scroll solo en esta área */
-}
 
 /* Lógica de visibilidad de las páginas */
 .admin-page {
@@ -1418,79 +1352,14 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 }
 
 
-/* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
 
-/* --- ESTILOS RESPONSIVOS PARA EL PANEL DE ADMIN --- */
-
-/* 1. Estilos por defecto (Móvil) */
-
-.admin-content-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--clr-dark-border);
-}
-
-#currentPageTitle {
-    font-size: 1.5em;
-    color: var(--clr-white);
-    font-weight: 600;
-}
-
-.admin-sidebar {
-    position: fixed; /* Lo sacamos del flujo normal */
-    left: -260px; /* Lo escondemos fuera de la pantalla a la izquierda */
-    top: 0;
-    width: 250px; /* Ancho fijo para el menú deslizable */
-    z-index: 1010; /* Z-index alto para que aparezca por encima de todo */
-    transition: left 0.3s ease-in-out;
-    box-shadow: 5px 0 15px rgba(0,0,0,0.2);
-}
 
 /* Clase que se añadirá con JS para mostrar el menú */
-.admin-sidebar.is-open {
-    left: 0;
-}
-
-.sidebar-overlay {
-    display: none; /* Oculto por defecto */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    z-index: 1000;
-}
-
-.sidebar-overlay.is-open {
-    display: block; /* Se muestra cuando el menú está abierto */
-}
 
 
-/* 2. Estilos para Escritorio (a partir de 992px) */
-/* En pantallas grandes, revertimos los estilos móviles y mostramos el layout de 2 columnas. */
-@media (min-width: 992px) {
-    /* Ocultamos el header y el botón de hamburguesa para móvil */
-    .admin-content-header {
-        display: none;
-    }
 
-    /* La barra lateral vuelve a su estado original, siempre visible */
-    .admin-sidebar {
-        position: sticky; /* Vuelve a ser pegajosa */
-        left: 0;
-        box-shadow: none;
-        z-index: auto;
-    }
 
-    /* La capa de superposición no es necesaria en escritorio */
-    .sidebar-overlay {
-        display: none !important;
-    }
-}
+
 /* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
 .quick-add-btn {
     display: inline-flex;
@@ -2007,4 +1876,105 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 .all-packages strong {
     color: var(--clr-accent);
+}
+
+/* ============================================== */
+/* --- ESTILOS PARA EL LAYOUT DEL PANEL ADMIN --- */
+/* ============================================== */
+
+/* Contenedor principal del layout */
+.admin-layout-wrapper {
+    display: flex;
+    align-items: flex-start;
+}
+
+/* --- BARRA LATERAL (SIDEBAR) --- */
+
+/* Estilos para ESCRITORIO (mayor a 992px) */
+.admin-sidebar {
+    width: 240px;
+    height: 100vh; /* Ocupa toda la altura de la ventana */
+    position: sticky; /* Se queda fija al hacer scroll */
+    top: 0;
+    background-color: var(--clr-dark-bg-alt);
+    border-right: 1px solid var(--clr-dark-border);
+    padding: 20px 0;
+    flex-shrink: 0; /* Evita que se encoja */
+    transition: left 0.3s ease-in-out; /* Transición suave para móvil */
+}
+
+/* --- CONTENIDO PRINCIPAL --- */
+.admin-main-content {
+    flex-grow: 1; /* Ocupa el resto del espacio */
+    padding: 30px;
+    width: 100%;
+}
+
+/* Header que solo es visible en MÓVIL */
+.admin-content-header {
+    display: none; /* Oculto por defecto en escritorio */
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--clr-dark-border);
+}
+
+#mobileSidebarToggle {
+    background: none;
+    border: none;
+    color: var(--clr-dark-text);
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+#currentPageTitle {
+    font-size: 1.5em;
+    color: var(--clr-white);
+    font-weight: 600;
+}
+
+/* Capa oscura que aparece detrás del menú en MÓVIL */
+.sidebar-overlay {
+    display: none;
+}
+
+
+/* --- Media Query para MÓVILES (menor a 992px) --- */
+@media (max-width: 991px) {
+    .admin-main-content {
+        padding: 20px;
+    }
+    
+    /* Mostramos el header del móvil */
+    .admin-content-header {
+        display: flex;
+    }
+
+    /* Ocultamos la barra lateral fuera de la pantalla */
+    .admin-sidebar {
+        position: fixed;
+        left: -260px; /* Posición inicial, oculta */
+        z-index: 1010;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+    }
+
+    /* Clase que la hace visible */
+    .admin-sidebar.is-open {
+        left: 0; /* Posición final, visible */
+    }
+
+    /* La capa oscura se activa */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+    }
+    .sidebar-overlay.is-open {
+        display: block;
+    }
 }
