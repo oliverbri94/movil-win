@@ -429,29 +429,42 @@ app.post('/api/admin/sorteos', requireAdminLogin, async (req, res) => {
 app.put('/api/admin/sorteos/:id_sorteo', requireAdminLogin, async (req, res) => {
     try {
         const { id_sorteo } = req.params;
-        // Añadimos paquetes_json a los datos que recibimos
+        // Obtenemos los datos del cuerpo de la petición, incluyendo los paquetes
         const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, paquetes_json } = req.body;
 
         if (!nombre_premio_display || !nombre_base_archivo_guia || !meta_participaciones) {
             return res.status(400).json({ error: "Nombre, guía y meta son requeridos." });
         }
-
+        
+        // Convertimos el array de paquetes a un string JSON para guardarlo en la base de datos
         const paquetesString = JSON.stringify(paquetes_json || []);
 
-        const sql = `UPDATE sorteos_config SET nombre_premio_display = $1, imagen_url = $2, nombre_base_archivo_guia = $3, meta_participaciones = $4, paquetes_json = $5 WHERE id_sorteo = $6`;
+        // La consulta SQL para actualizar, usando placeholders de PostgreSQL
+        const sql = `
+            UPDATE sorteos_config 
+            SET 
+                nombre_premio_display = $1, 
+                imagen_url = $2, 
+                nombre_base_archivo_guia = $3, 
+                meta_participaciones = $4, 
+                paquetes_json = $5 
+            WHERE id_sorteo = $6
+        `;
         const params = [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, paquetesString, id_sorteo];
 
         const result = await new Promise((resolve, reject) => {
             db.run(sql, params, function(err) {
                 if (err) return reject(err);
-                resolve(this);
+                resolve(this); // 'this' contiene la propiedad .changes
             });
         });
 
         if (result.changes === 0) {
-            return res.status(404).json({ error: "Sorteo no encontrado." });
+            return res.status(404).json({ error: "Sorteo no encontrado para actualizar." });
         }
+        
         res.json({ message: "Sorteo actualizado exitosamente." });
+
     } catch (error) {
         console.error(`Error en PUT /api/admin/sorteos/${req.params.id_sorteo}:`, error);
         res.status(500).json({ error: "Error interno al editar el sorteo." });
