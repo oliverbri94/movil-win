@@ -243,7 +243,7 @@ function initializeRafflePage() {
 
     function renderMedia(sorteo) {
         const url = sorteo.imagen_url || 'images/proximo_sorteo.png';
-        const esProximo = !sorteo.id_sorteo || sorteo.esProximo;
+        const esProximo = sorteo.status_sorteo === 'programado';
         const classes = esProximo ? 'grayscale' : '';
         if (url.endsWith('.mp4') || url.endsWith('.webm')) {
             return `<video src="${url}" class="${classes}" autoplay loop muted playsinline></video>`;
@@ -572,7 +572,7 @@ function initializeRafflePage() {
             slideWrapper.className = 'slide-wrapper';
             slideWrapper.style.cssText = 'width: 100%; flex-shrink: 0;';
             
-            const esProximo = !sorteo.id_sorteo || sorteo.esProximo;
+            const esProximo = sorteo.status_sorteo === 'programado';
             let percentage = 0;
             let motivationalMessage = "¡El sorteo ha comenzado!";
             
@@ -797,29 +797,27 @@ function initializeRafflePage() {
 
         checkMainPageCountdownStatus();
     }
+
     async function cargarSorteosVisibles() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/sorteos-visibles`);
             if (!response.ok) throw new Error('No se pudo obtener la lista de sorteos.');
+            
             const data = await response.json();
             
             if (data.success && data.sorteos && data.sorteos.length > 0) {
+                // Simplemente asignamos los sorteos reales que vienen de la API
                 sorteosDisponibles = data.sorteos;
-                if (sorteosDisponibles.length === 1) {
-                    sorteosDisponibles.push({
-                        id_sorteo: null,
-                        nombre_premio_display: "Próximo Gran Premio",
-                        imagen_url: 'images/proximo_sorteo.png',
-                        esProximo: true
-                    });
-                }
+                
                 await generarSlidesDelCarrusel();
                 generarPanelesDeNavegacion();
                 
+                // Mueve al primer sorteo activo, o al primero de la lista si no hay activos
                 const initialIndex = sorteosDisponibles.findIndex(s => s.status_sorteo === 'activo');
                 moveToSlide(initialIndex !== -1 ? initialIndex : 0);
             } else {
-                throw new Error("No hay sorteos disponibles. ¡Vuelve pronto!");
+                // Si no hay sorteos activos ni programados, muestra un mensaje
+                if (prizeCarouselTrack) prizeCarouselTrack.innerHTML = `<div style="text-align:center; padding: 50px 20px;"><h2 class="prize-title">No hay sorteos disponibles en este momento. ¡Vuelve pronto!</h2></div>`;
             }
         } catch (error) {
             if (prizeCarouselTrack) prizeCarouselTrack.innerHTML = `<div style="text-align:center; padding: 50px 20px;"><h2 class="prize-title">${error.message}</h2></div>`;
