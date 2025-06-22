@@ -2123,3 +2123,26 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 .btn-eliminar-paquete:hover {
     background-color: color-mix(in srgb, var(--clr-red) 80%, black);
 }
+/* Pega este código al final de style.css */
+
+/* Estilo para el precio original que aparecerá tachado */
+.precio-original-tachado {
+    font-size: 0.6em; /* Más pequeño que el precio principal */
+    color: var(--clr-red); /* Color rojo para llamar la atención */
+    text-decoration: line-through;
+    margin-left: 10px;
+    font-weight: 400;
+}
+
+/* Estilo para la nueva etiqueta de "boletos gratis" */
+.etiqueta-ahorro {
+    background-color: var(--clr-accent);
+    color: var(--clr-white);
+    font-size: 0.85em;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 50px; /* Bordes redondeados para que parezca una píldora */
+    margin-top: -10px; /* Un poco de margen negativo para acercarlo */
+    margin-bottom: 15px;
+    display: inline-block; /* Para que ocupe solo el ancho de su contenido */
+}

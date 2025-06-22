@@ -100,6 +100,7 @@ function stringToHslColor(str) {
 }
 // Pega esta nueva función completa en tu archivo script.js
 
+
 /**
  * Renderiza las tarjetas de paquetes para el público en un contenedor específico.
  * @param {Array<object>} paquetes - El array de paquetes del sorteo actual.
@@ -110,15 +111,46 @@ function renderizarPaquetesPublicos(paquetes, contenedor) {
     contenedor.innerHTML = ''; // Limpia los paquetes anteriores
 
     if (!paquetes || paquetes.length === 0) {
-        contenedor.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">No hay paquetes de boletos disponibles para este sorteo en este momento.</p>';
+        contenedor.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">No hay paquetes de boletos disponibles para este sorteo.</p>';
         return;
     }
 
-    // Determina cuál es el paquete "popular" (el que ofrece más boletos)
-    const paquetePopular = paquetes.reduce((max, p) => (p.boletos > max.boletos ? p : max), paquetes[0]);
+    // --- INICIO DE LA NUEVA LÓGICA ---
+
+    // 1. Buscamos el precio del boleto individual como base para los cálculos.
+    const paqueteIndividual = paquetes.find(p => p.boletos === 1);
+    const precioIndividual = paqueteIndividual ? paqueteIndividual.precio : null;
+
+    // 2. Determina cuál es el paquete "popular" (el que ofrece más boletos, excluyendo el individual)
+    const paquetesMultiples = paquetes.filter(p => p.boletos > 1);
+    const paquetePopular = paquetesMultiples.length > 0
+        ? paquetesMultiples.reduce((max, p) => (p.boletos > max.boletos ? p : max), paquetesMultiples[0])
+        : null;
 
     paquetes.forEach(paquete => {
-        const esPopular = (paquete === paquetePopular && paquetes.length > 1);
+        let valorRealHTML = '';
+        let boletosGratisHTML = '';
+
+        // 3. Hacemos los cálculos solo si tenemos un precio individual y el paquete tiene más de 1 boleto.
+        if (precioIndividual && paquete.boletos > 1) {
+            const valorReal = precioIndividual * paquete.boletos;
+            const ahorro = valorReal - paquete.precio;
+            
+            if (ahorro > 0) {
+                // Preparamos el HTML para el precio tachado
+                valorRealHTML = `<span class="precio-original-tachado">$${valorReal.toFixed(0)}</span>`;
+                
+                // Calculamos y preparamos el HTML para los boletos gratis
+                const boletosGratis = Math.floor(ahorro / precioIndividual);
+                if (boletosGratis > 0) {
+                    boletosGratisHTML = `<div class="etiqueta-ahorro">+${boletosGratis} Boleto(s) GRATIS</div>`;
+                }
+            }
+        }
+        
+        // --- FIN DE LA NUEVA LÓGICA ---
+
+        const esPopular = (paquete === paquetePopular);
         const mensajeWhatsApp = `Hola, quiero el paquete "${paquete.nombre}" de ${paquete.boletos} boletos por $${paquete.precio} para el sorteo MOVIL WIN!`;
         
         const paqueteHTML = `
@@ -126,9 +158,11 @@ function renderizarPaquetesPublicos(paquetes, contenedor) {
                 ${esPopular ? '<span class="etiqueta-popular">Más Popular</span>' : ''}
                 <div class="paquete-icono"><i class="fas fa-rocket"></i></div>
                 <h4>${paquete.nombre}</h4>
-                <div class="paquete-precio">$${paquete.precio}</div>
+                <div class="paquete-precio">
+                    $${paquete.precio}
+                    ${valorRealHTML} </div>
                 <div class="paquete-cantidad">${paquete.boletos} Boleto(s) Digital(es)</div>
-                <p class="paquete-descripcion">Aumenta tus probabilidades de ganar con este increíble paquete.</p>
+                ${boletosGratisHTML} <p class="paquete-descripcion">Aumenta tus probabilidades de ganar con este increíble paquete.</p>
                 <a href="https://wa.me/593963135510?text=${encodeURIComponent(mensajeWhatsApp)}" target="_blank" class="boton-paquete">Elegir Paquete</a>
             </div>
         `;
@@ -574,7 +608,7 @@ function initializeRafflePage() {
                         <div class="progress-info-wrapper" style="${esProximo ? 'display: none;' : ''}">
                             <div class="progress-bar-wrapper">
                                 <div class="progress-bar-fill" style="width: ${percentage.toFixed(2)}%;"></div>
-                                <span class="progress-bar-text">${percentage.toFixed(0)}%</span>
+                                <span class="progress-bar-text">${percentage.toFixed(2)}%</span>
                             </div>
                             <p class="motivational-text-integrated">${motivationalMessage}</p>
                         </div>
