@@ -36,6 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 // --- 4. LÓGICA CONDICIONAL DE DB Y SESIÓN ---
 // Declaramos las variables aquí para que sean accesibles en todo el archivo
 let db;
+let dbClient; 
 let sessionStore = new session.MemoryStore(); // Usamos un store de memoria por defecto
 
 // Verificamos si estamos en producción (en Render)
@@ -43,7 +44,7 @@ if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
     console.log("Detectado entorno de producción. Conectando a PostgreSQL...");
 
     // 1. CREAMOS LA CONEXIÓN A LA BASE DE DATOS PRIMERO
-    const dbClient = new Pool({
+    dbClient = new Pool({
         connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized: false }
     });
@@ -534,110 +535,61 @@ app.get('/api/admin/participantes-activos', requireAdminLogin, (req, res) => {
 
 // **RUTA POST PARTICIPANTES CON LÓGICA DE EMAIL/WHATSAPP**
 app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
-    // Log para saber que la petición llegó
     console.log("-> Petición recibida para añadir participante:", req.body);
-
     const { id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, quantity, sorteo_id } = req.body;
 
-    // Validación inicial de datos de entrada
     if (!id_documento || !nombre || !sorteo_id || !quantity) {
         return res.status(400).json({ error: 'Datos incompletos', message: 'Faltan datos requeridos para el registro.' });
     }
     const numQuantity = parseInt(quantity, 10);
 
+    const client = await dbClient.connect();
+
     try {
-        // --- PASO 1: OBTENER INFORMACIÓN DEL SORTEO ---
-        const sorteoInfo = await new Promise((resolve, reject) => {
-            const sql = `SELECT *, (SELECT COUNT(*) FROM participaciones WHERE id_sorteo_config_fk = ?) as participantes_actuales FROM sorteos_config WHERE id_sorteo = ?`;
-            db.get(sql, [sorteo_id, sorteo_id], (err, row) => {
-                if (err) return reject(new Error("Error al consultar la base de datos del sorteo."));
-                resolve(row);
-            });
-        });
+        const sorteoInfoSql = `SELECT *, (SELECT COUNT(*) FROM participaciones WHERE id_sorteo_config_fk = $1) as participantes_actuales FROM sorteos_config WHERE id_sorteo = $1`;
+        const sorteoRes = await client.query(sorteoInfoSql, [sorteo_id]);
+        const sorteoInfo = sorteoRes.rows[0];
 
         if (!sorteoInfo) {
-            return res.status(404).json({ error: 'Sorteo no encontrado', message: `El sorteo con ID ${sorteo_id} no existe.` });
+            throw new Error(`El sorteo con ID ${sorteo_id} no existe.`);
         }
-        console.log("--- PASO 1 COMPLETADO: INFO DE SORTEO OBTENIDA ---");
-
-        console.log(`-> Información del sorteo ID ${sorteo_id} obtenida.`);
-
-        // --- PASO 2: VALIDACIÓN ESTRICTA DE CONFIGURACIÓN Y ARCHIVO ---
         if (!sorteoInfo.nombre_base_archivo_guia || sorteoInfo.nombre_base_archivo_guia.trim() === '') {
-            console.error(`VALIDATION FAIL: El sorteo ID ${sorteo_id} no tiene un 'nombre_base_archivo_guia' configurado.`);
-            return res.status(400).json({ 
-                error: "Sorteo mal configurado",
-                message: `El sorteo '${sorteoInfo.nombre_premio_display}' no tiene un 'Nombre Base Archivo Guía' asignado. Edita el sorteo y añade uno.`
-            });
+            throw new Error(`El sorteo '${sorteoInfo.nombre_premio_display}' no tiene un 'Nombre Base Archivo Guía' asignado.`);
         }
-
-        const nombreArchivoGuia = `MiniGuia_${sorteoInfo.nombre_base_archivo_guia.replace(/\s+/g, '_')}.pdf`;
-        const rutaGuia = path.join(__dirname, 'guias', nombreArchivoGuia);
-
-        if (!fs.existsSync(rutaGuia)) {
-            console.error(`VALIDATION FAIL: El archivo de la guía no existe en la ruta: ${rutaGuia}`);
-            return res.status(409).json({
-                error: "Falta el archivo de la guía",
-                message: `El archivo PDF requerido '${nombreArchivoGuia}' no se encontró en la carpeta /guias. Por favor, sube el archivo al servidor.`
-            });
-        }
-        console.log(`-> Guía '${nombreArchivoGuia}' encontrada.`);
-
-        // --- PASO 3: VALIDACIÓN DE CUPO DISPONIBLE ---
         if ((sorteoInfo.participantes_actuales + numQuantity) > sorteoInfo.meta_participaciones) {
             const boletosRestantes = sorteoInfo.meta_participaciones - sorteoInfo.participantes_actuales;
-            return res.status(409).json({
-                error: "Cupo excedido",
-                message: `No se pueden añadir ${numQuantity} boletos. Solo quedan ${boletosRestantes} cupos disponibles.`
-            });
+            throw new Error(`No se pueden añadir ${numQuantity} boletos. Solo quedan ${boletosRestantes} cupos disponibles.`);
         }
-        console.log(`-> Cupo validado. Hay espacio disponible.`);
 
-        // --- PASO 4: TRANSACCIÓN SEGURA EN LA BASE DE DATOS ---
-        await new Promise((resolve, reject) => {
-            db.serialize(() => {
-                db.run("BEGIN TRANSACTION;");
-                const sqlUpsertUnico = `INSERT INTO datos_unicos_participantes (id_documento, nombre, ciudad, celular, email) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id_documento) DO UPDATE SET nombre=excluded.nombre, ciudad=excluded.ciudad, celular=excluded.celular, email=excluded.email;`;
-                db.run(sqlUpsertUnico, [id_documento, nombre, ciudad, celular, email]);
+        await client.query('BEGIN');
 
-                const sqlInsertParticipacion = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-                const stmt = db.prepare(sqlInsertParticipacion);
-                for (let i = 0; i < numQuantity; i++) {
-                    stmt.run([id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, sorteo_id]);
-                }
-                stmt.finalize((err) => {
-                    if (err) return reject(new Error("Error al finalizar la inserción de participaciones."));
-                    db.run("COMMIT;", (commitErr) => {
-                        if (commitErr) {
-                            console.error("Error al hacer COMMIT, revirtiendo...", commitErr);
-                            db.run("ROLLBACK;");
-                            return reject(new Error("Error al confirmar la transacción en la base de datos."));
-                        }
-                        resolve();
-                    });
-                });
-            });
-        });
+        const sqlUpsertUnico = `
+            INSERT INTO datos_unicos_participantes (id_documento, nombre, ciudad, celular, email) 
+            VALUES ($1, $2, $3, $4, $5) 
+            ON CONFLICT(id_documento) DO UPDATE SET 
+                nombre = EXCLUDED.nombre, ciudad = EXCLUDED.ciudad, celular = EXCLUDED.celular, email = EXCLUDED.email;
+        `;
+        await client.query(sqlUpsertUnico, [id_documento, nombre, ciudad, celular, email]);
+
+        const sqlInsertParticipacion = `
+            INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+        `;
+        for (let i = 0; i < numQuantity; i++) {
+            await client.query(sqlInsertParticipacion, [id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, sorteo_id]);
+        }
+        
+        await client.query('COMMIT');
         console.log(`-> Transacción completada. ${numQuantity} participaciones guardadas.`);
 
-        // --- PASO 5: NOTIFICACIONES (SE EJECUTA SÓLO SI TODO LO ANTERIOR FUE EXITOSO) ---
-        let linkWhatsApp = null;
-        if (celular) {
-            let numeroFormateado = String(celular).trim().replace(/\D/g, '');
-            if (numeroFormateado.length === 10 && numeroFormateado.startsWith('0')) {
-                numeroFormateado = `593${numeroFormateado.substring(1)}`;
-            }
-            const mensajeWhatsApp = `¡Hola, ${nombre}! Gracias por tu(s) ${numQuantity} boleto(s) digital(es) para el sorteo del ${sorteoInfo.nombre_premio_display}. ¡Mucha suerte de parte de MOVIL WIN!`;
-            linkWhatsApp = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensajeWhatsApp)}`;
-        }
-        // --- PASO 6: RESPUESTA FINAL DE ÉXITO ---
-        res.status(201).json({ 
-            message: `¡${numQuantity} boleto(s) digital(es) para ${nombre} añadidos con éxito!`,
-            whatsappLink: linkWhatsApp
-        });
-        
+        // --- INICIO DE LA LÓGICA DE NOTIFICACIONES ---
+
+        // 1. Envío de Correo Electrónico (si aplica)
         if (email && transporter) {
-             const mailOptions = {
+            const nombreArchivoGuia = `MiniGuia_${sorteoInfo.nombre_base_archivo_guia.replace(/\s+/g, '_')}.pdf`;
+            const rutaGuia = path.join(__dirname, 'guias', nombreArchivoGuia);
+            
+            const mailOptions = {
                 from: `"MOVIL WIN" <${mailConfig.auth.user}>`,
                 to: email,
                 subject: `¡Gracias por participar en MOVIL WIN por el ${sorteoInfo.nombre_premio_display}!`,
@@ -665,24 +617,40 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
                 `,
                 attachments: []
             };
+
             if (fs.existsSync(rutaGuia)) {
-                 mailOptions.attachments.push({ filename: nombreArchivoGuia, path: rutaGuia });
-             }
-             
-             // Envolvemos el envío en un try/catch para registrar el error si falla, pero no afectará la respuesta ya enviada.
-             try {
-                await transporter.sendMail(mailOptions);
-                console.log(`-> Email de confirmación enviado exitosamente a ${email}.`);
-             } catch (emailError) {
-                console.error("⚠️  ERROR EN TAREA DE EMAIL EN SEGUNDO PLANO:", emailError);
-             }
+                mailOptions.attachments.push({ filename: nombreArchivoGuia, path: rutaGuia });
+            }
+            
+            // Enviamos el email en segundo plano y no detenemos la ejecución si falla
+            transporter.sendMail(mailOptions).catch(emailError => {
+                console.error("⚠️ ERROR EN TAREA DE EMAIL EN SEGUNDO PLANO:", emailError);
+            });
         }
 
+        // 2. Preparación del enlace de WhatsApp
+        let linkWhatsApp = null;
+        if (celular) {
+            let numeroFormateado = String(celular).trim().replace(/\D/g, '');
+            if (numeroFormateado.length === 10 && numeroFormateado.startsWith('0')) {
+                numeroFormateado = `593${numeroFormateado.substring(1)}`;
+            }
+            const mensajeWhatsApp = `¡Hola, ${nombre}! Gracias por tu(s) ${numQuantity} boleto(s) digital(es) para el sorteo del ${sorteoInfo.nombre_premio_display}. Ya puedes ver tus boletos añadidos en www.movilwin.com ¡Mucha suerte!`;
+            linkWhatsApp = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensajeWhatsApp)}`;
+        }
+        
+        // 3. Respuesta final al cliente
+        res.status(201).json({
+            message: `¡${numQuantity} boleto(s) digital(es) para ${nombre} añadidos con éxito!`,
+            whatsappLink: linkWhatsApp
+        });
 
     } catch (error) {
-        // CAPTURA CUALQUIER ERROR INESPERADO DE LOS PASOS ANTERIORES
-        console.error("❌ ERROR FATAL en el endpoint /api/admin/participantes:", error);
-        res.status(500).json({ error: "Error interno del servidor", message: error.message });
+        await client.query('ROLLBACK');
+        console.error("Error en transacción al añadir participante:", error);
+        res.status(500).json({ error: "Error en la base de datos", message: error.message });
+    } finally {
+        client.release();
     }
 });
 
