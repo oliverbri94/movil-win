@@ -762,11 +762,10 @@ document.addEventListener('DOMContentLoaded', async () => {
      * Maneja el guardado (creación o actualización) de un sorteo.
      * @param {Event} event 
      */
+
     async function handleGuardarSorteo(event) {
         event.preventDefault();
         const id = sorteoEditIdInput.value;
-
-        // Recogemos los datos de los paquetes desde el editor
         const paquetesData = recogerDatosPaquetes();
 
         const data = {
@@ -775,13 +774,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             nombre_base_archivo_guia: nombreBaseArchivoGuiaInput.value.trim(),
             meta_participaciones: parseInt(metaParticipacionesSorteoInput.value, 10),
             activo: sorteoActivoCheckbox.checked,
-            paquetes_json: paquetesData // <-- Añadimos los paquetes al payload
+            paquetes_json: paquetesData
         };
+
         if (!data.nombre_premio_display || !data.nombre_base_archivo_guia || isNaN(data.meta_participaciones) || data.meta_participaciones < 1) {
             showGenericStatusMessage(statusGestionSorteo, "Nombre del premio, nombre base de guía y meta válida son requeridos.", true);
             return;
         }
-        const url = editandoSorteo && id ? `<span class="math-inline">\{API\_BASE\_URL\}/api/admin/sorteos/</span>{id}` : `${API_BASE_URL}/api/admin/sorteos`;
+
+        // Esta es la línea clave que debe construirse correctamente
+        const url = editandoSorteo && id ? `${API_BASE_URL}/api/admin/sorteos/${id}` : `${API_BASE_URL}/api/admin/sorteos`;
         const method = editandoSorteo && id ? 'PUT' : 'POST';
 
         showGenericStatusMessage(statusGestionSorteo, editandoSorteo ? 'Actualizando sorteo...' : 'Guardando nuevo sorteo...');
@@ -792,15 +794,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                 body: JSON.stringify(data),
                 credentials: 'include'
             });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.error || `Error ${response.status}`);
+            
+            if (!response.ok) {
+                // Si la respuesta no es JSON, no intentes parsearla.
+                if (response.status === 405) {
+                    throw new Error('Método no permitido (405). Revisa la ruta PUT en tu server.js.');
+                }
+                // Para otros errores, intentamos leer el texto.
+                const errorText = await response.text();
+                throw new Error(errorText || `Error del servidor: ${response.status}`);
+            }
 
+            const result = await response.json();
+            
             showGenericStatusMessage(statusGestionSorteo, result.message, false);
             resetFormGestionSorteo();
             await cargarListaSorteos();
             await fetchInfoSorteoActualParaAdmin();
+
         } catch (error) {
             console.error("Error guardando sorteo:", error);
+            // Mostramos el error real que ahora sí podemos leer
             showGenericStatusMessage(statusGestionSorteo, `Error: ${error.message}`, true);
         }
     }
