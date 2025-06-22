@@ -243,8 +243,9 @@ function initializeRafflePage() {
 
     function renderMedia(sorteo) {
         const url = sorteo.imagen_url || 'images/proximo_sorteo.png';
-        const esProximo = sorteo.status_sorteo === 'programado';
-        const classes = esProximo ? 'grayscale' : '';
+        // La propiedad 'esProximo' ahora la pasaremos directamente en el objeto 'sorteo'
+        const classes = sorteo.esProximo ? 'grayscale' : '';
+        
         if (url.endsWith('.mp4') || url.endsWith('.webm')) {
             return `<video src="${url}" class="${classes}" autoplay loop muted playsinline></video>`;
         }
@@ -563,6 +564,8 @@ function initializeRafflePage() {
     
 // Pega esta función completa en script.js, reemplazando la versión anterior.
 
+// En script.js, reemplaza tu función generarSlidesDelCarrusel completa por esta
+
     async function generarSlidesDelCarrusel() {
         if (!prizeCarouselTrack) return;
         prizeCarouselTrack.innerHTML = '';
@@ -572,7 +575,27 @@ function initializeRafflePage() {
             slideWrapper.className = 'slide-wrapper';
             slideWrapper.style.cssText = 'width: 100%; flex-shrink: 0;';
             
+            // --- INICIO DE LA NUEVA LÓGICA ---
+            
+            // 1. Verificamos si el sorteo es 'programado'
             const esProximo = sorteo.status_sorteo === 'programado';
+
+            // 2. Definimos qué título y qué imagen se van a mostrar
+            let tituloMostrado = sorteo.nombre_premio_display;
+            let mediaParaRenderizar = sorteo;
+
+            if (esProximo) {
+                // Si es un sorteo programado, forzamos el texto y la imagen genéricos
+                tituloMostrado = "Próximo Gran Premio";
+                mediaParaRenderizar = {
+                    imagen_url: 'images/proximo_sorteo.png',
+                    nombre_premio_display: 'Próximo Sorteo',
+                    esProximo: true // Propiedad para que renderMedia aplique el filtro grayscale
+                };
+            }
+            
+            // --- FIN DE LA NUEVA LÓGICA ---
+
             let percentage = 0;
             let motivationalMessage = "¡El sorteo ha comenzado!";
             
@@ -586,10 +609,11 @@ function initializeRafflePage() {
             slideWrapper.innerHTML = `
                 <div class="prize-carousel-slide" data-sorteo-id="${sorteo.id_sorteo || 'proximo'}">
                     <div class="prize-image-container">
-                        ${renderMedia(sorteo)}
+                        ${renderMedia(mediaParaRenderizar)} 
                     </div>
                     <div class="prize-info-container">
-                        <h2 class="prize-title">${sorteo.nombre_premio_display}</h2>
+                        <h2 class="prize-title">${tituloMostrado}</h2>
+
                         <div class="mini-package-selector" style="${esProximo ? 'display: none;' : ''}">
                             <a href="https://wa.me/593963135510?text=Hola%2C%20quiero%20comprar%201%20boleto%20individual%20por%20%242." target="_blank" class="mini-package-btn">
                                 <strong>1 Boleto</strong>
@@ -608,7 +632,7 @@ function initializeRafflePage() {
                         <div class="progress-info-wrapper" style="${esProximo ? 'display: none;' : ''}">
                             <div class="progress-bar-wrapper">
                                 <div class="progress-bar-fill" style="width: ${percentage.toFixed(2)}%;"></div>
-                                <span class="progress-bar-text">${percentage.toFixed(2)}%</span>
+                                <span class="progress-bar-text">${percentage.toFixed(0)}%</span>
                             </div>
                             <p class="motivational-text-integrated">${motivationalMessage}</p>
                         </div>
@@ -625,7 +649,7 @@ function initializeRafflePage() {
                 
                 ${!esProximo ? `
                 <div class="contenedor-sorteo content-section">
-                    <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
+                    <h2 class="titulo-dorado" data-text="¡A GIRAR!">¡A GIRAR!</h2>
                     <p class="rueda-subtitulo">¡Mucha Suerte a Todos los Participantes!</p>
                     <div class="price-is-right-wheel-frame">
                         <div class="wheel-price-is-right-container">
@@ -654,7 +678,6 @@ function initializeRafflePage() {
             });
         }
     }
-
 // --- REEMPLAZA TU FUNCIÓN ACTUALIZARTOPPARTICIPANTES CON ESTA ---
 
     async function actualizarTopParticipantes(sorteoId, slideElement) {
