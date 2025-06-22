@@ -1,3 +1,5 @@
+console.log("VERSIÓN DEL SCRIPT: 22 DE JUNIO - ACTUALIZADA"); 
+
 // =================================================================================
 // ARCHIVO JAVASCRIPT CONSOLIDADO PARA MOVIL WIN
 // Contiene:
@@ -649,7 +651,7 @@ function initializeRafflePage() {
                 
                 ${!esProximo ? `
                 <div class="contenedor-sorteo content-section">
-                    <h2 class="titulo-dorado" data-text="¡A GIRAR!">¡A GIRAR!</h2>
+                    <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
                     <p class="rueda-subtitulo">¡Mucha Suerte a Todos los Participantes!</p>
                     <div class="price-is-right-wheel-frame">
                         <div class="wheel-price-is-right-container">
@@ -766,14 +768,14 @@ function initializeRafflePage() {
     async function moveToSlide(index) {
         sorteoFinalizado = false;
         if (!prizeCarouselTrack || index < 0 || index >= sorteosDisponibles.length) return;
-
+        
         premioActualIndex = index;
         prizeCarouselTrack.style.transform = `translateX(${-index * 100}%)`;
 
         const sorteoActual = sorteosDisponibles[premioActualIndex];
         const activeSlide = prizeCarouselTrack.children[index];
         if (!activeSlide) return;
-
+        
         document.querySelectorAll('.prize-nav-panel').forEach((p, i) => p.classList.toggle('active', i === index));
 
         actualizarTopParticipantes(sorteoActual.id_sorteo, activeSlide);
@@ -799,8 +801,7 @@ function initializeRafflePage() {
                 wheelCanvas.height = wheelHeight;
             }
             try {
-                // Esta es la línea que corregimos para que la URL sea correcta
-                const response = await fetch(`<span class="math-inline">\{API\_BASE\_URL\}/api/participantes?sorteoId\=</span>{sorteoActual.id_sorteo}`);
+                const response = await fetch(`${API_BASE_URL}/api/participantes?sorteoId=${sorteoActual.id_sorteo}`);
                 if (!response.ok) {
                     throw new Error(`El servidor respondió con un error ${response.status}`);
                 }
