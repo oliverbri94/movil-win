@@ -590,13 +590,13 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
             const rutaGuia = path.join(__dirname, 'guias', nombreArchivoGuia);
             
             const mailOptions = {
-                from: `"MOVIL WIN" <${mailConfig.auth.user}>`,
+                from: `"MOVIL WIN" <${process.env.EMAIL_USER}>`,
                 to: email,
                 subject: `¡Gracias por participar en MOVIL WIN por el ${sorteoInfo.nombre_premio_display}!`,
                 html: `
                     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
                         <div style="text-align: center; margin-bottom: 20px;">
-                            <img src="images/logo.png" alt="MOVIL WIN Logo" style="max-width: 150px; height: auto;">
+                            <img src="cid:logo_movilwin" alt="MOVIL WIN Logo" style="max-width: 150px; height: auto;">
                         </div>
                         <h2 style="color: #7f5af0; text-align: center;">¡Hola, ${nombre}!</h2>
                         <p>¡Gracias por adquirir tu Mini-Guía y obtener <strong>${numQuantity} boleto(s) digital(es)</strong> para el sorteo del <strong>${sorteoInfo.nombre_premio_display}</strong> en MOVIL WIN!</p>
@@ -615,7 +615,13 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
                         <p style="text-align: center; font-size: 0.9em; color: #777;">Atentamente,<br>El equipo de MOVIL WIN</p>
                     </div>
                 `,
-                attachments: []
+                attachments: [
+                    {
+                        filename: 'logo.png',
+                        path: path.join(__dirname, 'images', 'logo.png'),
+                        cid: 'logo_movilwin' // Identificador único para la imagen
+                    }
+                ]
             };
 
             if (fs.existsSync(rutaGuia)) {
