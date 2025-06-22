@@ -221,6 +221,7 @@ app.get('/debug-cors', (req, res) => {
         session_secret_existe: !!process.env.SESSION_SECRET
     });
 });
+
 app.get('/api/sorteos-visibles', async (req, res) => {
     try {
         const sql = `
@@ -234,13 +235,29 @@ app.get('/api/sorteos-visibles', async (req, res) => {
                 resolve(rows);
             });
         });
-        res.json({ success: true, sorteos: rows });
+
+        // Convertimos el string JSON de paquetes de vuelta a un objeto para cada sorteo
+        const sorteosProcesados = rows.map(sorteo => {
+            try {
+                // Si paquetes_json existe y no está vacío, lo parseamos
+                if (sorteo.paquetes_json) {
+                    sorteo.paquetes_json = JSON.parse(sorteo.paquetes_json);
+                } else {
+                    sorteo.paquetes_json = []; // Si es null o no existe, lo definimos como un array vacío
+                }
+            } catch (e) {
+                console.error(`Error parseando JSON para sorteo ID ${sorteo.id_sorteo}:`, e);
+                sorteo.paquetes_json = []; // En caso de error, también lo dejamos como array vacío
+            }
+            return sorteo;
+        });
+
+        res.json({ success: true, sorteos: sorteosProcesados });
     } catch (error) {
         console.error("Error en GET /api/sorteos-visibles:", error);
         res.status(500).json({ success: false, error: "Error interno del servidor." });
     }
 });
-
 // CÓDIGO CORREGIDO
 app.get('/api/participantes', (req, res) => {
     const sorteoIdQuery = req.query.sorteoId;

@@ -98,6 +98,43 @@ function stringToHslColor(str) {
     // Usamos saturación y luminosidad fijas para una paleta de colores pastel agradable
     return `hsl(${h}, 60%, 75%)`;
 }
+// Pega esta nueva función completa en tu archivo script.js
+
+/**
+ * Renderiza las tarjetas de paquetes para el público en un contenedor específico.
+ * @param {Array<object>} paquetes - El array de paquetes del sorteo actual.
+ * @param {HTMLElement} contenedor - El elemento HTML donde se insertarán las tarjetas.
+ */
+function renderizarPaquetesPublicos(paquetes, contenedor) {
+    if (!contenedor) return;
+    contenedor.innerHTML = ''; // Limpia los paquetes anteriores
+
+    if (!paquetes || paquetes.length === 0) {
+        contenedor.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">No hay paquetes de boletos disponibles para este sorteo en este momento.</p>';
+        return;
+    }
+
+    // Determina cuál es el paquete "popular" (el que ofrece más boletos)
+    const paquetePopular = paquetes.reduce((max, p) => (p.boletos > max.boletos ? p : max), paquetes[0]);
+
+    paquetes.forEach(paquete => {
+        const esPopular = (paquete === paquetePopular && paquetes.length > 1);
+        const mensajeWhatsApp = `Hola, quiero el paquete "${paquete.nombre}" de ${paquete.boletos} boletos por $${paquete.precio} para el sorteo MOVIL WIN!`;
+        
+        const paqueteHTML = `
+            <div class="paquete-item ${esPopular ? 'popular' : ''}">
+                ${esPopular ? '<span class="etiqueta-popular">Más Popular</span>' : ''}
+                <div class="paquete-icono"><i class="fas fa-rocket"></i></div>
+                <h4>${paquete.nombre}</h4>
+                <div class="paquete-precio">$${paquete.precio}</div>
+                <div class="paquete-cantidad">${paquete.boletos} Boleto(s) Digital(es)</div>
+                <p class="paquete-descripcion">Aumenta tus probabilidades de ganar con este increíble paquete.</p>
+                <a href="https://wa.me/593963135510?text=${encodeURIComponent(mensajeWhatsApp)}" target="_blank" class="boton-paquete">Elegir Paquete</a>
+            </div>
+        `;
+        contenedor.innerHTML += paqueteHTML;
+    });
+}
 /**
  * Dibuja texto en un canvas, dividiéndolo en múltiples líneas si excede el ancho máximo.
  * @param {CanvasRenderingContext2D} context El contexto del canvas (ctx).
@@ -106,6 +143,7 @@ function stringToHslColor(str) {
  * @param {number} y La coordenada Y.
  * @param {number} maxWidth El ancho máximo permitido para el texto.
  * @param {number} lineHeight La altura de cada línea.
+ * 
  */
 function wrapText(context, text, x, y, maxWidth, lineHeight) {
     const words = text.split(' ');
@@ -671,22 +709,31 @@ function initializeRafflePage() {
 // --- REEMPLAZA TU FUNCIÓN moveToSlide CON ESTA ---
 
     async function moveToSlide(index) {
-        sorteoFinalizado = false; 
+        sorteoFinalizado = false;
         if (!prizeCarouselTrack || index < 0 || index >= sorteosDisponibles.length) return;
-        
+
         premioActualIndex = index;
         prizeCarouselTrack.style.transform = `translateX(${-index * 100}%)`;
 
         const sorteoActual = sorteosDisponibles[premioActualIndex];
         const activeSlide = prizeCarouselTrack.children[index];
         if (!activeSlide) return;
-        
+
         document.querySelectorAll('.prize-nav-panel').forEach((p, i) => p.classList.toggle('active', i === index));
 
-        // --- LÍNEA CLAVE AÑADIDA ---
-        // Llama a la función para actualizar la lista de Top Participantes del slide actual.
         actualizarTopParticipantes(sorteoActual.id_sorteo, activeSlide);
-        // ----------------------------
+
+        // --- INICIO DE LA MODIFICACIÓN ---
+        // Busca el contenedor de paquetes y renderiza los paquetes para el sorteo actual
+        const paqueteContainer = document.getElementById('paquetes-section');
+        if (paqueteContainer) {
+            if (sorteoActual.esProximo) {
+                paqueteContainer.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">Los paquetes de participación se anunciarán pronto. ¡Mantente atento!</p>';
+            } else {
+                renderizarPaquetesPublicos(sorteoActual.paquetes_json, paqueteContainer);
+            }
+        }
+        // --- FIN DE LA MODIFICACIÓN ---
 
         const currentWheelCanvas = activeSlide.querySelector('.price-wheel-canvas');
         if (sorteoActual && sorteoActual.id_sorteo && currentWheelCanvas) {
@@ -700,8 +747,7 @@ function initializeRafflePage() {
                 wheelCanvas.height = wheelHeight;
             }
             try {
-                // CORRECTO
-                const response = await fetch(`${API_BASE_URL}/api/participantes?sorteoId=${sorteoActual.id_sorteo}`);
+                const response = await fetch(`<span class="math-inline">\{API\_BASE\_URL\}/api/participantes?sorteoId\=</span>{sorteoActual.id_sorteo}`);
                 participantes = await response.json() || [];
                 currentYOffset = 0;
                 addWheelEventListeners(wheelCanvas);
@@ -717,7 +763,6 @@ function initializeRafflePage() {
 
         checkMainPageCountdownStatus();
     }
-        
     async function cargarSorteosVisibles() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/sorteos-visibles`);
