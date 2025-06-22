@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loginStatusMessage = document.getElementById('loginStatusMessage');
     const logoutButton = document.getElementById('logoutButton');
 
+    const btnAnadirPaquete = document.getElementById('btnAnadirPaquete');
+    btnAnadirPaquete?.addEventListener('click', () => anadirFilaPaquete());
+
     // Elementos del Menú Lateral (Sidebar)
     const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
     const adminSidebar = document.querySelector('.admin-sidebar');
@@ -123,6 +126,65 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => {
             if (element) element.classList.add('oculto');
         }, duration);
+    }
+
+    /**
+     * Crea y añade una fila de inputs para un nuevo paquete en el editor.
+     * @param {object} [paquete] - Datos opcionales de un paquete para rellenar los campos.
+     */
+    function anadirFilaPaquete(paquete = { nombre: '', precio: '', boletos: '' }) {
+        const container = document.getElementById('paquetes-editor-container');
+        if (!container) return; // Añadimos una guarda de seguridad
+
+        const fila = document.createElement('div');
+        fila.className = 'paquete-editor-fila';
+        fila.innerHTML = `
+            <input type="text" placeholder="Nombre del Paquete (ej: Individual)" value="${paquete.nombre}" class="paquete-nombre" required>
+            <input type="number" placeholder="Precio ($)" value="${paquete.precio}" class="paquete-precio" required>
+            <input type="number" placeholder="Nº Boletos" value="${paquete.boletos}" class="paquete-boletos" required>
+            <button type="button" class="btn-eliminar-paquete" title="Eliminar este paquete">&times;</button>
+        `;
+        container.appendChild(fila);
+
+        // Añadimos el listener para el botón de eliminar de esta nueva fila
+        fila.querySelector('.btn-eliminar-paquete').addEventListener('click', () => {
+            fila.remove();
+        });
+    }
+
+    /**
+     * Lee los datos de todos los inputs de paquetes del editor y los devuelve como un array de objetos.
+     * @returns {Array<object>} Un array con los paquetes configurados.
+     */
+    function recogerDatosPaquetes() {
+        const paquetes = [];
+        document.querySelectorAll('.paquete-editor-fila').forEach(fila => {
+            const nombre = fila.querySelector('.paquete-nombre').value.trim();
+            const precio = parseFloat(fila.querySelector('.paquete-precio').value);
+            const boletos = parseInt(fila.querySelector('.paquete-boletos').value, 10);
+
+            if (nombre && !isNaN(precio) && !isNaN(boletos)) {
+                paquetes.push({ nombre, precio, boletos });
+            }
+        });
+        return paquetes;
+    }
+
+    /**
+     * Limpia el editor de paquetes y renderiza las filas para los paquetes de un sorteo específico.
+     * @param {Array<object>} [paquetes] - El array de paquetes de un sorteo. Si no se proporciona, muestra un paquete por defecto.
+     */
+    function renderizarEditorPaquetes(paquetes = []) {
+        const container = document.getElementById('paquetes-editor-container');
+        if (!container) return;
+
+        container.innerHTML = ''; // Limpia el editor antes de renderizar
+        if (paquetes && paquetes.length > 0) {
+            paquetes.forEach(p => anadirFilaPaquete(p));
+        } else {
+            // Si es un sorteo nuevo sin paquetes, añade uno por defecto para empezar
+            anadirFilaPaquete({ nombre: 'Individual', precio: 2, boletos: 1 });
+        }
     }
     /**
      * Actualiza el panel de estadísticas del sorteo seleccionado.
@@ -664,10 +726,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         editandoSorteo = true;
         sorteoEditIdInput.value = sorteo.id_sorteo;
         nombrePremioDisplayInput.value = sorteo.nombre_premio_display;
-        document.getElementById('imagenUrlSorteo').value = sorteo.imagen_url || ''; // <-- AÑADIR ESTA LÍNEA
+        document.getElementById('imagenUrlSorteo').value = sorteo.imagen_url || '';
         nombreBaseArchivoGuiaInput.value = sorteo.nombre_base_archivo_guia;
         metaParticipacionesSorteoInput.value = sorteo.meta_participaciones;
         sorteoActivoCheckbox.checked = sorteo.status_sorteo === 'activo';
+
+        // Renderiza los paquetes existentes del sorteo
+        renderizarEditorPaquetes(sorteo.paquetes_json);
+
         btnGuardarSorteo.textContent = 'Actualizar Sorteo';
         btnCancelarEdicionSorteo.style.display = 'inline-block';
         formGestionSorteo.scrollIntoView({ behavior: 'smooth' });
@@ -681,9 +747,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         editandoSorteo = false;
         sorteoEditIdInput.value = '';
         formGestionSorteo.reset();
-        document.getElementById('imagenUrlSorteo').value = ''; 
+        document.getElementById('imagenUrlSorteo').value = '';
         metaParticipacionesSorteoInput.value = '200';
         sorteoActivoCheckbox.checked = false;
+
+        // Limpia y resetea el editor de paquetes
+        renderizarEditorPaquetes(); 
+
         btnGuardarSorteo.textContent = 'Guardar Sorteo';
         btnCancelarEdicionSorteo.style.display = 'none';
     }
@@ -695,26 +765,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function handleGuardarSorteo(event) {
         event.preventDefault();
         const id = sorteoEditIdInput.value;
+
+        // Recogemos los datos de los paquetes desde el editor
+        const paquetesData = recogerDatosPaquetes();
+
         const data = {
             nombre_premio_display: nombrePremioDisplayInput.value.trim(),
-            imagen_url: document.getElementById('imagenUrlSorteo').value.trim(), 
+            imagen_url: document.getElementById('imagenUrlSorteo').value.trim(),
             nombre_base_archivo_guia: nombreBaseArchivoGuiaInput.value.trim(),
             meta_participaciones: parseInt(metaParticipacionesSorteoInput.value, 10),
-            activo: sorteoActivoCheckbox.checked
+            activo: sorteoActivoCheckbox.checked,
+            paquetes_json: paquetesData // <-- Añadimos los paquetes al payload
         };
         if (!data.nombre_premio_display || !data.nombre_base_archivo_guia || isNaN(data.meta_participaciones) || data.meta_participaciones < 1) {
             showGenericStatusMessage(statusGestionSorteo, "Nombre del premio, nombre base de guía y meta válida son requeridos.", true);
             return;
         }
-        const url = editandoSorteo && id ? `${API_BASE_URL}/api/admin/sorteos/${id}` : `${API_BASE_URL}/api/admin/sorteos`;
+        const url = editandoSorteo && id ? `<span class="math-inline">\{API\_BASE\_URL\}/api/admin/sorteos/</span>{id}` : `${API_BASE_URL}/api/admin/sorteos`;
         const method = editandoSorteo && id ? 'PUT' : 'POST';
 
         showGenericStatusMessage(statusGestionSorteo, editandoSorteo ? 'Actualizando sorteo...' : 'Guardando nuevo sorteo...');
         try {
-            const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), credentials: 'include' });
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+                credentials: 'include'
+            });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || `Error ${response.status}`);
-            
+
             showGenericStatusMessage(statusGestionSorteo, result.message, false);
             resetFormGestionSorteo();
             await cargarListaSorteos();

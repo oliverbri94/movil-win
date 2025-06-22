@@ -361,71 +361,73 @@ app.post('/api/logout', (req, res) => {
 
 // CRUD de Sorteos
 app.get('/api/admin/sorteos', requireAdminLogin, (req, res) => {
-    // ESTA CONSULTA AHORA INCLUYE EL CONTEO DE PARTICIPANTES PARA CADA SORTEO
-    const sql = `
-        SELECT s.*, (SELECT COUNT(*) FROM participaciones p WHERE p.id_sorteo_config_fk = s.id_sorteo) as participantes_actuales
-        FROM sorteos_config s 
-        ORDER BY s.id_sorteo DESC
-    `;
-    db.all(sql, [], (err, rows) => {
-        if (err) {
+    const sql = `SELECT s.*, (SELECT COUNT(*) FROM participaciones p WHERE p.id_sorteo_config_fk = s.id_sorteo) as participantes_actuales FROM sorteos_config s ORDER BY s.id_sorteo DESC`;
+    db.all(sql, [], (err, rows) => {
+        if (err) {
             console.error("Error fetching admin-sorteos:", err.message);
-            res.status(500).json({ error: "Error al obtener sorteos." });
-        } else {
-            res.json(rows);
+            return res.status(500).json({ error: "Error al obtener sorteos." });
         }
-    });
+        // Convertimos el string JSON de vuelta a un objeto antes de enviarlo
+        const sorteosProcesados = rows.map(sorteo => {
+            try {
+                sorteo.paquetes_json = JSON.parse(sorteo.paquetes_json);
+            } catch (e) {
+                sorteo.paquetes_json = []; // Si hay un error o está vacío, envía un array vacío
+            }
+            return sorteo;
+        });
+        res.json(sorteosProcesados);
+    });
 });
 // --- REEMPLAZA LA RUTA DE AÑADIR SORTEO CON ESTA VERSIÓN ---
 
 app.post('/api/admin/sorteos', requireAdminLogin, async (req, res) => {
     try {
-        const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, activo } = req.body;
+        // Añadimos paquetes_json a los datos que recibimos
+        const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, activo, paquetes_json } = req.body;
+
         if (!nombre_premio_display || !nombre_base_archivo_guia || !meta_participaciones) {
             return res.status(400).json({ error: "Nombre, guía y meta son requeridos." });
         }
-        
-        const statusInicial = activo ? 'activo' : 'programado';
-        const sql = `INSERT INTO sorteos_config (nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, status_sorteo) VALUES ($1, $2, $3, $4, $5) RETURNING id_sorteo`;
-        const params = [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, statusInicial];
 
-        // "Envolvemos" la consulta en una Promesa para poder usar await
+        const statusInicial = activo ? 'activo' : 'programado';
+        // Convertimos el array de paquetes a un string JSON para guardarlo
+        const paquetesString = JSON.stringify(paquetes_json || []);
+
+        const sql = `INSERT INTO sorteos_config (nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, status_sorteo, paquetes_json) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id_sorteo`;
+        const params = [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, statusInicial, paquetesString];
+
         const result = await new Promise((resolve, reject) => {
-            // La función de callback ya no es 'async'
-            db.get(sql, params, function(err, row) {
-                if (err) return reject(err);
-                // 'this' en sqlite3 contiene lastID, pero en pg el ID se retorna con RETURNING
-                // Usamos row para obtener el ID devuelto por PostgreSQL
-                resolve(row); 
-            });
+            db.get(sql, params, (err, row) => err ? reject(err) : resolve(row));
         });
 
-        // Este código solo se ejecuta DESPUÉS de que la base de datos haya terminado con éxito.
-        console.log("Sorteo añadido con éxito. ID:", result.id_sorteo);
         res.status(201).json({ message: "Sorteo añadido con éxito.", id_sorteo: result.id_sorteo });
-
     } catch (error) {
         console.error("Error al añadir sorteo:", error);
         res.status(500).json({ error: "Error en la base de datos al añadir el sorteo." });
     }
 });
 
+
 app.put('/api/admin/sorteos/:id_sorteo', requireAdminLogin, async (req, res) => {
     try {
         const { id_sorteo } = req.params;
-        const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones } = req.body;
+        // Añadimos paquetes_json a los datos que recibimos
+        const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, paquetes_json } = req.body;
 
         if (!nombre_premio_display || !nombre_base_archivo_guia || !meta_participaciones) {
             return res.status(400).json({ error: "Nombre, guía y meta son requeridos." });
         }
 
-        const sql = `UPDATE sorteos_config SET nombre_premio_display = $1, imagen_url = $2, nombre_base_archivo_guia = $3, meta_participaciones = $4 WHERE id_sorteo = $5`;
-        const params = [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, id_sorteo];
+        const paquetesString = JSON.stringify(paquetes_json || []);
+
+        const sql = `UPDATE sorteos_config SET nombre_premio_display = $1, imagen_url = $2, nombre_base_archivo_guia = $3, meta_participaciones = $4, paquetes_json = $5 WHERE id_sorteo = $6`;
+        const params = [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, paquetesString, id_sorteo];
 
         const result = await new Promise((resolve, reject) => {
             db.run(sql, params, function(err) {
-                if (err) return reject(new Error("Error al actualizar sorteo en la BD."));
-                resolve(this); // 'this' contiene .changes
+                if (err) return reject(err);
+                resolve(this);
             });
         });
 
@@ -433,13 +435,11 @@ app.put('/api/admin/sorteos/:id_sorteo', requireAdminLogin, async (req, res) => 
             return res.status(404).json({ error: "Sorteo no encontrado." });
         }
         res.json({ message: "Sorteo actualizado exitosamente." });
-
     } catch (error) {
         console.error(`Error en PUT /api/admin/sorteos/${req.params.id_sorteo}:`, error);
         res.status(500).json({ error: "Error interno al editar el sorteo." });
     }
 });
-
 app.put('/api/admin/sorteos/activar/:id_sorteo', requireAdminLogin, (req, res) => {
     const { id_sorteo } = req.params;
     const { activar } = req.body; // Esto será 'true' si se presiona "Activar" o 'false' si es "Desactivar"
@@ -613,6 +613,12 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
                         </p>
                         <p style="text-align: center; margin-top: 20px;">¡Mucha suerte en el sorteo!</p>
                         <p style="text-align: center; font-size: 0.9em; color: #777;">Atentamente,<br>El equipo de MOVIL WIN</p>
+                        <p style="text-align: center; font-size: 0.9em; color: #777;">
+                            Recuerda revisar nuestras 
+                            <a href="https://movilwin.com/bases.html" style="color: #7f5af0; text-decoration: underline;" target="_blank">
+                                Bases y Condiciones
+                            </a>
+                        </p>
                     </div>
                 `,
                 attachments: [

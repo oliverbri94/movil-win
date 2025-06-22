@@ -315,6 +315,12 @@
                                     <label for="nombreBaseArchivoGuia">Nombre Base Archivo Guía:</label>
                                     <input type="text" id="nombreBaseArchivoGuia" required>
                                 </div>                                <div class="form-group"><label for="metaParticipacionesSorteo">Meta de Boletos:</label><input type="number" id="metaParticipacionesSorteo" value="200" min="1" required></div>
+                                <div class="form-group">
+                                    <label>Configuración de Paquetes:</label>
+                                    <div id="paquetes-editor-container" class="paquetes-editor-container">
+                                        </div>
+                                    <button type="button" id="btnAnadirPaquete" class="admin-button" style="margin-top: 10px; background-color: var(--clr-secondary); max-width: 200px;">+ Añadir Paquete</button>
+                                </div>                                
                                 <div class="form-group"><input type="checkbox" id="sorteoActivo" style="width: auto; margin-right: 10px;"><label for="sorteoActivo">Marcar como Sorteo Activo</label></div>
                                 <button type="submit" class="admin-button" id="btnGuardarSorteo">Guardar Sorteo</button>
                                 <button type="button" class="admin-button" id="btnCancelarEdicionSorteo" style="display:none; background-color: var(--clr-dark-text-alt);">Cancelar Edición</button>
