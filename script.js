@@ -632,7 +632,7 @@ function initializeRafflePage() {
                         <div class="progress-info-wrapper" style="${esProximo ? 'display: none;' : ''}">
                             <div class="progress-bar-wrapper">
                                 <div class="progress-bar-fill" style="width: ${percentage.toFixed(2)}%;"></div>
-                                <span class="progress-bar-text">${percentage.toFixed(0)}%</span>
+                                <span class="progress-bar-text">${percentage.toFixed(2)}%</span>
                             </div>
                             <p class="motivational-text-integrated">${motivationalMessage}</p>
                         </div>
