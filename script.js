@@ -763,8 +763,6 @@ function initializeRafflePage() {
         });
     }
 
-// --- REEMPLAZA TU FUNCIÓN moveToSlide CON ESTA ---
-
     async function moveToSlide(index) {
         sorteoFinalizado = false;
         if (!prizeCarouselTrack || index < 0 || index >= sorteosDisponibles.length) return;
@@ -780,20 +778,17 @@ function initializeRafflePage() {
 
         actualizarTopParticipantes(sorteoActual.id_sorteo, activeSlide);
 
-        // --- INICIO DE LA MODIFICACIÓN ---
-        // Busca el contenedor de paquetes y renderiza los paquetes para el sorteo actual
         const paqueteContainer = document.getElementById('paquetes-section');
         if (paqueteContainer) {
-            if (sorteoActual.esProximo) {
+            if (sorteoActual.status_sorteo === 'programado') {
                 paqueteContainer.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">Los paquetes de participación se anunciarán pronto. ¡Mantente atento!</p>';
             } else {
                 renderizarPaquetesPublicos(sorteoActual.paquetes_json, paqueteContainer);
             }
         }
-        // --- FIN DE LA MODIFICACIÓN ---
 
         const currentWheelCanvas = activeSlide.querySelector('.price-wheel-canvas');
-        if (sorteoActual && sorteoActual.id_sorteo && currentWheelCanvas) {
+        if (sorteoActual && sorteoActual.id_sorteo && currentWheelCanvas && sorteoActual.status_sorteo !== 'programado') {
             wheelCanvas = currentWheelCanvas;
             wheelCtx = wheelCanvas.getContext('2d');
             const container = activeSlide.querySelector('.wheel-price-is-right-container');
@@ -804,12 +799,17 @@ function initializeRafflePage() {
                 wheelCanvas.height = wheelHeight;
             }
             try {
+                // Esta es la línea que corregimos para que la URL sea correcta
                 const response = await fetch(`<span class="math-inline">\{API\_BASE\_URL\}/api/participantes?sorteoId\=</span>{sorteoActual.id_sorteo}`);
+                if (!response.ok) {
+                    throw new Error(`El servidor respondió con un error ${response.status}`);
+                }
                 participantes = await response.json() || [];
                 currentYOffset = 0;
                 addWheelEventListeners(wheelCanvas);
                 drawFrontWheel(participantes);
             } catch (err) {
+                console.error("Error al cargar participantes para la rueda:", err);
                 participantes = [];
                 drawFrontWheel(participantes);
             }
