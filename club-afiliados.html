@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club de Afiliados - Movil Win</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tailwind-config.js"></script>
+</head>
+<body class="dark-theme">
+
+    <nav class="bg-custom-dark-bg-frame shadow-lg fixed w-full top-0 z-50">
+        <div class="main-nav-grid">
+            <div class="nav-left">
+                <button id="mobileMenuButton" class="nav-icon-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="nav-center">
+                <a href="index.html">
+                    <img src="images/logo.png" alt="Logo Movil Win" class="nav-logo">
+                </a>
+            </div>
+            <div class="nav-right"></div>
+        </div>
+        <div id="fullScreenMenu" class="hidden fixed inset-0 bg-custom-dark-bg bg-opacity-95 backdrop-blur-sm z-40 flex flex-col items-center justify-center p-6 transition-opacity duration-300 ease-in-out">
+            <button id="closeMenuButton" class="absolute top-6 right-6 text-custom-text-alt hover:text-custom-primary text-4xl leading-none">&times;</button>
+            <img src="images/logo.png" alt="Logo Movil Win" class="h-20 w-auto mb-8">
+            <ul class="flex flex-col items-center space-y-6">
+                <li><a href="index.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Inicio</a></li>
+                <li><a href="faq.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Preguntas Frecuentes</a></li>
+                <li><a href="bases.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Bases y Condiciones</a></li>
+                <li><a href="ganadores.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Historial de Ganadores</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="site-main">
+
+        <section class="hero-afiliados content-section text-center">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4">Convierte tu Influencia en Ingresos</h1>
+            <p class="text-lg md:text-xl text-custom-text-alt max-w-3xl mx-auto mb-8">
+                Únete al Club de Afiliados de Movil Win y gana atractivas comisiones recomendando nuestros sorteos. Sin inversión, sin horarios, solo con tu celular.
+            </p>
+            <a href="https://wa.me/593963135510?text=Hola%2C%20estoy%20interesado%20en%20unirme%20al%20Club%20de%20Afiliados%20de%20Movil%20Win.%20%C2%BFPodr%C3%ADan%20darme%20m%C3%A1s%20informaci%C3%B3n%3F" target="_blank" class="boton-cta boton-cta-grande">
+                <i class="fab fa-whatsapp"></i> ¡Quiero Ser Afiliado Ahora!
+            </a>
+        </section>
+
+        <section class="content-section">
+            <h2 class="text-center">Es Tan Fácil Como Contar Hasta 3</h2>
+            <div class="pasos-container-nuevo mt-12">
+                <div class="paso-nuevo">
+                    <div class="paso-icono-nuevo"><i class="fas fa-user-plus"></i></div>
+                    <div class="paso-texto-nuevo">
+                        <h3>1. Regístrate Gratis</h3>
+                        <p>Contáctanos por WhatsApp para darte de alta. Te entregaremos tu enlace de afiliado personal y único en minutos.</p>
+                    </div>
+                </div>
+                <div class="paso-nuevo">
+                    <div class="paso-icono-nuevo"><i class="fas fa-share-alt"></i></div>
+                    <div class="paso-texto-nuevo">
+                        <h3>2. Comparte tu Enlace</h3>
+                        <p>Publica tu enlace en tus redes (WhatsApp, Instagram, Facebook) o compártelo con amigos, familiares y conocidos.</p>
+                    </div>
+                </div>
+                <div class="paso-nuevo">
+                    <div class="paso-icono-nuevo"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="paso-texto-nuevo">
+                        <h3>3. Gana Comisiones</h3>
+                        <p>Recibes una atractiva comisión por cada boleto que se venda a través de tu enlace. ¡Sin límites ni complicaciones!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2 class="text-center">Ventajas de Ser un Socio Movil Win</h2>
+            <div class="beneficios-grid">
+                <div class="beneficio-card">
+                    <i class="fas fa-coins"></i>
+                    <h3>Comisiones Generosas</h3>
+                    <p>Ofrecemos uno de los mejores porcentajes de comisión del mercado. Tu esfuerzo se recompensa de verdad.</p>
+                </div>
+                <div class="beneficio-card">
+                    <i class="fas fa-ban"></i>
+                    <h3>Cero Inversión</h3>
+                    <p>No necesitas comprar nada ni pagar membresías. Unirte es y siempre será gratis. No tienes nada que perder.</p>
+                </div>
+                <div class="beneficio-card">
+                    <i class="fas fa-gift"></i>
+                    <h3>Producto Fácil de Vender</h3>
+                    <p>¿Quién no quiere ganar un smartphone de última generación? Promocionas un premio deseado por todos.</p>
+                </div>
+                <div class="beneficio-card">
+                    <i class="fas fa-bullhorn"></i>
+                    <h3>Material de Marketing</h3>
+                    <p>Te proporcionamos imágenes, videos y textos de alta calidad para que tus publicaciones luzcan profesionales.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2 class="text-center">Lo que Dicen Nuestros Afiliados</h2>
+            <div class="testimonios-container">
+                <div class="testimonio-card">
+                    <blockquote>"Al principio dudaba, pero en mi primer sorteo gané lo suficiente para pagar la factura de internet. Es muy fácil, solo comparto el enlace en mi grupo de amigos."</blockquote>
+                    <cite>– Ana G., Estudiante Universitaria</cite>
+                </div>
+                <div class="testimonio-card">
+                    <blockquote>"Lo hago en mi tiempo libre desde casa. Es el ingreso extra perfecto sin descuidar a mi familia. La gente se anima mucho a participar."</blockquote>
+                    <cite>– Carlos V., Padre de Familia</cite>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-final-afiliados content-section">
+            <h2>¿Qué Estás Esperando?</h2>
+            <p>Miles de personas quieren participar. Tú puedes ser el puente que los conecte con su próximo gran premio... y ganar por ello.</p>
+            <a href="https://wa.me/593963135510?text=Hola%2C%20estoy%20listo%2Flisto%20para%20unirme%20al%20Club%20de%20Afiliados%20y%20empezar%20a%20ganar." target="_blank" class="boton-cta boton-cta-grande">
+                <i class="fas fa-rocket"></i> ¡Comenzar a Ganar Hoy Mismo!
+            </a>
+        </section>
+    </main>
+    
+    <footer class="site-footer">
+        <p>&copy; 2025 Movil Win | Todos los derechos reservados.</p>
+        <div class="social-links-footer">
+            <a href="https://wa.me/593963135510" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
