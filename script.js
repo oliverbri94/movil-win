@@ -84,7 +84,37 @@ function getInitials(name) {
     }
     return '?';
 }
+// Pega este código al final de tu archivo script.js, dentro de DOMContentLoaded
 
+// --- Lógica para las Pestañas del Instructivo de Afiliados ---
+const tabsContainer = document.querySelector(".instructivo-tabs");
+const panelsContainer = document.querySelector(".instructivo-contenido");
+
+if (tabsContainer && panelsContainer) {
+    tabsContainer.addEventListener("click", (e) => {
+        const clickedTab = e.target.closest(".tab-btn");
+        if (!clickedTab) return; // Si no se hizo clic en un botón, no hacer nada
+
+        // Quitar la clase 'active' de todas las pestañas
+        tabsContainer.querySelectorAll(".tab-btn").forEach(tab => tab.classList.remove("active"));
+        
+        // Añadir 'active' a la pestaña clickeada
+        clickedTab.classList.add("active");
+
+        const targetPanelId = clickedTab.dataset.target;
+        
+        // Ocultar todos los paneles de contenido
+        panelsContainer.querySelectorAll(".instructivo-panel").forEach(panel => {
+            panel.classList.remove("active");
+        });
+
+        // Mostrar el panel de contenido correspondiente
+        const targetPanel = document.getElementById(targetPanelId);
+        if(targetPanel) {
+            targetPanel.classList.add("active");
+        }
+    });
+}
 /**
  * Convierte una cadena de texto en un color HSL único y consistente.
  * Esto asegura que cada participante siempre tenga el mismo color de avatar.
