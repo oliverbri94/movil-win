@@ -2156,7 +2156,7 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     padding: 60px 20px;
 }
 .hero-afiliados h1 {
-    background: linear-gradient(125deg, var(--clr-accent), var(--clr-primary), var(--clr-white));
+    background: linear-gradient(125deg, var(--clr-accent), var(--clr-red), var(--clr-white));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -2259,4 +2259,95 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 .cta-final-afiliados p {
     color: var(--clr-dark-text-alt);
     margin-bottom: 30px;
+}
+
+.main-title h1 {
+    background: linear-gradient(125deg, var(--clr-accent), var(--clr-red), var(--clr-white));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ================================================= */
+/* --- ESTILOS PARA INSTRUCTIVO DE AFILIADOS --- */
+/* ================================================= */
+
+.instructivo-tabs {
+    display: flex;
+    justify-content: center;
+    border-bottom: 2px solid var(--clr-dark-border);
+    margin-bottom: 30px;
+}
+
+.tab-btn {
+    padding: 15px 30px;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--clr-dark-text-alt);
+    font-weight: 600;
+    font-size: 1.1em;
+    transition: all 0.3s ease;
+    margin-bottom: -2px; /* Truco para que el borde se fusione */
+}
+
+.tab-btn:hover {
+    color: var(--clr-primary);
+}
+
+.tab-btn.active {
+    color: var(--clr-primary);
+    border-bottom-color: var(--clr-primary);
+}
+
+.tab-btn i {
+    margin-right: 8px;
+}
+
+.instructivo-panel {
+    display: none; /* Oculto por defecto */
+    flex-direction: column;
+    gap: 25px;
+    animation: fadeIn 0.5s ease;
+}
+
+.instructivo-panel.active {
+    display: flex; /* Visible cuando está activo */
+}
+
+.paso-instructivo {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    background-color: var(--clr-dark-bg);
+    padding: 20px;
+    border-radius: var(--border-radius-medium);
+}
+
+.paso-instructivo .paso-num {
+    flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--clr-secondary), var(--clr-primary));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.paso-instructivo h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--clr-dark-text);
+    margin-bottom: 5px;
+}
+
+.paso-instructivo p {
+    color: var(--clr-dark-text-alt);
+    line-height: 1.7;
 }
