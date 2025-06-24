@@ -194,6 +194,16 @@ function initializeRafflePage() {
     // --- 3. FUNCIONES DE DIBUJO DE LA RULETA ---
 
 
+
+    const RUEDA_COLORES = [
+        '#EF4565', // Rojo/Rosa Vibrante
+        '#7F5AF0', // Púrpura (de tu paleta)
+        '#2CB67D', // Verde (de tu paleta)
+        '#FF8906', // Naranja (de tu paleta)
+        '#00A8E8', // Azul Brillante
+        '#F9C80E'  // Amarillo/Dorado
+    ];
+
     function drawSegment(index, y, participant) {
         if (!wheelCtx) return;
 
@@ -201,37 +211,33 @@ function initializeRafflePage() {
         const ribbonWidth = 60; // Ancho de la franja derecha
         const mainAreaWidth = wheelWidth - ribbonWidth;
         
-        // Generamos dos tonos del mismo color para el gradiente
-        const colorStart = stringToHslColor(participant.id);
-        const colorEnd = `hsl(${colorStart.match(/\d+/g)[0]}, 80%, 45%)`; // Tono más oscuro y saturado
+        // 1. Seleccionamos un color de la paleta en un ciclo repetitivo
+        const segmentColor = RUEDA_COLORES[index % RUEDA_COLORES.length];
 
         // --- Formateo de Datos ---
         const formattedName = formatNameForWheel(participant.name);
         const confidentialId = formatConfidentialId(participant.id);
         const ticketId = participant.orden_id;
 
-        // 1. Dibuja el fondo de gradiente diagonal
-        const gradient = wheelCtx.createLinearGradient(0, y, mainAreaWidth, y + SEGMENT_HEIGHT_FRONT);
-        gradient.addColorStop(0, colorStart);
-        gradient.addColorStop(1, colorEnd);
-        wheelCtx.fillStyle = gradient;
+        // 2. Dibuja el fondo del área principal con un color plano y vivo
+        wheelCtx.fillStyle = segmentColor;
         wheelCtx.fillRect(0, y, wheelWidth, SEGMENT_HEIGHT_FRONT);
 
-        // 2. Dibuja la franja vertical semi-transparente a la derecha
+        // 3. Dibuja la franja vertical semi-transparente a la derecha
         wheelCtx.fillStyle = 'rgba(0, 0, 0, 0.25)';
         wheelCtx.fillRect(mainAreaWidth, y, ribbonWidth, SEGMENT_HEIGHT_FRONT);
         // Línea divisoria sutil
-        wheelCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        wheelCtx.fillStyle = 'rgba(255, 255, 255, 0.15)';
         wheelCtx.fillRect(mainAreaWidth, y, 1, SEGMENT_HEIGHT_FRONT);
 
-        // 3. Dibuja el texto centrado en el área principal
+        // 4. Dibuja el texto centrado en el área principal
         const centerX = mainAreaWidth / 2;
         wheelCtx.textAlign = 'center';
         wheelCtx.textBaseline = "middle";
 
-        // Efecto de sombra para que el texto resalte
-        wheelCtx.shadowColor = 'rgba(0,0,0,0.7)';
-        wheelCtx.shadowBlur = 5;
+        // Efecto de sombra para que el texto resalte sobre cualquier color
+        wheelCtx.shadowColor = 'rgba(0,0,0,0.6)';
+        wheelCtx.shadowBlur = 4;
         wheelCtx.shadowOffsetY = 2;
 
         // Nombre del participante
@@ -241,20 +247,21 @@ function initializeRafflePage() {
         
         // Cédula anonimizada
         wheelCtx.font = `500 13px Poppins, sans-serif`;
-        wheelCtx.fillStyle = "rgba(255, 255, 255, 0.7)";
+        wheelCtx.fillStyle = "rgba(255, 255, 255, 0.8)";
         wheelCtx.fillText(confidentialId, centerX, y + (SEGMENT_HEIGHT_FRONT / 2) + 14);
 
-        wheelCtx.shadowBlur = 0; // Reseteamos la sombra
+        wheelCtx.shadowBlur = 0;
         wheelCtx.shadowOffsetY = 0;
 
-        // 4. Dibuja el número de boleto ROTADO en la franja
+        // 5. Dibuja el número de boleto ROTADO en la franja
         wheelCtx.save();
         wheelCtx.translate(mainAreaWidth + ribbonWidth / 2, y + SEGMENT_HEIGHT_FRONT / 2);
-        wheelCtx.rotate(Math.PI / 2); // Rota +90 grados
+        wheelCtx.rotate(Math.PI / 2);
         
         wheelCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
         wheelCtx.font = `bold 16px 'Lucida Console', Monaco, monospace`;
-        wheelCtx.fillText(`TICKET #${ticketId}`, 0, 0);
+        wheelCtx.textAlign = "center";
+        wheelCtx.fillText(`#${ticketId}`, 0, 0);
 
         wheelCtx.restore();
     }
