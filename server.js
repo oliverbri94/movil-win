@@ -604,10 +604,6 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
         if (!sorteoInfo.nombre_base_archivo_guia || sorteoInfo.nombre_base_archivo_guia.trim() === '') {
             throw new Error(`El sorteo '${sorteoInfo.nombre_premio_display}' no tiene un 'Nombre Base Archivo Guía' asignado.`);
         }
-        if ((sorteoInfo.participantes_actuales + numQuantity) > sorteoInfo.meta_participaciones) {
-            const boletosRestantes = sorteoInfo.meta_participaciones - sorteoInfo.participantes_actuales;
-            throw new Error(`No se pueden añadir ${numQuantity} boletos. Solo quedan ${boletosRestantes} cupos disponibles.`);
-        }
 
         await client.query('BEGIN');
 
