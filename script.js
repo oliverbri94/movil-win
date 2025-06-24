@@ -295,82 +295,118 @@ function wrapText(context, text, x, y, maxWidth, lineHeight) {
     context.fillText(line, x, y);
 }
 function initializeRafflePage() {
-    // 1. ESTADO Y VARIABLES COMPARTIDAS DEL SORTEO
-    // Declaramos aquí arriba todas las variables que se usan en diferentes funciones.
+    
+    // --- 1. VARIABLES Y ESTADO DE LA RULETA ---
+    // Todas las variables que la ruleta necesita para funcionar
     const clackSound = new Audio('sounds/tick.mp3');
     const winnerSound = new Audio('sounds/win.mp3');
     let sorteosDisponibles = [];
     let premioActualIndex = 0;
     let participantes = [];
     let estaGirando = false;
-    let sorteoFinalizado = false; 
-    let lastSegmentIndex = -1; 
+    let sorteoFinalizado = false;
     let finalWinnerInfo = null;
     let wheelCanvas = null;
-    let wheelCtx = null;
+    let wheelCtx = null; // ¡Nuestra variable importante!
     let wheelWidth, wheelHeight;
     let isDragging = false;
     let startY_Drag = 0;
     let startYOffset_Drag = 0;
     let touchStartX = 0;
-    
-    // 2. ELEMENTOS DEL DOM
-    const resultadoDiv = document.getElementById('resultadoGanador');
-    const listaGanadoresDiv = document.getElementById('listaGanadoresAnteriores');
-    const loaderGanadores = document.getElementById('loaderGanadores');
-    const prizeCarouselTrack = document.getElementById('prizeCarouselTrack');
-    const countdownDisplayContainer = document.getElementById('countdownDisplayContainer');
-    const countdownTimerDiv = document.getElementById('countdownTimer');
-    const SEGMENT_HEIGHT_FRONT = 60; // Constantes también pueden ir aquí
+    const SEGMENT_HEIGHT_FRONT = 60;
     const VISIBLE_SEGMENTS_COUNT = 7;
     let currentYOffset = 0;
+
+    // Elementos del DOM
+    const prizeCarouselTrack = document.getElementById('prizeCarouselTrack');
+    const prizeNavContainer = document.getElementById('prizeNavContainer');
     
-    // 3. CONFIGURACIÓN INICIAL
-    clackSound.volume = 0.5;
+    // Configuración inicial
+    clackSound.volume = 0.7;
     winnerSound.volume = 0.7;
 
-    // --- Funciones de Ayuda (Helpers) ---
-
-    function formatConfidentialId(id_documento) {
-        if (typeof id_documento === 'string' && id_documento.length === 10) {
-            return `${id_documento.substring(0, 2)}*****${id_documento.substring(id_documento.length - 2)}`;
+    // --- 2. FUNCIONES DE AYUDA (Helpers) ---
+    // Todas las funciones que ayudan a formatear datos o dibujar
+    
+    function formatNameForWheel(name) {
+        if (!name) return 'Participante';
+        const nameParts = name.trim().split(' ');
+        const firstName = nameParts[0];
+        if (nameParts.length > 1) {
+            const lastNameInitial = nameParts[nameParts.length - 1].charAt(0).toUpperCase();
+            return `${firstName} ${lastNameInitial}.`;
         }
-        return id_documento ? String(id_documento) : 'N/A';
+        return firstName;
     }
 
-    function renderMedia(sorteo) {
-        const url = sorteo.imagen_url || 'images/proximo_sorteo.png';
-        // La propiedad 'esProximo' ahora la pasaremos directamente en el objeto 'sorteo'
-        const classes = sorteo.esProximo ? 'grayscale' : '';
-        
-        if (url.endsWith('.mp4') || url.endsWith('.webm')) {
-            return `<video src="${url}" class="${classes}" autoplay loop muted playsinline></video>`;
+    function getAvatarInitials(name) {
+        if (!name) return '??';
+        const nameParts = name.trim().split(' ');
+        if (nameParts.length > 1) {
+            return `${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`.toUpperCase();
         }
-        return `<img src="${url}" alt="${sorteo.nombre_premio_display}" class="${classes}">`;
+        return name.substring(0, 2).toUpperCase();
     }
 
-    function getMotivationalMessage(percentage) {
-        if (percentage >= 100) return "¡Meta alcanzada! El sorteo será pronto.";
-        if (percentage >= 95) return "¡Estamos a un paso! Tu oportunidad es AHORA.";
-        if (percentage >= 75) return "¡Casi llegamos! Muy pocos boletos para la meta.";
-        if (percentage >= 50) return "¡Impresionante! Superamos la mitad del camino.";
-        if (percentage >= 25) return "¡Excelente progreso! Sigamos así.";
-        return "¡El sorteo ha comenzado! Sé de los primeros.";
-    }
-
-    function getColorForId(id) {
-        if (!id || typeof id !== 'string') return '#4a4a4a';
+    function stringToHslColor(str) {
         let hash = 0;
-        for (let i = 0; i < id.length; i++) {
-            const char = id.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash |= 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
         }
-        const hue = Math.abs(hash % 360);
-        return `hsl(${hue}, 70%, 55%)`;
+        const h = hash % 360;
+        return `hsl(${h}, 60%, 75%)`;
     }
 
-    // --- Funciones de la Rueda y Canvas ---
+    function drawSegment(index, y, participant) {
+        // Como esta función ahora está DENTRO de initializeRafflePage, puede ver wheelCtx sin problemas.
+        if (!wheelCtx) return;
+        
+        const esGanador = finalWinnerInfo && participant.orden_id === finalWinnerInfo.orden_id;
+
+        if (esGanador) {
+            const goldGradient = wheelCtx.createLinearGradient(0, y, wheelWidth, y);
+            goldGradient.addColorStop(0, '#B8860B');
+            goldGradient.addColorStop(0.5, '#FFD700');
+            goldGradient.addColorStop(1, '#B8860B');
+            wheelCtx.fillStyle = goldGradient;
+            wheelCtx.shadowColor = 'yellow';
+            wheelCtx.shadowBlur = 25;
+        } else {
+            wheelCtx.fillStyle = index % 2 === 0 ? "rgba(255, 255, 255, 0.02)" : "rgba(0, 0, 0, 0.05)";
+            wheelCtx.shadowBlur = 0;
+        }
+        wheelCtx.fillRect(0, y, wheelWidth, SEGMENT_HEIGHT_FRONT);
+        wheelCtx.shadowBlur = 0;
+
+        const avatarRadius = 22;
+        const avatarX = 50;
+        const avatarY = y + SEGMENT_HEIGHT_FRONT / 2;
+
+        wheelCtx.beginPath();
+        wheelCtx.arc(avatarX, avatarY, avatarRadius, 0, 2 * Math.PI);
+        wheelCtx.fillStyle = esGanador ? 'rgba(0,0,0,0.4)' : stringToHslColor(participant.id);
+        wheelCtx.fill();
+
+        const avatarInitials = getAvatarInitials(participant.name);
+        wheelCtx.fillStyle = "#fff";
+        wheelCtx.font = `bold ${avatarRadius * 0.8}px Poppins, sans-serif`;
+        wheelCtx.textAlign = "center";
+        wheelCtx.textBaseline = "middle";
+        wheelCtx.fillText(avatarInitials, avatarX, avatarY);
+
+        const formattedName = formatNameForWheel(participant.name);
+        const ticketIdText = `Boleto #${participant.orden_id}`;
+        
+        wheelCtx.fillStyle = esGanador ? '#000' : 'rgba(255, 255, 255, 0.9)';
+        wheelCtx.font = esGanador ? `bold 22px Poppins, sans-serif` : `600 20px Poppins, sans-serif`;
+        wheelCtx.textAlign = "left";
+        wheelCtx.fillText(formattedName, avatarX + avatarRadius + 15, avatarY - 8);
+
+        wheelCtx.fillStyle = esGanador ? 'rgba(0,0,0,0.7)' : 'rgba(255, 255, 255, 0.5)';
+        wheelCtx.font = `400 14px Poppins, sans-serif`;
+        wheelCtx.fillText(ticketIdText, avatarX + avatarRadius + 15, avatarY + 15);
+    }
+    
 
     function drawScrollbar() {
         if (estaGirando) return; // <-- AÑADE ESTA LÍNEA. Si la rueda está girando, no hagas nada más.
@@ -435,19 +471,98 @@ function initializeRafflePage() {
 
         // Bucle principal que dibuja cada casilla visible
         for (let i = startIndex; i < endIndex; i++) {
-            // Maneja el bucle infinito de la rueda
             const participantIndex = (i % participantesDelSorteo.length + participantesDelSorteo.length) % participantesDelSorteo.length;
             const participant = participantesDelSorteo[participantIndex];
             const segmentY = (i * SEGMENT_HEIGHT_FRONT) - yOffsetToDraw;
-
             if (!participant) continue;
-
-            // Llama a nuestra nueva función para dibujar la casilla
             drawSegment(i, segmentY, participant);
         }
-
         // Dibuja la barra de scroll al final
         drawScrollbar();
+
+    async function moveToSlide(index) {
+        sorteoFinalizado = false;
+        if (!prizeCarouselTrack || index < 0 || index >= sorteosDisponibles.length) return;
+        
+        premioActualIndex = index;
+        prizeCarouselTrack.style.transform = `translateX(${-index * 100}%)`;
+
+        const sorteoActual = sorteosDisponibles[premioActualIndex];
+        const activeSlide = prizeCarouselTrack.children[index];
+        if (!activeSlide) return;
+        
+        document.querySelectorAll('.prize-nav-panel').forEach((p, i) => p.classList.toggle('active', i === index));
+
+        actualizarTopParticipantes(sorteoActual.id_sorteo, activeSlide);
+
+        const paqueteContainer = document.getElementById('paquetes-section');
+        if (paqueteContainer) {
+            if (sorteoActual.status_sorteo === 'programado') {
+                paqueteContainer.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">Los paquetes de participación se anunciarán pronto. ¡Mantente atento!</p>';
+            } else {
+                renderizarPaquetesPublicos(sorteoActual.paquetes_json, paqueteContainer);
+            }
+        }
+
+        const currentWheelCanvas = activeSlide.querySelector('.price-wheel-canvas');
+        if (sorteoActual && sorteoActual.id_sorteo && currentWheelCanvas && sorteoActual.status_sorteo !== 'programado') {
+            wheelCanvas = currentWheelCanvas;
+            wheelCtx = wheelCanvas.getContext('2d');
+            const container = activeSlide.querySelector('.wheel-price-is-right-container');
+            if (container) {
+                wheelWidth = container.clientWidth;
+                wheelHeight = SEGMENT_HEIGHT_FRONT * VISIBLE_SEGMENTS_COUNT;
+                wheelCanvas.width = wheelWidth;
+                wheelCanvas.height = wheelHeight;
+            }
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/participantes?sorteoId=${sorteoActual.id_sorteo}`);
+                if (!response.ok) {
+                    throw new Error(`El servidor respondió con un error ${response.status}`);
+                }
+                participantes = await response.json() || [];
+                currentYOffset = 0;
+                addWheelEventListeners(wheelCanvas);
+                drawFrontWheel(participantes);
+            } catch (err) {
+                console.error("Error al cargar participantes para la rueda:", err);
+                participantes = [];
+                drawFrontWheel(participantes);
+            }
+        } else {
+            participantes = [];
+            wheelCanvas = null;
+        }
+
+        checkMainPageCountdownStatus();
+    }
+
+    async function cargarSorteosVisibles() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/sorteos-visibles`);
+            if (!response.ok) throw new Error('No se pudo obtener la lista de sorteos.');
+            
+            const data = await response.json();
+            
+            if (data.success && data.sorteos && data.sorteos.length > 0) {
+                // Simplemente asignamos los sorteos reales que vienen de la API
+                sorteosDisponibles = data.sorteos;
+                
+                await generarSlidesDelCarrusel();
+                generarPanelesDeNavegacion();
+                
+                // Mueve al primer sorteo activo, o al primero de la lista si no hay activos
+                const initialIndex = sorteosDisponibles.findIndex(s => s.status_sorteo === 'activo');
+                moveToSlide(initialIndex !== -1 ? initialIndex : 0);
+            } else {
+                // Si no hay sorteos activos ni programados, muestra un mensaje
+                if (prizeCarouselTrack) prizeCarouselTrack.innerHTML = `<div style="text-align:center; padding: 50px 20px;"><h2 class="prize-title">No hay sorteos disponibles en este momento. ¡Vuelve pronto!</h2></div>`;
+            }
+        } catch (error) {
+            if (prizeCarouselTrack) prizeCarouselTrack.innerHTML = `<div style="text-align:center; padding: 50px 20px;"><h2 class="prize-title">${error.message}</h2></div>`;
+        }
+    }
+    
     }
 
     // --- Lógica Principal del Sorteo ---
@@ -812,88 +927,6 @@ function initializeRafflePage() {
         });
     }
 
-    async function moveToSlide(index) {
-        sorteoFinalizado = false;
-        if (!prizeCarouselTrack || index < 0 || index >= sorteosDisponibles.length) return;
-        
-        premioActualIndex = index;
-        prizeCarouselTrack.style.transform = `translateX(${-index * 100}%)`;
-
-        const sorteoActual = sorteosDisponibles[premioActualIndex];
-        const activeSlide = prizeCarouselTrack.children[index];
-        if (!activeSlide) return;
-        
-        document.querySelectorAll('.prize-nav-panel').forEach((p, i) => p.classList.toggle('active', i === index));
-
-        actualizarTopParticipantes(sorteoActual.id_sorteo, activeSlide);
-
-        const paqueteContainer = document.getElementById('paquetes-section');
-        if (paqueteContainer) {
-            if (sorteoActual.status_sorteo === 'programado') {
-                paqueteContainer.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">Los paquetes de participación se anunciarán pronto. ¡Mantente atento!</p>';
-            } else {
-                renderizarPaquetesPublicos(sorteoActual.paquetes_json, paqueteContainer);
-            }
-        }
-
-        const currentWheelCanvas = activeSlide.querySelector('.price-wheel-canvas');
-        if (sorteoActual && sorteoActual.id_sorteo && currentWheelCanvas && sorteoActual.status_sorteo !== 'programado') {
-            wheelCanvas = currentWheelCanvas;
-            wheelCtx = wheelCanvas.getContext('2d');
-            const container = activeSlide.querySelector('.wheel-price-is-right-container');
-            if (container) {
-                wheelWidth = container.clientWidth;
-                wheelHeight = SEGMENT_HEIGHT_FRONT * VISIBLE_SEGMENTS_COUNT;
-                wheelCanvas.width = wheelWidth;
-                wheelCanvas.height = wheelHeight;
-            }
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/participantes?sorteoId=${sorteoActual.id_sorteo}`);
-                if (!response.ok) {
-                    throw new Error(`El servidor respondió con un error ${response.status}`);
-                }
-                participantes = await response.json() || [];
-                currentYOffset = 0;
-                addWheelEventListeners(wheelCanvas);
-                drawFrontWheel(participantes);
-            } catch (err) {
-                console.error("Error al cargar participantes para la rueda:", err);
-                participantes = [];
-                drawFrontWheel(participantes);
-            }
-        } else {
-            participantes = [];
-            wheelCanvas = null;
-        }
-
-        checkMainPageCountdownStatus();
-    }
-
-    async function cargarSorteosVisibles() {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/sorteos-visibles`);
-            if (!response.ok) throw new Error('No se pudo obtener la lista de sorteos.');
-            
-            const data = await response.json();
-            
-            if (data.success && data.sorteos && data.sorteos.length > 0) {
-                // Simplemente asignamos los sorteos reales que vienen de la API
-                sorteosDisponibles = data.sorteos;
-                
-                await generarSlidesDelCarrusel();
-                generarPanelesDeNavegacion();
-                
-                // Mueve al primer sorteo activo, o al primero de la lista si no hay activos
-                const initialIndex = sorteosDisponibles.findIndex(s => s.status_sorteo === 'activo');
-                moveToSlide(initialIndex !== -1 ? initialIndex : 0);
-            } else {
-                // Si no hay sorteos activos ni programados, muestra un mensaje
-                if (prizeCarouselTrack) prizeCarouselTrack.innerHTML = `<div style="text-align:center; padding: 50px 20px;"><h2 class="prize-title">No hay sorteos disponibles en este momento. ¡Vuelve pronto!</h2></div>`;
-            }
-        } catch (error) {
-            if (prizeCarouselTrack) prizeCarouselTrack.innerHTML = `<div style="text-align:center; padding: 50px 20px;"><h2 class="prize-title">${error.message}</h2></div>`;
-        }
-    }
     
     async function mostrarGanadoresAnteriores() {
         if (!listaGanadoresDiv) return;
@@ -958,11 +991,7 @@ function checkMainPageCountdownStatus() {
         countdownContainer.classList.add('oculto');
     }
 }
-// --- REEMPLAZA TU FUNCIÓN ACTUAL CON ESTA VERSIÓN MEJORADA ---
 
-// --- REEMPLAZA TU FUNCIÓN CON ESTA VERSIÓN FINAL ---
-
-// --- REEMPLAZA TU FUNCIÓN CON ESTA VERSIÓN AUTOMÁTICA ---
 
 function actualizarDisplayCountdownPrincipal(tiempoFinalizacion) {
     const timerDiv = document.getElementById('countdownTimer');
