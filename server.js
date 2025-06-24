@@ -579,6 +579,24 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
         const sorteoInfoSql = `SELECT *, (SELECT COUNT(*) FROM participaciones WHERE id_sorteo_config_fk = $1) as participantes_actuales FROM sorteos_config WHERE id_sorteo = $1`;
         const sorteoRes = await client.query(sorteoInfoSql, [sorteo_id]);
         const sorteoInfo = sorteoRes.rows[0];
+        
+        if (!sorteoInfo) {
+            return res.status(404).json({ error: "Sorteo no encontrado", message: `El sorteo con ID ${sorteo_id} no existe.` });
+        }
+        // 1. Forzamos que todos los valores sean números enteros antes de la operación matemática.
+        const meta_participaciones = parseInt(sorteoInfo.meta_participaciones, 10);
+        const participantes_actuales = parseInt(sorteoInfo.participantes_actuales, 10);
+        const cantidad_a_anadir = parseInt(quantity, 10);
+
+        // 2. Ahora la comparación matemática será correcta.
+        if ((participantes_actuales + cantidad_a_anadir) > meta_participaciones) {
+            const boletosRestantes = meta_participaciones - participantes_actuales;
+            return res.status(409).json({
+                error: "Cupo excedido",
+                message: `No se pueden añadir ${cantidad_a_anadir} boletos. Solo quedan ${boletosRestantes} cupos disponibles.`
+            });
+        }
+        // --- FIN DE LA CORRECCIÓN DEL BUG ---
 
         if (!sorteoInfo) {
             throw new Error(`El sorteo con ID ${sorteo_id} no existe.`);

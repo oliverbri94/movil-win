@@ -1535,8 +1535,10 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 .top-list-item {
     display: grid;
-    /* Definimos 5 columnas: Ranking, Avatar, Detalles, Barra, Cantidad */
-    grid-template-columns: 30px 45px 1fr 50px;
+    /* * ANTES: La última columna tenía un ancho fijo de 50px, que era muy poco.
+     * AHORA: La última columna es 'auto', para que se ajuste sola al tamaño del texto.
+    */
+    grid-template-columns: 30px 45px 1fr auto;
     gap: 15px;
     align-items: center;
     padding: 10px;
@@ -1614,7 +1616,6 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     font-size: 1.1em;
     color: var(--clr-primary);
     text-align: right;
-    white-space: nowrap;
 }
 
 
