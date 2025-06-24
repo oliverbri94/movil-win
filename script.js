@@ -88,7 +88,7 @@ function initializeRafflePage() {
      */
     function formatConfidentialId(id_documento) {
         if (typeof id_documento === 'string' && id_documento.length === 10) {
-            return `Cédula: ${id_documento.substring(0, 2)}...${id_documento.substring(id_documento.length - 2)}`;
+            return `CI: ${id_documento.substring(0, 2)}...${id_documento.substring(id_documento.length - 2)}`;
         }
         return id_documento || 'Cédula no disp.';
     }
@@ -113,13 +113,14 @@ function initializeRafflePage() {
     }
 
     function stringToHslColor(str) {
-        if (!str) return 'hsl(200, 50%, 50%)';
+        if (!str) return 'hsl(200, 70%, 55%)';
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
             hash = str.charCodeAt(i) + ((hash << 5) - hash);
         }
         const h = hash % 360;
-        return `hsl(${h}, 60%, 75%)`;
+        // Usamos alta saturación (70%) y una luminosidad media (55%) para colores vibrantes
+        return `hsl(${h}, 70%, 55%)`;
     }
 
     function wrapText(context, text, x, y, maxWidth, lineHeight) {
@@ -192,65 +193,70 @@ function initializeRafflePage() {
 
     // --- 3. FUNCIONES DE DIBUJO DE LA RULETA ---
 
-// En script.js, reemplaza tu función drawSegment completa por esta:
 
     function drawSegment(index, y, participant) {
         if (!wheelCtx) return;
 
         // --- Definiciones de Diseño ---
-        const stubWidth = 70; // Ancho del talón lateral para el número de boleto
-        const mainAreaWidth = wheelWidth - stubWidth;
-        const participantColor = stringToHslColor(participant.id);
-        const stubColor = `hsl(${participantColor.match(/\d+/g)[0]}, 30%, 25%)`; // Un tono más oscuro del mismo color
+        const ribbonWidth = 60; // Ancho de la franja derecha
+        const mainAreaWidth = wheelWidth - ribbonWidth;
+        
+        // Generamos dos tonos del mismo color para el gradiente
+        const colorStart = stringToHslColor(participant.id);
+        const colorEnd = `hsl(${colorStart.match(/\d+/g)[0]}, 80%, 45%)`; // Tono más oscuro y saturado
 
         // --- Formateo de Datos ---
         const formattedName = formatNameForWheel(participant.name);
         const confidentialId = formatConfidentialId(participant.id);
         const ticketId = participant.orden_id;
 
-        // 1. Dibuja el fondo del área principal con el color del participante
-        wheelCtx.fillStyle = participantColor;
-        wheelCtx.fillRect(0, y, mainAreaWidth, SEGMENT_HEIGHT_FRONT);
+        // 1. Dibuja el fondo de gradiente diagonal
+        const gradient = wheelCtx.createLinearGradient(0, y, mainAreaWidth, y + SEGMENT_HEIGHT_FRONT);
+        gradient.addColorStop(0, colorStart);
+        gradient.addColorStop(1, colorEnd);
+        wheelCtx.fillStyle = gradient;
+        wheelCtx.fillRect(0, y, wheelWidth, SEGMENT_HEIGHT_FRONT);
 
-        // 2. Dibuja el fondo del talón lateral
-        wheelCtx.fillStyle = stubColor;
-        wheelCtx.fillRect(mainAreaWidth, y, stubWidth, SEGMENT_HEIGHT_FRONT);
+        // 2. Dibuja la franja vertical semi-transparente a la derecha
+        wheelCtx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+        wheelCtx.fillRect(mainAreaWidth, y, ribbonWidth, SEGMENT_HEIGHT_FRONT);
+        // Línea divisoria sutil
+        wheelCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        wheelCtx.fillRect(mainAreaWidth, y, 1, SEGMENT_HEIGHT_FRONT);
 
-        // 3. Dibuja la línea punteada "perforada"
-        wheelCtx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-        wheelCtx.lineWidth = 2;
-        wheelCtx.setLineDash([4, 4]); // Línea de 4px, espacio de 4px
-        wheelCtx.beginPath();
-        wheelCtx.moveTo(mainAreaWidth, y);
-        wheelCtx.lineTo(mainAreaWidth, y + SEGMENT_HEIGHT_FRONT);
-        wheelCtx.stroke();
-        wheelCtx.setLineDash([]); // Resetea a línea sólida para otros dibujos
-
-        // 4. Dibuja el texto en el área principal
+        // 3. Dibuja el texto centrado en el área principal
+        const centerX = mainAreaWidth / 2;
+        wheelCtx.textAlign = 'center';
         wheelCtx.textBaseline = "middle";
-        wheelCtx.textAlign = "left";
+
+        // Efecto de sombra para que el texto resalte
+        wheelCtx.shadowColor = 'rgba(0,0,0,0.7)';
+        wheelCtx.shadowBlur = 5;
+        wheelCtx.shadowOffsetY = 2;
 
         // Nombre del participante
-        wheelCtx.fillStyle = "rgba(0, 0, 0, 0.8)"; // Texto oscuro para buen contraste
-        wheelCtx.font = `600 20px Poppins, sans-serif`;
-        wheelCtx.fillText(formattedName, 20, y + (SEGMENT_HEIGHT_FRONT / 2) - 10);
+        wheelCtx.fillStyle = "#FFFFFF";
+        wheelCtx.font = `bold 22px Poppins, sans-serif`;
+        wheelCtx.fillText(formattedName, centerX, y + (SEGMENT_HEIGHT_FRONT / 2) - 8);
         
         // Cédula anonimizada
-        wheelCtx.font = `400 14px Poppins, sans-serif`;
-        wheelCtx.fillStyle = "rgba(0, 0, 0, 0.6)";
-        wheelCtx.fillText(confidentialId, 20, y + (SEGMENT_HEIGHT_FRONT / 2) + 12);
+        wheelCtx.font = `500 13px Poppins, sans-serif`;
+        wheelCtx.fillStyle = "rgba(255, 255, 255, 0.7)";
+        wheelCtx.fillText(confidentialId, centerX, y + (SEGMENT_HEIGHT_FRONT / 2) + 14);
 
-        // 5. Dibuja el número de boleto ROTADO en el talón
-        wheelCtx.save(); // Guarda el estado actual del canvas
-        wheelCtx.translate(mainAreaWidth + stubWidth / 2, y + SEGMENT_HEIGHT_FRONT / 2); // Mueve el punto de origen al centro del talón
-        wheelCtx.rotate(-Math.PI / 2); // Rota el canvas -90 grados
+        wheelCtx.shadowBlur = 0; // Reseteamos la sombra
+        wheelCtx.shadowOffsetY = 0;
+
+        // 4. Dibuja el número de boleto ROTADO en la franja
+        wheelCtx.save();
+        wheelCtx.translate(mainAreaWidth + ribbonWidth / 2, y + SEGMENT_HEIGHT_FRONT / 2);
+        wheelCtx.rotate(Math.PI / 2); // Rota +90 grados
         
-        wheelCtx.fillStyle = "rgba(255, 255, 255, 0.8)";
-        wheelCtx.font = `bold 18px 'Courier New', Courier, monospace`; // Fuente tipo máquina de escribir para el número
-        wheelCtx.textAlign = "center";
-        wheelCtx.fillText(`#${ticketId}`, 0, 0);
+        wheelCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        wheelCtx.font = `bold 16px 'Lucida Console', Monaco, monospace`;
+        wheelCtx.fillText(`TICKET #${ticketId}`, 0, 0);
 
-        wheelCtx.restore(); // Restaura el canvas a su estado original (sin rotación)
+        wheelCtx.restore();
     }
     function drawScrollbar() {
         if (estaGirando || !wheelCtx || !participantes) return;
