@@ -79,7 +79,19 @@ function initializeRafflePage() {
 
     // --- 2. FUNCIONES DE AYUDA (Helpers) ---
     // Todas las funciones que ayudan a formatear datos, dibujar, etc.
-    
+// En script.js, añade esta nueva función de ayuda
+
+    /**
+     * Anonimiza un número de cédula, mostrando solo los primeros y últimos dos dígitos.
+     * @param {string} id_documento - El número de cédula de 10 dígitos.
+     * @returns {string} La cédula formateada (ej: "17...45").
+     */
+    function formatConfidentialId(id_documento) {
+        if (typeof id_documento === 'string' && id_documento.length === 10) {
+            return `Cédula: ${id_documento.substring(0, 2)}...${id_documento.substring(id_documento.length - 2)}`;
+        }
+        return id_documento || 'Cédula no disp.';
+    }
     function formatNameForWheel(name) {
         if (!name) return 'Participante';
         const nameParts = name.trim().split(' ');
@@ -180,47 +192,66 @@ function initializeRafflePage() {
 
     // --- 3. FUNCIONES DE DIBUJO DE LA RULETA ---
 
+// En script.js, reemplaza tu función drawSegment completa por esta:
+
     function drawSegment(index, y, participant) {
         if (!wheelCtx) return;
-        const esGanador = finalWinnerInfo && participant.orden_id === finalWinnerInfo.orden_id;
-        if (esGanador) {
-            const goldGradient = wheelCtx.createLinearGradient(0, y, wheelWidth, y);
-            goldGradient.addColorStop(0, '#B8860B');
-            goldGradient.addColorStop(0.5, '#FFD700');
-            goldGradient.addColorStop(1, '#B8860B');
-            wheelCtx.fillStyle = goldGradient;
-            wheelCtx.shadowColor = 'yellow';
-            wheelCtx.shadowBlur = 25;
-        } else {
-            wheelCtx.fillStyle = index % 2 === 0 ? "rgba(255, 255, 255, 0.02)" : "rgba(0, 0, 0, 0.05)";
-            wheelCtx.shadowBlur = 0;
-        }
-        wheelCtx.fillRect(0, y, wheelWidth, SEGMENT_HEIGHT_FRONT);
-        wheelCtx.shadowBlur = 0;
-        const avatarRadius = 22;
-        const avatarX = 50;
-        const avatarY = y + SEGMENT_HEIGHT_FRONT / 2;
-        wheelCtx.beginPath();
-        wheelCtx.arc(avatarX, avatarY, avatarRadius, 0, 2 * Math.PI);
-        wheelCtx.fillStyle = esGanador ? 'rgba(0,0,0,0.4)' : stringToHslColor(participant.id);
-        wheelCtx.fill();
-        const avatarInitials = getAvatarInitials(participant.name);
-        wheelCtx.fillStyle = "#fff";
-        wheelCtx.font = `bold ${avatarRadius * 0.8}px Poppins, sans-serif`;
-        wheelCtx.textAlign = "center";
-        wheelCtx.textBaseline = "middle";
-        wheelCtx.fillText(avatarInitials, avatarX, avatarY);
+
+        // --- Definiciones de Diseño ---
+        const stubWidth = 70; // Ancho del talón lateral para el número de boleto
+        const mainAreaWidth = wheelWidth - stubWidth;
+        const participantColor = stringToHslColor(participant.id);
+        const stubColor = `hsl(${participantColor.match(/\d+/g)[0]}, 30%, 25%)`; // Un tono más oscuro del mismo color
+
+        // --- Formateo de Datos ---
         const formattedName = formatNameForWheel(participant.name);
-        const ticketIdText = `Boleto #${participant.orden_id}`;
-        wheelCtx.fillStyle = esGanador ? '#000' : 'rgba(255, 255, 255, 0.9)';
-        wheelCtx.font = esGanador ? `bold 22px Poppins, sans-serif` : `600 20px Poppins, sans-serif`;
+        const confidentialId = formatConfidentialId(participant.id);
+        const ticketId = participant.orden_id;
+
+        // 1. Dibuja el fondo del área principal con el color del participante
+        wheelCtx.fillStyle = participantColor;
+        wheelCtx.fillRect(0, y, mainAreaWidth, SEGMENT_HEIGHT_FRONT);
+
+        // 2. Dibuja el fondo del talón lateral
+        wheelCtx.fillStyle = stubColor;
+        wheelCtx.fillRect(mainAreaWidth, y, stubWidth, SEGMENT_HEIGHT_FRONT);
+
+        // 3. Dibuja la línea punteada "perforada"
+        wheelCtx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+        wheelCtx.lineWidth = 2;
+        wheelCtx.setLineDash([4, 4]); // Línea de 4px, espacio de 4px
+        wheelCtx.beginPath();
+        wheelCtx.moveTo(mainAreaWidth, y);
+        wheelCtx.lineTo(mainAreaWidth, y + SEGMENT_HEIGHT_FRONT);
+        wheelCtx.stroke();
+        wheelCtx.setLineDash([]); // Resetea a línea sólida para otros dibujos
+
+        // 4. Dibuja el texto en el área principal
+        wheelCtx.textBaseline = "middle";
         wheelCtx.textAlign = "left";
-        wheelCtx.fillText(formattedName, avatarX + avatarRadius + 15, avatarY - 8);
-        wheelCtx.fillStyle = esGanador ? 'rgba(0,0,0,0.7)' : 'rgba(255, 255, 255, 0.5)';
+
+        // Nombre del participante
+        wheelCtx.fillStyle = "rgba(0, 0, 0, 0.8)"; // Texto oscuro para buen contraste
+        wheelCtx.font = `600 20px Poppins, sans-serif`;
+        wheelCtx.fillText(formattedName, 20, y + (SEGMENT_HEIGHT_FRONT / 2) - 10);
+        
+        // Cédula anonimizada
         wheelCtx.font = `400 14px Poppins, sans-serif`;
-        wheelCtx.fillText(ticketIdText, avatarX + avatarRadius + 15, avatarY + 15);
+        wheelCtx.fillStyle = "rgba(0, 0, 0, 0.6)";
+        wheelCtx.fillText(confidentialId, 20, y + (SEGMENT_HEIGHT_FRONT / 2) + 12);
+
+        // 5. Dibuja el número de boleto ROTADO en el talón
+        wheelCtx.save(); // Guarda el estado actual del canvas
+        wheelCtx.translate(mainAreaWidth + stubWidth / 2, y + SEGMENT_HEIGHT_FRONT / 2); // Mueve el punto de origen al centro del talón
+        wheelCtx.rotate(-Math.PI / 2); // Rota el canvas -90 grados
+        
+        wheelCtx.fillStyle = "rgba(255, 255, 255, 0.8)";
+        wheelCtx.font = `bold 18px 'Courier New', Courier, monospace`; // Fuente tipo máquina de escribir para el número
+        wheelCtx.textAlign = "center";
+        wheelCtx.fillText(`#${ticketId}`, 0, 0);
+
+        wheelCtx.restore(); // Restaura el canvas a su estado original (sin rotación)
     }
-    
     function drawScrollbar() {
         if (estaGirando || !wheelCtx || !participantes) return;
         const totalContentHeight = participantes.length * SEGMENT_HEIGHT_FRONT;
