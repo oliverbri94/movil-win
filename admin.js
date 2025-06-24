@@ -543,77 +543,91 @@ document.addEventListener('DOMContentLoaded', async () => {
      * Obtiene datos de un participante por su cédula para autocompletar el formulario.
      * @param {string} idDocumento
      */
+    // En admin.js, reemplaza esta función completa
+
     async function fetchParticipantDataForAutocomplete(idDocumento) {
         if (!idDocumento || idDocumento.length !== 10) return;
         
         try {
             const response = await fetch(`${API_BASE_URL}/api/participante-datos/${idDocumento}`);
-            if (response.ok && result.success && result.data) {
+            
+            // Esta nueva validación previene el error de JSON
+            if (!response.ok) {
+                // Si la respuesta es un error (ej. 404, 500), no intentes leerla como JSON.
+                // Simplemente limpia los campos.
+                if (participantCityInput) participantCityInput.value = '';
+                if (participantPhoneInput) participantPhoneInput.value = '';
+                if (participantEmailInput) participantEmailInput.value = '';
+                return;
+            }
+
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                // Si se encontraron datos, se rellenan los campos.
                 if (participantNameInput) participantNameInput.value = result.data.nombre || '';
                 if (participantCityInput) participantCityInput.value = result.data.ciudad || '';
                 if (participantPhoneInput) participantPhoneInput.value = result.data.celular || '';
                 if (participantEmailInput) participantEmailInput.value = result.data.email || '';
             } else {
-                // No limpiar nombre, permitir que el admin lo ingrese
+                // Si no se encontraron datos, se limpian los campos.
                 if (participantCityInput) participantCityInput.value = '';
                 if (participantPhoneInput) participantPhoneInput.value = '';
                 if (participantEmailInput) participantEmailInput.value = '';
             }
-        } catch (error) { 
+        } catch (error) {
+            // El catch ahora manejará errores de red o errores de sintaxis si el JSON es inválido
             console.error("Error en autocompletado:", error);
         }
     }
-
     /**
      * Maneja el envío del formulario para añadir nuevos boletos.
      * @param {Event} event 
      */
-    // REEMPLAZA TU FUNCIÓN handleAddParticipant ENTERA CON ESTA VERSIÓN
     async function handleAddParticipant(event) {
-        event.preventDefault();
+        event.preventDefault();
 
-        // --- INICIO DE LA MODIFICACIÓN ---
-        // 1. Obtenemos una referencia a nuestro nuevo menú desplegable
         const affiliateSelect = document.getElementById('affiliateSelect');
-        // 2. Revisamos qué opción se seleccionó y guardamos su TEXTO visible.
-        // Si la opción seleccionada no es la primera ("-- Ninguno --"), guardamos el nombre. Si no, guardamos un texto vacío.
         const selectedAffiliateName = affiliateSelect.selectedIndex > 0 ? affiliateSelect.options[affiliateSelect.selectedIndex].text : '';
-        // --- FIN DE LA MODIFICACIÓN ---
+        
+        const payload = {
+            id_documento: participantIdInput.value.trim(),
+            nombre: participantNameInput.value.trim(),
+            ciudad: participantCityInput?.value.trim(),
+            celular: participantPhoneInput?.value.trim(),
+            email: participantEmailInput.value.trim(),
+            paquete_elegido: packageChosenSelect?.value,
+            nombre_afiliado: selectedAffiliateName,
+            quantity: parseInt(quantityInput.value, 10),
+            sorteo_id: sorteoDestinoSelect.value,
+        };
 
-        const payload = {
-            id_documento: participantIdInput.value.trim(),
-            nombre: participantNameInput.value.trim(),
-            ciudad: participantCityInput?.value.trim(),
-            celular: participantPhoneInput?.value.trim(),
-            email: participantEmailInput.value.trim(),
-            paquete_elegido: packageChosenSelect?.value,
-            // 3. Usamos la nueva variable que creamos para enviar el dato correcto al servidor.
-            nombre_afiliado: selectedAffiliateName, 
-            quantity: parseInt(quantityInput.value, 10),
-            sorteo_id: sorteoDestinoSelect.value,
-        };
-
-        // El resto de la función (validación, el bloque try/catch, etc.) se mantiene exactamente igual que antes.
-        if (!payload.id_documento || !payload.nombre || !payload.sorteo_id) {
-            showGenericStatusMessage(statusMessage, 'Cédula, Nombre y Sorteo de Destino son obligatorios.', true);
-            return;
-        }
+        if (!payload.id_documento || !payload.nombre || !payload.sorteo_id) {
+            showGenericStatusMessage(statusMessage, 'Cédula, Nombre y Sorteo de Destino son obligatorios.', true);
+            return;
+        }
         if (!/^\d{10}$/.test(payload.id_documento)) { showGenericStatusMessage(statusMessage, 'La cédula debe contener 10 dígitos.', true); return; }
-        if (payload.celular && !/^\d{9,10}$/.test(payload.celular)) { showGenericStatusMessage(statusMessage, 'El celular debe tener 9 o 10 dígitos.', true); return; }
-        if (isNaN(payload.quantity) || payload.quantity < 1 || payload.quantity > 500) { showGenericStatusMessage(statusMessage, 'Cantidad inválida (debe ser entre 1 y 500).', true); return; }
+        if (payload.celular && !/^\d{9,10}$/.test(payload.celular)) { showGenericStatusMessage(statusMessage, 'El celular debe tener 9 o 10 dígitos.', true); return; }
+        if (isNaN(payload.quantity) || payload.quantity < 1 || payload.quantity > 500) { showGenericStatusMessage(statusMessage, 'Cantidad inválida (debe ser entre 1 y 500).', true); return; }
 
-        try {
-            // ... (El bloque try/catch se mantiene igual)
+        try {
             const response = await fetch(`${API_BASE_URL}/api/admin/participantes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
                 credentials: 'include'
             });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.error || `Error ${response.status}`);
 
-            let successMessageContent = `<p>${result.message}</p>`; 
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Tu sesión ha expirado. Por favor, refresca la página e inicia sesión de nuevo.');
+                }
+                const errorResult = await response.json().catch(() => ({ error: `Error del servidor: ${response.status}` }));
+                throw new Error(errorResult.message || errorResult.error);
+            }
+
+            const result = await response.json();
+            let successMessageContent = `<p>${result.message}</p>`;
 
             if (result.whatsappLink) {
                 successMessageContent += `<a href="${result.whatsappLink}" target="_blank" class="whatsapp-action-link" style="margin-top: 15px;"><i class="fab fa-whatsapp"></i> Enviar Confirmación por WhatsApp</a>`;
@@ -623,14 +637,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             const sorteoAfectado = adminSorteosData.find(s => s.id_sorteo == payload.sorteo_id);
             if (sorteoAfectado) {
-                sorteoAfectado.participantes_actuales += payload.quantity;
+                // --- INICIO DE LA CORRECCIÓN DE LA SUMA ---
+                // Forzamos ambos valores a número antes de sumar para evitar la concatenación de texto
+                sorteoAfectado.participantes_actuales = parseInt(sorteoAfectado.participantes_actuales, 10) + payload.quantity;
+                // --- FIN DE LA CORRECCIÓN DE LA SUMA ---
             }
+            
             updateRaffleStatsDisplay();
             fetchAndDisplayParticipants();
             cargarDashboardStats();
 
-            addParticipantForm.reset();
-            quantityInput.value = '1';
+            // Lógica para mantener o limpiar el formulario
+            const mantenerDatosCheckbox = document.getElementById('mantenerDatos');
+            if (mantenerDatosCheckbox && mantenerDatosCheckbox.checked) {
+                participantIdInput.value = '';
+                participantNameInput.value = '';
+                participantCityInput.value = '';
+                participantPhoneInput.value = '';
+                participantEmailInput.value = '';
+                packageChosenSelect.value = '';
+                quantityInput.value = '1';
+            } else {
+                addParticipantForm.reset();
+                quantityInput.value = '1';
+            }
 
         } catch (error) {
             showGenericStatusMessage(statusMessage, `Error: ${error.message}`, true);
