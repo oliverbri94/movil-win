@@ -547,8 +547,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!idDocumento || idDocumento.length !== 10) return;
         
         try {
-            const response = await fetch(`/api/participante-datos/${idDocumento}`);
-            const result = await response.json();
+            const response = await fetch(`${API_BASE_URL}/api/participante-datos/${idDocumento}`);
             if (response.ok && result.success && result.data) {
                 if (participantNameInput) participantNameInput.value = result.data.nombre || '';
                 if (participantCityInput) participantCityInput.value = result.data.ciudad || '';
