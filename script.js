@@ -711,7 +711,6 @@ function initializeRafflePage() {
 
         const sorteoSeleccionado = sorteosDisponibles.find(s => s.id_sorteo == sorteoId);
         
-        // Oculta el Top 5 si el sorteo es 'programado'
         if (!sorteoId || !sorteoSeleccionado || sorteoSeleccionado.status_sorteo === 'programado') {
             wrapper.style.display = 'none';
             return;
@@ -740,25 +739,24 @@ function initializeRafflePage() {
                     if (rank === 2) rankIcon = '🥈';
                     if (rank === 3) rankIcon = '🥉';
 
-                    // --- ESTA ES LA LÍNEA CORREGIDA ---
-                    const initials = getAvatarInitials(p.name); 
-                    // ------------------------------------
-
+                    const initials = getAvatarInitials(p.name);
                     const avatarColor = stringToHslColor(p.id);
                     const barPercentage = maxTickets > 0 ? (p.total_participaciones / maxTickets) * 100 : 0;
                     
+                    // --- INICIO DE LA MODIFICACIÓN ---
+                    // Usamos la función que ya teníamos para formatear el nombre
+                    const formattedName = formatNameForWheel(p.name);
+                    // --- FIN DE LA MODIFICACIÓN ---
+
                     li.innerHTML = `
                         <div class="rank-icon">${rankIcon}</div>
                         <div class="participant-avatar" style="background-color: ${avatarColor};">
                             ${initials}
                         </div>
                         <div class="participant-details">
-                            <span class="participant-name">${p.name || 'N/A'}</span>
-                            <div class="micro-progress-bar-container">
-                                <div class="micro-progress-bar-fill" style="width: ${barPercentage}%;"></div>
-                            </div>
+                            <span class="participant-name">${formattedName}</span>
                         </div>
-                        <div class="ticket-count">${p.total_participaciones}</div>
+                        <div class="ticket-count">${p.total_participaciones} boletos</div>
                     `;
                     listElement.appendChild(li);
                 });
