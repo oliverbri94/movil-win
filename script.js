@@ -68,21 +68,86 @@ if (topCountdownBanner) {
 // Todo el código original de script.js ahora vive dentro de esta función o es llamado por ella.
 // --- AÑADE ESTAS DOS FUNCIONES AL PRINCIPIO DE SCRIPT.JS ---
 
+// En script.js, reemplaza getInitials por estas dos funciones:
+
 /**
- * Genera las iniciales a partir de un nombre completo.
- * Ejemplo: "Juan Pérez" -> "JP", "Ana" -> "A"
- * @param {string} name El nombre del participante.
+ * Formatea un nombre completo al formato "Nombre Apellido." (ej: "Carlos B.").
+ * @param {string} name - El nombre completo del participante.
+ * @returns {string} El nombre formateado.
+ */
+function formatNameForWheel(name) {
+    if (!name) return 'Participante';
+    const nameParts = name.trim().split(' ');
+    const firstName = nameParts[0];
+    if (nameParts.length > 1) {
+        // Toma la inicial del último nombre/apellido
+        const lastNameInitial = nameParts[nameParts.length - 1].charAt(0).toUpperCase();
+        return `${firstName} ${lastNameInitial}.`;
+    }
+    return firstName; // Si solo hay un nombre, lo devuelve tal cual
+}
+
+/**
+ * Obtiene las iniciales de un nombre para usar en un avatar (ej: "Carlos Briceño" -> "CB").
+ * @param {string} name - El nombre completo.
  * @returns {string} Las iniciales.
  */
-function getInitials(name) {
-    if (!name) return '?';
-    const words = name.trim().split(' ');
-    if (words.length > 1) {
-        return (words[0][0] + words[words.length - 1][0]).toUpperCase();
-    } else if (words[0]) {
-        return words[0][0].toUpperCase();
+function getAvatarInitials(name) {
+    if (!name) return '??';
+    const nameParts = name.trim().split(' ');
+    if (nameParts.length > 1) {
+        return `${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`.toUpperCase();
     }
-    return '?';
+    // Si solo hay un nombre, devuelve las dos primeras letras
+    return name.substring(0, 2).toUpperCase();
+}
+
+// En script.js, reemplaza tu función drawSegment por esta:
+
+/**
+ * Dibuja un único segmento (casilla) de la rueda con el nuevo diseño de tarjeta.
+ * @param {number} index - El índice del segmento.
+ * @param {number} y - La posición Y donde empieza a dibujarse el segmento.
+ * @param {object} participant - El objeto del participante con sus datos.
+ */
+function drawSegment(index, y, participant) {
+    if (!wheelCtx) return;
+    
+    // 1. Dibuja el fondo del segmento con colores alternos
+    wheelCtx.fillStyle = index % 2 === 0 ? "rgba(255, 255, 255, 0.02)" : "rgba(0, 0, 0, 0.05)";
+    wheelCtx.fillRect(0, y, wheelWidth, SEGMENT_HEIGHT_FRONT);
+
+    // Definimos la posición y tamaño del avatar circular
+    const avatarRadius = 22;
+    const avatarX = 50;
+    const avatarY = y + SEGMENT_HEIGHT_FRONT / 2;
+
+    // 2. Dibuja el círculo del avatar
+    wheelCtx.beginPath();
+    wheelCtx.arc(avatarX, avatarY, avatarRadius, 0, 2 * Math.PI);
+    wheelCtx.fillStyle = stringToHslColor(participant.id, 50, 20); // Color único basado en la cédula
+    wheelCtx.fill();
+
+    // 3. Dibuja las iniciales dentro del avatar
+    const avatarInitials = getAvatarInitials(participant.name);
+    wheelCtx.fillStyle = "#fff";
+    wheelCtx.font = `bold ${avatarRadius * 0.8}px Poppins, sans-serif`;
+    wheelCtx.textAlign = "center";
+    wheelCtx.textBaseline = "middle";
+    wheelCtx.fillText(avatarInitials, avatarX, avatarY);
+
+    // 4. Dibuja el nombre formateado del participante
+    const formattedName = formatNameForWheel(participant.name);
+    wheelCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    wheelCtx.font = `600 20px Poppins, sans-serif`;
+    wheelCtx.textAlign = "left";
+    wheelCtx.fillText(formattedName, avatarX + avatarRadius + 15, avatarY - 8);
+
+    // 5. Dibuja el ID del boleto debajo del nombre
+    const ticketIdText = `Boleto #${participant.orden_id}`;
+    wheelCtx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    wheelCtx.font = `400 14px Poppins, sans-serif`;
+    wheelCtx.fillText(ticketIdText, avatarX + avatarRadius + 15, avatarY + 15);
 }
 // Pega este código al final de tu archivo script.js, dentro de DOMContentLoaded
 
@@ -334,101 +399,56 @@ function initializeRafflePage() {
 
         const yOffsetToDraw = yOffsetAnim !== null ? yOffsetAnim : currentYOffset;
 
+        // Lógica para cuando no hay participantes (diseño "artista")
         if (!participantesDelSorteo || participantesDelSorteo.length === 0) {
             wheelCtx.clearRect(0, 0, wheelWidth, wheelHeight);
             const centerX = wheelWidth / 2;
             const centerY = wheelHeight / 2;
-
-            // 1. Dibuja el fondo (sin cambios)
             const gradient = wheelCtx.createRadialGradient(centerX, centerY, 5, centerX, centerY, wheelWidth / 1.5);
             gradient.addColorStop(0, 'rgba(44, 182, 125, 0.1)');
             gradient.addColorStop(1, 'rgba(36, 38, 41, 0)');
             wheelCtx.fillStyle = gradient;
             wheelCtx.fillRect(0, 0, wheelWidth, wheelHeight);
-
-            // 2. Dibuja el icono de boleto (sin cambios)
             wheelCtx.font = "900 120px 'Font Awesome 6 Free'";
             wheelCtx.fillStyle = "rgba(255, 255, 255, 0.05)";
             wheelCtx.textAlign = "center";
             wheelCtx.textBaseline = "middle";
             wheelCtx.fillText('\uf3ff', centerX, centerY);
-
-            // --- INICIO DE LA LÓGICA DE TEXTO RESPONSIVO ---
-
-            // 3. Calcula tamaños de fuente dinámicos basados en el ancho de la rueda
-            const mainFontSize = Math.max(16, Math.min(22, wheelWidth / 15)); // Tamaño entre 16px y 22px
-            const subFontSize = Math.max(12, Math.min(16, wheelWidth / 20)); // Tamaño entre 12px y 16px
-            const lineHeight = mainFontSize * 1.2;
-
-            // 4. Escribe el texto principal usando la nueva función wrapText
             wheelCtx.fillStyle = "rgba(255, 255, 255, 0.8)";
-            wheelCtx.font = `bold ${mainFontSize}px Poppins, sans-serif`;
+            wheelCtx.font = "bold 22px Poppins, sans-serif";
             wheelCtx.shadowColor = 'black';
             wheelCtx.shadowBlur = 5;
-            // Usamos la nueva función para que el texto se divida si es necesario
-            wrapText(wheelCtx, "¡TU NOMBRE PODRÍA ESTAR AQUÍ!", centerX, centerY + 80, wheelWidth * 0.9, lineHeight);
-
-            // 5. Escribe el llamado a la acción
+            wrapText(wheelCtx, "¡TU NOMBRE PODRÍA ESTAR AQUÍ!", centerX, centerY + 80, wheelWidth * 0.9, 26);
             wheelCtx.fillStyle = "var(--clr-primary)";
-            wheelCtx.font = `500 ${subFontSize}px Poppins, sans-serif`;
+            wheelCtx.font = "500 16px Poppins, sans-serif";
             wheelCtx.shadowBlur = 0;
             wheelCtx.fillText("¡Compra tu boleto y sé el primero!", centerX, centerY + 120);
-            
-            // --- FIN DE LA LÓGICA DE TEXTO RESPONSIVO ---
-            
             wheelCtx.textBaseline = "alphabetic";
             return;
         }
+
+        // Si hay participantes, procede a dibujar la rueda
         wheelCtx.clearRect(0, 0, wheelWidth, wheelHeight);
         
         const startIndex = Math.floor(yOffsetToDraw / SEGMENT_HEIGHT_FRONT);
-        const yPixelOffset = -(yOffsetToDraw % SEGMENT_HEIGHT_FRONT);
-        
-        for (let i = 0; i < VISIBLE_SEGMENTS_COUNT + 2; i++) {
-            const pIndex = (startIndex + i) % participantesDelSorteo.length;
-            const p = participantesDelSorteo[pIndex];
-            if (!p) continue;
+        const endIndex = startIndex + VISIBLE_SEGMENTS_COUNT + 2;
 
-            const isWinner = finalWinnerInfo && p.orden_id === finalWinnerInfo.orden_id;
-            const segY = yPixelOffset + i * SEGMENT_HEIGHT_FRONT;
+        // Bucle principal que dibuja cada casilla visible
+        for (let i = startIndex; i < endIndex; i++) {
+            // Maneja el bucle infinito de la rueda
+            const participantIndex = (i % participantesDelSorteo.length + participantesDelSorteo.length) % participantesDelSorteo.length;
+            const participant = participantesDelSorteo[participantIndex];
+            const segmentY = (i * SEGMENT_HEIGHT_FRONT) - yOffsetToDraw;
 
-            if (isWinner) {
-                const goldGradient = wheelCtx.createLinearGradient(0, segY, wheelWidth, segY);
-                goldGradient.addColorStop(0, '#B8860B');
-                goldGradient.addColorStop(0.5, '#FFD700');
-                goldGradient.addColorStop(1, '#B8860B');
-                wheelCtx.fillStyle = goldGradient;
-                wheelCtx.shadowColor = 'yellow';
-                wheelCtx.shadowBlur = 25;
-            } else {
-                wheelCtx.fillStyle = getColorForId(p.id);
-                wheelCtx.shadowBlur = 0;
-            }
+            if (!participant) continue;
 
-            wheelCtx.fillRect(0, segY, wheelWidth, SEGMENT_HEIGHT_FRONT);
-            wheelCtx.shadowBlur = 0;
-
-            wheelCtx.strokeStyle = '#16161a';
-            wheelCtx.lineWidth = isWinner ? 6 : 4;
-            wheelCtx.strokeRect(0, segY, wheelWidth, SEGMENT_HEIGHT_FRONT);
-            
-            if (isWinner) {
-                wheelCtx.fillStyle = '#000';
-                wheelCtx.font = "800 18px Poppins, sans-serif";
-            } else {
-                wheelCtx.fillStyle = '#fff';
-                wheelCtx.font = "600 16px Poppins, sans-serif";
-            }
-            
-            wheelCtx.textAlign = "center";
-            wheelCtx.fillText(p.name, wheelWidth / 2, segY + SEGMENT_HEIGHT_FRONT / 2 - 10);
-            wheelCtx.font = "400 12px Poppins, sans-serif";
-            wheelCtx.fillText(`CI: ${formatConfidentialId(p.id)}`, wheelWidth / 2, segY + SEGMENT_HEIGHT_FRONT / 2 + 10);
+            // Llama a nuestra nueva función para dibujar la casilla
+            drawSegment(i, segmentY, participant);
         }
 
+        // Dibuja la barra de scroll al final
         drawScrollbar();
     }
-
 
     // --- Lógica Principal del Sorteo ---
 

@@ -234,7 +234,7 @@ body.dark-theme {
     font-size: clamp(1.8em, 5vw, 2.8em); /* Más grande */
     font-weight: 800;
     line-height: 1.15;
-    background: linear-gradient(125deg, var(--clr-accent), var(--clr-primary), var(--clr-white));
+    background: linear-gradient(125deg, var(--clr-accent), var(--clr-red), var(--clr-white));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
