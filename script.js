@@ -1,4 +1,4 @@
-console.log("VERSIÓN DEL SCRIPT: 22 DE JUNIO - ACTUALIZADA"); 
+console.log("VERSIÓN DEL SCRIPT: 24 DE JUNIO - ACTUALIZADA"); 
 
 // =================================================================================
 // ARCHIVO JAVASCRIPT CONSOLIDADO PARA MOVIL WIN
@@ -7,42 +7,20 @@ console.log("VERSIÓN DEL SCRIPT: 22 DE JUNIO - ACTUALIZADA");
 // 2. Lógica del Carrusel, Rueda y Sorteos (Funciona solo en index.html).
 // =================================================================================
 
-// --- Evento principal que se ejecuta cuando el contenido HTML de la página ha cargado ---
+// =================================================================
+// === ARCHIVO SCRIPT.JS COMPLETO Y REORGANIZADO (24 DE JUNIO) ===
+// =================================================================
+
 document.addEventListener('DOMContentLoaded', () => {
 
-// --- PEGA ESTO DENTRO DE document.addEventListener('DOMContentLoaded', ...) ---
-// Pega esta nueva función al principio de script.js
-
-
-const topCountdownBanner = document.getElementById('topCountdownBanner');
-
-if (topCountdownBanner) {
-    window.addEventListener('scroll', () => {
-        // Si el scroll vertical es mayor a 50px, añade la clase.
-        // Si es menor, la quita.
-        if (window.scrollY > 50) {
-            topCountdownBanner.classList.add('is-scrolled');
-        } else {
-            topCountdownBanner.classList.remove('is-scrolled');
-        }
-    });
-}
-    // --- SECCIÓN 1: LÓGICA DEL MENÚ DE NAVEGACIÓN (GLOBAL) ---
-    // Este código se ejecuta en todas las páginas para hacer funcionar el menú.
+    // --- LÓGICA DEL MENÚ DE NAVEGACIÓN (GLOBAL) ---
     try {
         const mobileMenuButton = document.getElementById('mobileMenuButton');
         const fullScreenMenu = document.getElementById('fullScreenMenu');
         const closeMenuButton = document.getElementById('closeMenuButton');
 
-        function toggleFullScreenMenu() {
-            // La solución más simple y robusta:
-            // Usamos la clase 'hidden' de Tailwind para mostrar u ocultar el menú.
-            if (fullScreenMenu) {
-                fullScreenMenu.classList.toggle('hidden');
-            }
-        }
-
         if (mobileMenuButton && fullScreenMenu && closeMenuButton) {
+            const toggleFullScreenMenu = () => fullScreenMenu.classList.toggle('hidden');
             mobileMenuButton.addEventListener('click', toggleFullScreenMenu);
             closeMenuButton.addEventListener('click', toggleFullScreenMenu);
         }
@@ -50,7 +28,7 @@ if (topCountdownBanner) {
         console.error("Error al inicializar el menú de navegación:", error);
     }
 
-    // --- SECCIÓN 2: LÓGICA DE LA PÁGINA PRINCIPAL (INDEX.HTML) ---
+    // --- LÓGICA DE LA PÁGINA PRINCIPAL (INDEX.HTML) ---
     // Verificamos si estamos en la página principal buscando un elemento clave.
     const prizeCarouselContainer = document.getElementById('prizeCarouselContainer');
     if (prizeCarouselContainer) {
@@ -63,241 +41,12 @@ if (topCountdownBanner) {
 });
 
 
-
-// --- Función de Inicialización para la Página del Sorteo ---
-// Todo el código original de script.js ahora vive dentro de esta función o es llamado por ella.
-// --- AÑADE ESTAS DOS FUNCIONES AL PRINCIPIO DE SCRIPT.JS ---
-
-// En script.js, reemplaza getInitials por estas dos funciones:
-
 /**
- * Formatea un nombre completo al formato "Nombre Apellido." (ej: "Carlos B.").
- * @param {string} name - El nombre completo del participante.
- * @returns {string} El nombre formateado.
+ * Esta es la función principal que contiene toda la lógica para la página del sorteo.
  */
-function formatNameForWheel(name) {
-    if (!name) return 'Participante';
-    const nameParts = name.trim().split(' ');
-    const firstName = nameParts[0];
-    if (nameParts.length > 1) {
-        // Toma la inicial del último nombre/apellido
-        const lastNameInitial = nameParts[nameParts.length - 1].charAt(0).toUpperCase();
-        return `${firstName} ${lastNameInitial}.`;
-    }
-    return firstName; // Si solo hay un nombre, lo devuelve tal cual
-}
-
-/**
- * Obtiene las iniciales de un nombre para usar en un avatar (ej: "Carlos Briceño" -> "CB").
- * @param {string} name - El nombre completo.
- * @returns {string} Las iniciales.
- */
-function getAvatarInitials(name) {
-    if (!name) return '??';
-    const nameParts = name.trim().split(' ');
-    if (nameParts.length > 1) {
-        return `${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`.toUpperCase();
-    }
-    // Si solo hay un nombre, devuelve las dos primeras letras
-    return name.substring(0, 2).toUpperCase();
-}
-
-// En script.js, reemplaza tu función drawSegment por esta:
-
-/**
- * Dibuja un único segmento (casilla) de la rueda con el nuevo diseño de tarjeta.
- * @param {number} index - El índice del segmento.
- * @param {number} y - La posición Y donde empieza a dibujarse el segmento.
- * @param {object} participant - El objeto del participante con sus datos.
- */
-function drawSegment(index, y, participant) {
-    if (!wheelCtx) return;
-    
-    // 1. Dibuja el fondo del segmento con colores alternos
-    wheelCtx.fillStyle = index % 2 === 0 ? "rgba(255, 255, 255, 0.02)" : "rgba(0, 0, 0, 0.05)";
-    wheelCtx.fillRect(0, y, wheelWidth, SEGMENT_HEIGHT_FRONT);
-
-    // Definimos la posición y tamaño del avatar circular
-    const avatarRadius = 22;
-    const avatarX = 50;
-    const avatarY = y + SEGMENT_HEIGHT_FRONT / 2;
-
-    // 2. Dibuja el círculo del avatar
-    wheelCtx.beginPath();
-    wheelCtx.arc(avatarX, avatarY, avatarRadius, 0, 2 * Math.PI);
-    wheelCtx.fillStyle = stringToHslColor(participant.id, 50, 20); // Color único basado en la cédula
-    wheelCtx.fill();
-
-    // 3. Dibuja las iniciales dentro del avatar
-    const avatarInitials = getAvatarInitials(participant.name);
-    wheelCtx.fillStyle = "#fff";
-    wheelCtx.font = `bold ${avatarRadius * 0.8}px Poppins, sans-serif`;
-    wheelCtx.textAlign = "center";
-    wheelCtx.textBaseline = "middle";
-    wheelCtx.fillText(avatarInitials, avatarX, avatarY);
-
-    // 4. Dibuja el nombre formateado del participante
-    const formattedName = formatNameForWheel(participant.name);
-    wheelCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    wheelCtx.font = `600 20px Poppins, sans-serif`;
-    wheelCtx.textAlign = "left";
-    wheelCtx.fillText(formattedName, avatarX + avatarRadius + 15, avatarY - 8);
-
-    // 5. Dibuja el ID del boleto debajo del nombre
-    const ticketIdText = `Boleto #${participant.orden_id}`;
-    wheelCtx.fillStyle = "rgba(255, 255, 255, 0.5)";
-    wheelCtx.font = `400 14px Poppins, sans-serif`;
-    wheelCtx.fillText(ticketIdText, avatarX + avatarRadius + 15, avatarY + 15);
-}
-// Pega este código al final de tu archivo script.js, dentro de DOMContentLoaded
-
-// --- Lógica para las Pestañas del Instructivo de Afiliados ---
-const tabsContainer = document.querySelector(".instructivo-tabs");
-const panelsContainer = document.querySelector(".instructivo-contenido");
-
-if (tabsContainer && panelsContainer) {
-    tabsContainer.addEventListener("click", (e) => {
-        const clickedTab = e.target.closest(".tab-btn");
-        if (!clickedTab) return; // Si no se hizo clic en un botón, no hacer nada
-
-        // Quitar la clase 'active' de todas las pestañas
-        tabsContainer.querySelectorAll(".tab-btn").forEach(tab => tab.classList.remove("active"));
-        
-        // Añadir 'active' a la pestaña clickeada
-        clickedTab.classList.add("active");
-
-        const targetPanelId = clickedTab.dataset.target;
-        
-        // Ocultar todos los paneles de contenido
-        panelsContainer.querySelectorAll(".instructivo-panel").forEach(panel => {
-            panel.classList.remove("active");
-        });
-
-        // Mostrar el panel de contenido correspondiente
-        const targetPanel = document.getElementById(targetPanelId);
-        if(targetPanel) {
-            targetPanel.classList.add("active");
-        }
-    });
-}
-/**
- * Convierte una cadena de texto en un color HSL único y consistente.
- * Esto asegura que cada participante siempre tenga el mismo color de avatar.
- * @param {string} str La cadena a convertir (nombre o cédula).
- * @returns {string} Un color en formato HSL (ej: 'hsl(120, 70%, 80%)').
- */
-function stringToHslColor(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const h = hash % 360;
-    // Usamos saturación y luminosidad fijas para una paleta de colores pastel agradable
-    return `hsl(${h}, 60%, 75%)`;
-}
-// Pega esta nueva función completa en tu archivo script.js
-
-
-/**
- * Renderiza las tarjetas de paquetes para el público en un contenedor específico.
- * @param {Array<object>} paquetes - El array de paquetes del sorteo actual.
- * @param {HTMLElement} contenedor - El elemento HTML donde se insertarán las tarjetas.
- */
-function renderizarPaquetesPublicos(paquetes, contenedor) {
-    if (!contenedor) return;
-    contenedor.innerHTML = ''; // Limpia los paquetes anteriores
-
-    if (!paquetes || paquetes.length === 0) {
-        contenedor.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">No hay paquetes de boletos disponibles para este sorteo.</p>';
-        return;
-    }
-
-    // --- INICIO DE LA NUEVA LÓGICA ---
-
-    // 1. Buscamos el precio del boleto individual como base para los cálculos.
-    const paqueteIndividual = paquetes.find(p => p.boletos === 1);
-    const precioIndividual = paqueteIndividual ? paqueteIndividual.precio : null;
-
-    // 2. Determina cuál es el paquete "popular" (el que ofrece más boletos, excluyendo el individual)
-    const paquetesMultiples = paquetes.filter(p => p.boletos > 1);
-    const paquetePopular = paquetesMultiples.length > 0
-        ? paquetesMultiples.reduce((max, p) => (p.boletos > max.boletos ? p : max), paquetesMultiples[0])
-        : null;
-
-    paquetes.forEach(paquete => {
-        let valorRealHTML = '';
-        let boletosGratisHTML = '';
-
-        // 3. Hacemos los cálculos solo si tenemos un precio individual y el paquete tiene más de 1 boleto.
-        if (precioIndividual && paquete.boletos > 1) {
-            const valorReal = precioIndividual * paquete.boletos;
-            const ahorro = valorReal - paquete.precio;
-            
-            if (ahorro > 0) {
-                // Preparamos el HTML para el precio tachado
-                valorRealHTML = `<span class="precio-original-tachado">$${valorReal.toFixed(0)}</span>`;
-                
-                // Calculamos y preparamos el HTML para los boletos gratis
-                const boletosGratis = Math.floor(ahorro / precioIndividual);
-                if (boletosGratis > 0) {
-                    boletosGratisHTML = `<div class="etiqueta-ahorro">+${boletosGratis} Boleto(s) GRATIS</div>`;
-                }
-            }
-        }
-        
-        // --- FIN DE LA NUEVA LÓGICA ---
-
-        const esPopular = (paquete === paquetePopular);
-        const mensajeWhatsApp = `Hola, quiero el paquete "${paquete.nombre}" de ${paquete.boletos} boletos por $${paquete.precio} para el sorteo MOVIL WIN!`;
-        
-        const paqueteHTML = `
-            <div class="paquete-item ${esPopular ? 'popular' : ''}">
-                ${esPopular ? '<span class="etiqueta-popular">Más Popular</span>' : ''}
-                <div class="paquete-icono"><i class="fas fa-rocket"></i></div>
-                <h4>${paquete.nombre}</h4>
-                <div class="paquete-precio">
-                    $${paquete.precio}
-                    ${valorRealHTML} </div>
-                <div class="paquete-cantidad">${paquete.boletos} Boleto(s) Digital(es)</div>
-                ${boletosGratisHTML} <p class="paquete-descripcion">Aumenta tus probabilidades de ganar con este increíble paquete.</p>
-                <a href="https://wa.me/593963135510?text=${encodeURIComponent(mensajeWhatsApp)}" target="_blank" class="boton-paquete">Elegir Paquete</a>
-            </div>
-        `;
-        contenedor.innerHTML += paqueteHTML;
-    });
-}
-/**
- * Dibuja texto en un canvas, dividiéndolo en múltiples líneas si excede el ancho máximo.
- * @param {CanvasRenderingContext2D} context El contexto del canvas (ctx).
- * @param {string} text El texto a dibujar.
- * @param {number} x La coordenada X.
- * @param {number} y La coordenada Y.
- * @param {number} maxWidth El ancho máximo permitido para el texto.
- * @param {number} lineHeight La altura de cada línea.
- * 
- */
-function wrapText(context, text, x, y, maxWidth, lineHeight) {
-    const words = text.split(' ');
-    let line = '';
-
-    for (let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + ' ';
-        const metrics = context.measureText(testLine);
-        const testWidth = metrics.width;
-        if (testWidth > maxWidth && n > 0) {
-            context.fillText(line, x, y);
-            line = words[n] + ' ';
-            y += lineHeight;
-        } else {
-            line = testLine;
-        }
-    }
-    context.fillText(line, x, y);
-}
 function initializeRafflePage() {
-    
+
     // --- 1. VARIABLES Y ESTADO DE LA RULETA ---
-    // Todas las variables que la ruleta necesita para funcionar
     const clackSound = new Audio('sounds/tick.mp3');
     const winnerSound = new Audio('sounds/win.mp3');
     let sorteosDisponibles = [];
@@ -307,7 +56,7 @@ function initializeRafflePage() {
     let sorteoFinalizado = false;
     let finalWinnerInfo = null;
     let wheelCanvas = null;
-    let wheelCtx = null; // ¡Nuestra variable importante!
+    let wheelCtx = null;
     let wheelWidth, wheelHeight;
     let isDragging = false;
     let startY_Drag = 0;
@@ -316,17 +65,20 @@ function initializeRafflePage() {
     const SEGMENT_HEIGHT_FRONT = 60;
     const VISIBLE_SEGMENTS_COUNT = 7;
     let currentYOffset = 0;
+    let lastSegmentIndex = -1;
 
     // Elementos del DOM
     const prizeCarouselTrack = document.getElementById('prizeCarouselTrack');
     const prizeNavContainer = document.getElementById('prizeNavContainer');
-    
+    const listaGanadoresDiv = document.getElementById('listaGanadoresAnteriores');
+    const loaderGanadores = document.getElementById('loaderGanadores');
+
     // Configuración inicial
-    clackSound.volume = 0.7;
+    clackSound.volume = 0.5;
     winnerSound.volume = 0.7;
 
     // --- 2. FUNCIONES DE AYUDA (Helpers) ---
-    // Todas las funciones que ayudan a formatear datos o dibujar
+    // Todas las funciones que ayudan a formatear datos, dibujar, etc.
     
     function formatNameForWheel(name) {
         if (!name) return 'Participante';
@@ -349,6 +101,7 @@ function initializeRafflePage() {
     }
 
     function stringToHslColor(str) {
+        if (!str) return 'hsl(200, 50%, 50%)';
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
             hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -357,12 +110,79 @@ function initializeRafflePage() {
         return `hsl(${h}, 60%, 75%)`;
     }
 
-    function drawSegment(index, y, participant) {
-        // Como esta función ahora está DENTRO de initializeRafflePage, puede ver wheelCtx sin problemas.
-        if (!wheelCtx) return;
-        
-        const esGanador = finalWinnerInfo && participant.orden_id === finalWinnerInfo.orden_id;
+    function wrapText(context, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let line = '';
+        for (let n = 0; n < words.length; n++) {
+            const testLine = line + words[n] + ' ';
+            const metrics = context.measureText(testLine);
+            if (metrics.width > maxWidth && n > 0) {
+                context.fillText(line, x, y);
+                line = words[n] + ' ';
+                y += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        context.fillText(line, x, y);
+    }
+    
+    function getMotivationalMessage(percentage) {
+        if (percentage >= 100) return "¡Meta alcanzada! El sorteo será pronto.";
+        if (percentage >= 95) return "¡Estamos a un paso! Tu oportunidad es AHORA.";
+        if (percentage >= 75) return "¡Casi llegamos! Muy pocos boletos para la meta.";
+        if (percentage >= 50) return "¡Impresionante! Superamos la mitad del camino.";
+        if (percentage >= 25) return "¡Excelente progreso! Sigamos así.";
+        return "¡El sorteo ha comenzado! Sé de los primeros.";
+    }
 
+    function renderMedia(sorteo) {
+        const url = sorteo.imagen_url || 'images/proximo_sorteo.png';
+        const classes = sorteo.esProximo ? 'grayscale' : '';
+        if (url.endsWith('.mp4') || url.endsWith('.webm')) {
+            return `<video src="${url}" class="${classes}" autoplay loop muted playsinline></video>`;
+        }
+        return `<img src="${url}" alt="${sorteo.nombre_premio_display}" class="${classes}">`;
+    }
+
+    function renderizarPaquetesPublicos(paquetes, contenedor) {
+        if (!contenedor) return;
+        contenedor.innerHTML = '';
+        if (!paquetes || paquetes.length === 0) {
+            contenedor.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">No hay paquetes de boletos disponibles para este sorteo en este momento.</p>';
+            return;
+        }
+        const paqueteIndividual = paquetes.find(p => p.boletos === 1);
+        const precioIndividual = paqueteIndividual ? paqueteIndividual.precio : null;
+        const paquetesMultiples = paquetes.filter(p => p.boletos > 1);
+        const paquetePopular = paquetesMultiples.length > 0 ? paquetesMultiples.reduce((max, p) => (p.boletos > max.boletos ? p : max), paquetesMultiples[0]) : null;
+
+        paquetes.forEach(paquete => {
+            let valorRealHTML = '';
+            let boletosGratisHTML = '';
+            if (precioIndividual && paquete.boletos > 1) {
+                const valorReal = precioIndividual * paquete.boletos;
+                const ahorro = valorReal - paquete.precio;
+                if (ahorro > 0) {
+                    valorRealHTML = `<span class="precio-original-tachado">$${valorReal.toFixed(0)}</span>`;
+                    const boletosGratis = Math.floor(ahorro / precioIndividual);
+                    if (boletosGratis > 0) {
+                        boletosGratisHTML = `<div class="etiqueta-ahorro">+${boletosGratis} Boleto(s) GRATIS</div>`;
+                    }
+                }
+            }
+            const esPopular = (paquete === paquetePopular);
+            const mensajeWhatsApp = `Hola, quiero el paquete "${paquete.nombre}" de ${paquete.boletos} boletos por $${paquete.precio} para el sorteo MOVIL WIN!`;
+            const paqueteHTML = `<div class="paquete-item ${esPopular ? 'popular' : ''}">${esPopular ? '<span class="etiqueta-popular">Más Popular</span>' : ''}<div class="paquete-icono"><i class="fas fa-rocket"></i></div><h4>${paquete.nombre}</h4><div class="paquete-precio">$${paquete.precio} ${valorRealHTML}</div><div class="paquete-cantidad">${paquete.boletos} Boleto(s) Digital(es)</div>${boletosGratisHTML}<p class="paquete-descripcion">Aumenta tus probabilidades de ganar con este increíble paquete.</p><a href="https://wa.me/593963135510?text=${encodeURIComponent(mensajeWhatsApp)}" target="_blank" class="boton-paquete">Elegir Paquete</a></div>`;
+            contenedor.innerHTML += paqueteHTML;
+        });
+    }
+
+    // --- 3. FUNCIONES DE DIBUJO DE LA RULETA ---
+
+    function drawSegment(index, y, participant) {
+        if (!wheelCtx) return;
+        const esGanador = finalWinnerInfo && participant.orden_id === finalWinnerInfo.orden_id;
         if (esGanador) {
             const goldGradient = wheelCtx.createLinearGradient(0, y, wheelWidth, y);
             goldGradient.addColorStop(0, '#B8860B');
@@ -377,52 +197,41 @@ function initializeRafflePage() {
         }
         wheelCtx.fillRect(0, y, wheelWidth, SEGMENT_HEIGHT_FRONT);
         wheelCtx.shadowBlur = 0;
-
         const avatarRadius = 22;
         const avatarX = 50;
         const avatarY = y + SEGMENT_HEIGHT_FRONT / 2;
-
         wheelCtx.beginPath();
         wheelCtx.arc(avatarX, avatarY, avatarRadius, 0, 2 * Math.PI);
         wheelCtx.fillStyle = esGanador ? 'rgba(0,0,0,0.4)' : stringToHslColor(participant.id);
         wheelCtx.fill();
-
         const avatarInitials = getAvatarInitials(participant.name);
         wheelCtx.fillStyle = "#fff";
         wheelCtx.font = `bold ${avatarRadius * 0.8}px Poppins, sans-serif`;
         wheelCtx.textAlign = "center";
         wheelCtx.textBaseline = "middle";
         wheelCtx.fillText(avatarInitials, avatarX, avatarY);
-
         const formattedName = formatNameForWheel(participant.name);
         const ticketIdText = `Boleto #${participant.orden_id}`;
-        
         wheelCtx.fillStyle = esGanador ? '#000' : 'rgba(255, 255, 255, 0.9)';
         wheelCtx.font = esGanador ? `bold 22px Poppins, sans-serif` : `600 20px Poppins, sans-serif`;
         wheelCtx.textAlign = "left";
         wheelCtx.fillText(formattedName, avatarX + avatarRadius + 15, avatarY - 8);
-
         wheelCtx.fillStyle = esGanador ? 'rgba(0,0,0,0.7)' : 'rgba(255, 255, 255, 0.5)';
         wheelCtx.font = `400 14px Poppins, sans-serif`;
         wheelCtx.fillText(ticketIdText, avatarX + avatarRadius + 15, avatarY + 15);
     }
     
-
     function drawScrollbar() {
-        if (estaGirando) return; // <-- AÑADE ESTA LÍNEA. Si la rueda está girando, no hagas nada más.
-        if (!wheelCtx || !participantes) return;
+        if (estaGirando || !wheelCtx || !participantes) return;
         const totalContentHeight = participantes.length * SEGMENT_HEIGHT_FRONT;
         if (totalContentHeight <= wheelHeight) return;
-
         const scrollbarWidth = 10;
         const scrollbarX = wheelWidth - scrollbarWidth - 5;
         wheelCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
         wheelCtx.fillRect(scrollbarX, 0, scrollbarWidth, wheelHeight);
-
         const thumbHeight = (wheelHeight / totalContentHeight) * wheelHeight;
         const maxOffset = totalContentHeight - wheelHeight;
         const thumbY = (currentYOffset / maxOffset) * (wheelHeight - thumbHeight);
-        
         wheelCtx.fillStyle = '#DAA520';
         wheelCtx.strokeStyle = 'rgba(0,0,0,0.5)';
         wheelCtx.lineWidth = 1;
@@ -432,10 +241,7 @@ function initializeRafflePage() {
 
     function drawFrontWheel(participantesDelSorteo, yOffsetAnim = null) {
         if (!wheelCtx) return;
-
         const yOffsetToDraw = yOffsetAnim !== null ? yOffsetAnim : currentYOffset;
-
-        // Lógica para cuando no hay participantes (diseño "artista")
         if (!participantesDelSorteo || participantesDelSorteo.length === 0) {
             wheelCtx.clearRect(0, 0, wheelWidth, wheelHeight);
             const centerX = wheelWidth / 2;
@@ -450,26 +256,24 @@ function initializeRafflePage() {
             wheelCtx.textAlign = "center";
             wheelCtx.textBaseline = "middle";
             wheelCtx.fillText('\uf3ff', centerX, centerY);
+            const mainFontSize = Math.max(16, Math.min(22, wheelWidth / 15));
+            const subFontSize = Math.max(12, Math.min(16, wheelWidth / 20));
+            const lineHeight = mainFontSize * 1.2;
             wheelCtx.fillStyle = "rgba(255, 255, 255, 0.8)";
-            wheelCtx.font = "bold 22px Poppins, sans-serif";
+            wheelCtx.font = `bold ${mainFontSize}px Poppins, sans-serif`;
             wheelCtx.shadowColor = 'black';
             wheelCtx.shadowBlur = 5;
-            wrapText(wheelCtx, "¡TU NOMBRE PODRÍA ESTAR AQUÍ!", centerX, centerY + 80, wheelWidth * 0.9, 26);
+            wrapText(wheelCtx, "¡TU NOMBRE PODRÍA ESTAR AQUÍ!", centerX, centerY + 80, wheelWidth * 0.9, lineHeight);
             wheelCtx.fillStyle = "var(--clr-primary)";
-            wheelCtx.font = "500 16px Poppins, sans-serif";
+            wheelCtx.font = `500 ${subFontSize}px Poppins, sans-serif`;
             wheelCtx.shadowBlur = 0;
             wheelCtx.fillText("¡Compra tu boleto y sé el primero!", centerX, centerY + 120);
             wheelCtx.textBaseline = "alphabetic";
             return;
         }
-
-        // Si hay participantes, procede a dibujar la rueda
         wheelCtx.clearRect(0, 0, wheelWidth, wheelHeight);
-        
         const startIndex = Math.floor(yOffsetToDraw / SEGMENT_HEIGHT_FRONT);
         const endIndex = startIndex + VISIBLE_SEGMENTS_COUNT + 2;
-
-        // Bucle principal que dibuja cada casilla visible
         for (let i = startIndex; i < endIndex; i++) {
             const participantIndex = (i % participantesDelSorteo.length + participantesDelSorteo.length) % participantesDelSorteo.length;
             const participant = participantesDelSorteo[participantIndex];
@@ -477,24 +281,21 @@ function initializeRafflePage() {
             if (!participant) continue;
             drawSegment(i, segmentY, participant);
         }
-        // Dibuja la barra de scroll al final
         drawScrollbar();
+    }
+
+    // --- 4. FUNCIONES PRINCIPALES Y DE LÓGICA ---
 
     async function moveToSlide(index) {
         sorteoFinalizado = false;
         if (!prizeCarouselTrack || index < 0 || index >= sorteosDisponibles.length) return;
-        
         premioActualIndex = index;
         prizeCarouselTrack.style.transform = `translateX(${-index * 100}%)`;
-
         const sorteoActual = sorteosDisponibles[premioActualIndex];
         const activeSlide = prizeCarouselTrack.children[index];
         if (!activeSlide) return;
-        
         document.querySelectorAll('.prize-nav-panel').forEach((p, i) => p.classList.toggle('active', i === index));
-
         actualizarTopParticipantes(sorteoActual.id_sorteo, activeSlide);
-
         const paqueteContainer = document.getElementById('paquetes-section');
         if (paqueteContainer) {
             if (sorteoActual.status_sorteo === 'programado') {
@@ -503,7 +304,6 @@ function initializeRafflePage() {
                 renderizarPaquetesPublicos(sorteoActual.paquetes_json, paqueteContainer);
             }
         }
-
         const currentWheelCanvas = activeSlide.querySelector('.price-wheel-canvas');
         if (sorteoActual && sorteoActual.id_sorteo && currentWheelCanvas && sorteoActual.status_sorteo !== 'programado') {
             wheelCanvas = currentWheelCanvas;
@@ -517,9 +317,7 @@ function initializeRafflePage() {
             }
             try {
                 const response = await fetch(`${API_BASE_URL}/api/participantes?sorteoId=${sorteoActual.id_sorteo}`);
-                if (!response.ok) {
-                    throw new Error(`El servidor respondió con un error ${response.status}`);
-                }
+                if (!response.ok) { throw new Error(`El servidor respondió con un error ${response.status}`); }
                 participantes = await response.json() || [];
                 currentYOffset = 0;
                 addWheelEventListeners(wheelCanvas);
@@ -532,8 +330,11 @@ function initializeRafflePage() {
         } else {
             participantes = [];
             wheelCanvas = null;
+            wheelCtx = null;
+            if(activeSlide.querySelector('.wheel-price-is-right-container')) {
+                 drawFrontWheel([]); // Dibuja el estado vacío si el canvas existe pero el sorteo es programado
+            }
         }
-
         checkMainPageCountdownStatus();
     }
 
@@ -541,28 +342,19 @@ function initializeRafflePage() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/sorteos-visibles`);
             if (!response.ok) throw new Error('No se pudo obtener la lista de sorteos.');
-            
             const data = await response.json();
-            
             if (data.success && data.sorteos && data.sorteos.length > 0) {
-                // Simplemente asignamos los sorteos reales que vienen de la API
                 sorteosDisponibles = data.sorteos;
-                
                 await generarSlidesDelCarrusel();
                 generarPanelesDeNavegacion();
-                
-                // Mueve al primer sorteo activo, o al primero de la lista si no hay activos
                 const initialIndex = sorteosDisponibles.findIndex(s => s.status_sorteo === 'activo');
                 moveToSlide(initialIndex !== -1 ? initialIndex : 0);
             } else {
-                // Si no hay sorteos activos ni programados, muestra un mensaje
                 if (prizeCarouselTrack) prizeCarouselTrack.innerHTML = `<div style="text-align:center; padding: 50px 20px;"><h2 class="prize-title">No hay sorteos disponibles en este momento. ¡Vuelve pronto!</h2></div>`;
             }
         } catch (error) {
             if (prizeCarouselTrack) prizeCarouselTrack.innerHTML = `<div style="text-align:center; padding: 50px 20px;"><h2 class="prize-title">${error.message}</h2></div>`;
         }
-    }
-    
     }
 
     // --- Lógica Principal del Sorteo ---
