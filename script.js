@@ -222,67 +222,62 @@ function initializeRafflePage() {
         '#F9C80E'  // Amarillo/Dorado
     ];
 
+// En script.js, reemplaza tu función drawSegment completa por esta:
+
     function drawSegment(index, y, participant) {
         if (!wheelCtx) return;
 
-        // --- Definiciones de Diseño ---
-        const ribbonWidth = 60; // Ancho de la franja derecha
+        const ribbonWidth = 60;
         const mainAreaWidth = wheelWidth - ribbonWidth;
         
-        // 1. Obtenemos un índice de color ESTABLE basado en la cédula del participante
         const colorIndex = getStableColorIndex(participant.id, RUEDA_COLORES.length);
-        // 2. Seleccionamos el color de nuestra paleta usando ese índice estable
         const segmentColor = RUEDA_COLORES[colorIndex];
 
-        // Formateo de Datos
         const formattedName = formatNameForWheel(participant.name);
         const confidentialId = formatConfidentialId(participant.id);
         const ticketId = participant.orden_id;
 
-        // 2. Dibuja el fondo del área principal con un color plano y vivo
+        // Dibuja el fondo del área principal
         wheelCtx.fillStyle = segmentColor;
         wheelCtx.fillRect(0, y, wheelWidth, SEGMENT_HEIGHT_FRONT);
 
-        // 3. Dibuja la franja vertical semi-transparente a la derecha
+        // Dibuja la franja lateral
         wheelCtx.fillStyle = 'rgba(0, 0, 0, 0.25)';
         wheelCtx.fillRect(mainAreaWidth, y, ribbonWidth, SEGMENT_HEIGHT_FRONT);
-        // Línea divisoria sutil
         wheelCtx.fillStyle = 'rgba(255, 255, 255, 0.15)';
         wheelCtx.fillRect(mainAreaWidth, y, 1, SEGMENT_HEIGHT_FRONT);
 
-        // 4. Dibuja el texto centrado en el área principal
+        // --- INICIO DE LA MODIFICACIÓN ---
+        // 1. Dibuja un borde sutil para separar las casillas
+        wheelCtx.strokeStyle = 'rgba(0, 0, 0, 0.4)'; // Color del borde (negro semi-transparente)
+        wheelCtx.lineWidth = 2; // Ancho del borde en píxeles
+        wheelCtx.strokeRect(0, y, wheelWidth, SEGMENT_HEIGHT_FRONT);
+        // --- FIN DE LA MODIFICACIÓN ---
+
+        // Dibuja el texto centrado en el área principal
         const centerX = mainAreaWidth / 2;
         wheelCtx.textAlign = 'center';
         wheelCtx.textBaseline = "middle";
-
-        // Efecto de sombra para que el texto resalte sobre cualquier color
         wheelCtx.shadowColor = 'rgba(0,0,0,0.6)';
         wheelCtx.shadowBlur = 4;
         wheelCtx.shadowOffsetY = 2;
-
-        // Nombre del participante
         wheelCtx.fillStyle = "#FFFFFF";
         wheelCtx.font = `bold 22px Poppins, sans-serif`;
         wheelCtx.fillText(formattedName, centerX, y + (SEGMENT_HEIGHT_FRONT / 2) - 8);
-        
-        // Cédula anonimizada
         wheelCtx.font = `500 13px Poppins, sans-serif`;
         wheelCtx.fillStyle = "rgba(255, 255, 255, 0.8)";
         wheelCtx.fillText(confidentialId, centerX, y + (SEGMENT_HEIGHT_FRONT / 2) + 14);
-
         wheelCtx.shadowBlur = 0;
         wheelCtx.shadowOffsetY = 0;
 
-        // 5. Dibuja el número de boleto ROTADO en la franja
+        // Dibuja el número de boleto ROTADO en la franja
         wheelCtx.save();
         wheelCtx.translate(mainAreaWidth + ribbonWidth / 2, y + SEGMENT_HEIGHT_FRONT / 2);
         wheelCtx.rotate(Math.PI / 2);
-        
         wheelCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
         wheelCtx.font = `bold 16px 'Lucida Console', Monaco, monospace`;
         wheelCtx.textAlign = "center";
         wheelCtx.fillText(`#${ticketId}`, 0, 0);
-
         wheelCtx.restore();
     }
     function drawScrollbar() {
@@ -729,7 +724,6 @@ function initializeRafflePage() {
             if (top.length === 0) {
                 listElement.innerHTML = '<li class="top-list-item-empty">Aún no hay participantes destacados.</li>';
             } else {
-                const maxTickets = top[0].total_participaciones;
                 top.forEach((p, i) => {
                     const li = document.createElement('li');
                     li.className = `top-list-item rank-${i + 1}`;
@@ -740,14 +734,15 @@ function initializeRafflePage() {
                     if (rank === 3) rankIcon = '🥉';
 
                     const initials = getAvatarInitials(p.name);
-                    const avatarColor = stringToHslColor(p.id);
-                    const barPercentage = maxTickets > 0 ? (p.total_participaciones / maxTickets) * 100 : 0;
-                    
-                    // --- INICIO DE LA MODIFICACIÓN ---
-                    // Usamos la función que ya teníamos para formatear el nombre
                     const formattedName = formatNameForWheel(p.name);
-                    // --- FIN DE LA MODIFICACIÓN ---
 
+                    // --- INICIO DE LA MODIFICACIÓN ---
+                    // Se usa la misma lógica que la rueda para obtener un color consistente de la paleta
+                    const colorIndex = getStableColorIndex(p.id, RUEDA_COLORES.length);
+                    const avatarColor = RUEDA_COLORES[colorIndex];
+                    // --- FIN DE LA MODIFICACIÓN ---
+                    
+                    // Se simplificó el HTML para que coincida con tu última captura de pantalla
                     li.innerHTML = `
                         <div class="rank-icon">${rankIcon}</div>
                         <div class="participant-avatar" style="background-color: ${avatarColor};">
