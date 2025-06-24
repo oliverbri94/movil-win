@@ -730,7 +730,6 @@ function initializeRafflePage() {
             });
         }
     }
-// --- REEMPLAZA TU FUNCIÓN ACTUALIZARTOPPARTICIPANTES CON ESTA ---
 
     async function actualizarTopParticipantes(sorteoId, slideElement) {
         const listElement = slideElement.querySelector('.top-participants-list');
@@ -740,7 +739,9 @@ function initializeRafflePage() {
         if (!listElement || !loader || !wrapper) return;
 
         const sorteoSeleccionado = sorteosDisponibles.find(s => s.id_sorteo == sorteoId);
-        if (!sorteoId || !sorteoSeleccionado || sorteoSeleccionado.esProximo) {
+        
+        // Oculta el Top 5 si el sorteo es 'programado'
+        if (!sorteoId || !sorteoSeleccionado || sorteoSeleccionado.status_sorteo === 'programado') {
             wrapper.style.display = 'none';
             return;
         }
@@ -750,35 +751,31 @@ function initializeRafflePage() {
         listElement.innerHTML = '';
 
         try {
-            // CORRECTO
             const response = await fetch(`${API_BASE_URL}/api/top-participantes?sorteoId=${sorteoId}`);
             if (!response.ok) throw new Error('No se pudo cargar la lista.');
-
+            
             const top = await response.json();
 
             if (top.length === 0) {
                 listElement.innerHTML = '<li class="top-list-item-empty">Aún no hay participantes destacados.</li>';
             } else {
-                // Obtenemos la cantidad de boletos del primer puesto para la barra de progreso
                 const maxTickets = top[0].total_participaciones;
-
                 top.forEach((p, i) => {
                     const li = document.createElement('li');
                     li.className = `top-list-item rank-${i + 1}`;
-
-                    // --- NUEVA LÓGICA ---
                     const rank = i + 1;
                     let rankIcon = `<span class="rank-number">${rank}</span>`;
                     if (rank === 1) rankIcon = '🥇';
                     if (rank === 2) rankIcon = '🥈';
                     if (rank === 3) rankIcon = '🥉';
 
-                    const initials = getInitials(p.name);
+                    // --- ESTA ES LA LÍNEA CORREGIDA ---
+                    const initials = getAvatarInitials(p.name); 
+                    // ------------------------------------
+
                     const avatarColor = stringToHslColor(p.id);
                     const barPercentage = maxTickets > 0 ? (p.total_participaciones / maxTickets) * 100 : 0;
-                    // --- FIN NUEVA LÓGICA ---
-
-                    // --- NUEVA PLANTILLA HTML ---
+                    
                     li.innerHTML = `
                         <div class="rank-icon">${rankIcon}</div>
                         <div class="participant-avatar" style="background-color: ${avatarColor};">
