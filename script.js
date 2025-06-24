@@ -85,6 +85,7 @@ function initializeRafflePage() {
      * Anonimiza un número de cédula, mostrando solo los primeros y últimos dos dígitos.
      * @param {string} id_documento - El número de cédula de 10 dígitos.
      * @returns {string} La cédula formateada (ej: "17...45").
+     * 
      */
     function formatConfidentialId(id_documento) {
         if (typeof id_documento === 'string' && id_documento.length === 10) {
@@ -101,6 +102,23 @@ function initializeRafflePage() {
             return `${firstName} ${lastNameInitial}.`;
         }
         return firstName;
+    }
+
+    /**
+     * Genera un índice numérico estable a partir de un string (como una cédula).
+     * Se usará para asignar un color consistente de la paleta a cada participante.
+     * @param {string} str - La cadena de texto a procesar.
+     * @param {number} max - El número de colores disponibles en la paleta.
+     * @returns {number} Un índice numérico entre 0 y max-1.
+     */
+    function getStableColorIndex(str, max) {
+        if (!str) return 0;
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        // Usamos Math.abs para asegurar que el resultado sea siempre positivo
+        return Math.abs(hash % max);
     }
 
     function getAvatarInitials(name) {
@@ -211,10 +229,12 @@ function initializeRafflePage() {
         const ribbonWidth = 60; // Ancho de la franja derecha
         const mainAreaWidth = wheelWidth - ribbonWidth;
         
-        // 1. Seleccionamos un color de la paleta en un ciclo repetitivo
-        const segmentColor = RUEDA_COLORES[index % RUEDA_COLORES.length];
+        // 1. Obtenemos un índice de color ESTABLE basado en la cédula del participante
+        const colorIndex = getStableColorIndex(participant.id, RUEDA_COLORES.length);
+        // 2. Seleccionamos el color de nuestra paleta usando ese índice estable
+        const segmentColor = RUEDA_COLORES[colorIndex];
 
-        // --- Formateo de Datos ---
+        // Formateo de Datos
         const formattedName = formatNameForWheel(participant.name);
         const confidentialId = formatConfidentialId(participant.id);
         const ticketId = participant.orden_id;
