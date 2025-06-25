@@ -2352,3 +2352,91 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     color: var(--clr-dark-text-alt);
     line-height: 1.7;
 }
+
+/* ================================================= */
+/* --- ESTILOS PARA PÁGINAS DE TEXTO (BASES, FAQ) --- */
+/* ================================================= */
+
+.page-text-container {
+    max-width: 800px; /* Ancho ideal para lectura */
+    text-align: left;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.page-text-container h1 {
+    font-size: clamp(2em, 5vw, 2.8em);
+    font-weight: 700;
+    color: var(--clr-primary);
+    margin-bottom: 10px;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.page-text-container .last-updated {
+    display: block;
+    text-align: center;
+    font-style: italic;
+    color: var(--clr-dark-text-alt);
+    margin-bottom: 40px;
+    font-size: 0.9em;
+}
+
+/* Estilo para la lista ordenada (los números) */
+.page-text-container ol {
+    list-style: none;
+    counter-reset: term-counter; /* Inicia nuestro propio contador */
+    padding-left: 0;
+}
+
+.page-text-container ol > li {
+    counter-increment: term-counter; /* Aumenta el contador en cada item */
+    margin-bottom: 30px;
+    padding-left: 50px; /* Espacio para nuestro número personalizado */
+    position: relative;
+}
+
+/* Estilo para el número personalizado de cada cláusula */
+.page-text-container ol > li::before {
+    content: counter(term-counter); /* Muestra el valor del contador */
+    position: absolute;
+    left: 0;
+    top: 2px;
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--clr-secondary);
+    background-color: rgba(var(--clr-secondary-rgb), 0.1);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.page-text-container h2 {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: var(--clr-dark-text);
+    margin-bottom: 10px;
+    padding-bottom: 0;
+    border: none;
+}
+
+.page-text-container p, 
+.page-text-container ul {
+    color: var(--clr-dark-text-alt);
+    line-height: 1.8;
+    margin-bottom: 15px;
+}
+
+.page-text-container ul {
+    padding-left: 25px;
+    list-style-type: disc; /* Viñetas de disco estándar */
+}
+
+.page-text-container strong {
+    color: var(--clr-dark-text);
+    font-weight: 600;
+}

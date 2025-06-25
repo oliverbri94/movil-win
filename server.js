@@ -407,8 +407,12 @@ app.post('/api/admin/start-countdown', requireAdminLogin, async (req, res) => {
         }
 
         // Definimos la duración en milisegundos (1 hora)
-        const UNA_HORA_EN_MS = 60 * 60 * 1000;
-        const endTime = new Date().getTime() + UNA_HORA_EN_MS;
+        //const UNA_HORA_EN_MS = 60 * 60 * 1000;
+        const VEINTE_SEGUNDOS_EN_MS = 20 * 1000;
+
+        //const endTime = new Date().getTime() + UNA_HORA_EN_MS;
+        const endTime = new Date().getTime() + VEINTE_SEGUNDOS_EN_MS;
+
 
         const sql = `UPDATE sorteos_config SET status_sorteo = 'countdown', countdown_end_time = $1 WHERE id_sorteo = $2`;
         const params = [endTime, sorteo_id];

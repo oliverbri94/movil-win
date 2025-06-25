@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
+<head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MOVIL WIN - Sorteo de Smartphones</title>
+    <title>Bases y Condiciones - Movil Win</title>
 
-    <!-- Hojas de Estilo y Fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,27 +13,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 
-    <!-- Scripts de la cabecera (Head) -->
     <script src="config.js"></script>
-    <script src="admin.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    
-    <!-- Archivo de configuración para los colores de Tailwind -->
     <script src="tailwind-config.js"></script>
-    <style>
-        .page-container { max-width: 900px; margin: 40px auto; padding: 20px; }
-        .back-link { display: inline-block; margin-bottom: 30px; color: var(--clr-primary); text-decoration: none; font-weight: 600; }
-        .back-link:hover { text-decoration: underline; color: var(--clr-accent); }
-        .legal-text-content { text-align: left; font-size: 0.95em; line-height: 1.8; color: var(--clr-dark-text-alt); }
-        .legal-text-content h3 { font-size: 1.4em; color: var(--clr-primary); margin-top: 25px; margin-bottom: 12px; border-bottom: 1px solid var(--clr-dark-border); padding-bottom: 8px;}
-        .legal-text-content strong { color: var(--clr-dark-text); font-weight: 600;}
-        .legal-text-content ul { list-style: disc; padding-left: 30px; margin-bottom: 15px;}
-        .legal-text-content ul li { margin-bottom: 8px; }
-        .legal-text-content p { margin-bottom: 1em; }
-    </style>
 </head>
 <body class="dark-theme">
+
     <nav class="bg-custom-dark-bg-frame shadow-lg fixed w-full top-0 z-50">
         <div class="main-nav-grid">
             <div class="nav-left">
@@ -41,144 +26,98 @@
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
-
             <div class="nav-center">
                 <a href="index.html">
                     <img src="images/logo.png" alt="Logo Movil Win" class="nav-logo">
                 </a>
             </div>
-
-            <div class="nav-right">
-                </div>
+            <div class="nav-right"></div>
         </div>
-
         <div id="fullScreenMenu" class="hidden fixed inset-0 bg-custom-dark-bg bg-opacity-95 backdrop-blur-sm z-40 flex flex-col items-center justify-center p-6 transition-opacity duration-300 ease-in-out">
             <button id="closeMenuButton" class="absolute top-6 right-6 text-custom-text-alt hover:text-custom-primary text-4xl leading-none">&times;</button>
             <img src="images/logo.png" alt="Logo Movil Win" class="h-20 w-auto mb-8">
-            
             <ul class="flex flex-col items-center space-y-6">
                 <li><a href="index.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Inicio</a></li>
                 <li><a href="faq.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Preguntas Frecuentes</a></li>
                 <li><a href="bases.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Bases y Condiciones</a></li>
                 <li><a href="ganadores.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Historial de Ganadores</a></li>
             </ul>
-            
-            <div class="social-links-footer mt-12 flex space-x-6">
-                <a href="https://wa.me/593963135510" target="_blank" rel="noopener noreferrer" aria-label="Contáctanos en WhatsApp" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
-                    <i class="fab fa-whatsapp fa-2x"></i>
-                </a>
-                <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Facebook" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
-                    <i class="fab fa-facebook-f fa-2x"></i>
-                </a>
-                <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Instagram" class="text-custom-text-alt hover:text-custom-primary transition-colors duration-300">
-                    <i class="fab fa-instagram fa-2x"></i>
-                </a>
-            </div>
         </div>
     </nav>
+    
+    <main class="site-main">
+        <section class="content-section page-text-container">
+            <h1>Bases y Condiciones de Sorteos Movil Win</h1>
+            <p class="last-updated">Última actualización: 25 de junio de 2025</p>
+            
+            <p>La participación en los sorteos organizados por Movil Win implica la aceptación total e incondicional de las siguientes bases y condiciones. Este documento establece los derechos y obligaciones de los participantes y del organizador para garantizar un proceso justo y transparente para todos.</p>
 
-    <header class="site-header" style="padding-top: 20px; padding-bottom: 20px;">
-        <h1 class="main-title" style="font-family: 'Anton', sans-serif;font-weight: bold;font-size: clamp(2em, 5vw, 3em);">Bases y Condiciones</h1>
-        <h2 class="subtitle" style="font-size: clamp(1em, 2.5vw, 1.2em);">Promoción "[Nombre de tu Promoción/Sorteo Actual]"</h2>
-    </header>
+            <ol>
+                <li>
+                    <h2>EL ORGANIZADOR</h2>
+                    <p>Los sorteos son organizados y administrados por <strong>Movil Win</strong> (en adelante, "El Organizador"), con domicilio en Quito, Ecuador, a través de sus plataformas digitales oficiales bajo la marca "Movil Win".</p>
+                </li>
 
-    <main class="page-container">
-        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver al Sorteo Principal</a>
+                <li>
+                    <h2>LOS PARTICIPANTES (ELEGIBILIDAD)</h2>
+                    <p>Podrán participar todas las personas naturales mayores de 18 años, residentes en la República del Ecuador, que cumplan con la mecánica de participación. No podrán participar empleados del Organizador, familiares directos, ni miembros del CLub de Afiliados que pretendan comisionar en el sorteo del cual quieren participar.</p>
+                </li>
+                
+                <li>
+                    <h2>MECÁNICA DE PARTICIPACIÓN</h2>
+                    <p>Para participar, el interesado deberá adquirir uno de los paquetes de boletos digitales que se ofrecen para cada sorteo. El proceso es el siguiente:</p>
+                    <ul>
+                        <li>Contactar al equipo de Movil Win a través de los canales oficiales (principalmente WhatsApp).</li>
+                        <li>Seleccionar y pagar el paquete de boletos deseado mediante los métodos aceptados (transferencia o depósito bancario).</li>
+                        <li>Una vez confirmado el pago, el participante recibirá una confirmación y sus boletos digitales, los cuales se registran en la base de datos oficial del sorteo con un número de boleto (`orden_id`) único.</li>
+                    </ul>
+                </li>
 
-        <section class="content-section">
-            <div class="legal-text-content">
-                <p><strong>¡MUY IMPORTANTE! El presente documento es un BORRADOR HIPOTÉTICO y NO CONSTITUYE ASESORAMIENTO LEGAL. Debe ser revisado, adaptado y validado por un profesional del derecho en Ecuador antes de su uso.</strong></p>
+                <li>
+                    <h2>EL PREMIO</h2>
+                    <p>El premio para cada sorteo será especificado en las publicaciones y anuncios correspondientes. Las imágenes utilizadas son referenciales.</p>
+                    <p><strong>El premio es intransferible y bajo ninguna circunstancia será canjeable por dinero en efectivo</strong> o por cualquier otro bien o servicio, a menos que El Organizador así lo estipule explícitamente.</p>
+                </li>
 
-                <h3>1. ORGANIZADOR Y OBJETO DE LA PROMOCIÓN:</h3>
-                <p>La presente promoción, denominada "[Nombre de tu Promoción/Sorteo Actual]", es organizada por [Tu Nombre Completo o Nombre de tu Emprendimiento/Empresa si ya está constituida], con RUC Nro. [Tu Número de RUC], domiciliado en Santo Domingo, Ecuador, en adelante "EL ORGANIZADOR" o "MOVIL WIN".</p>
-                <p>El objeto de esta promoción es incentivar la adquisición de la <strong>"Mini-Guía Digital: Trucos para Sacarle el Jugo a tu Smartphone"</strong> ofrecida por MOVIL WIN, otorgando a los clientes que adquieran dicha guía durante el periodo de vigencia de la promoción, la oportunidad de participar gratuitamente en el sorteo de un premio mayor.</p>
+                <li>
+                    <h2>SELECCIÓN DEL GANADOR</h2>
+                    <p>La selección del ganador se realizará de forma aleatoria y transparente durante una transmisión <strong>EN VIVO</strong> en nuestras redes sociales (Facebook e Instagram) en la fecha y hora previamente anunciadas. Se utilizará nuestra plataforma automatizada con el uso de IA en la que ningún miembro del equipo Movil Win interviene para garantizar la imparcialidad del proceso. El resultado del sorteo es final e inapelable.</p>
+                </li>
 
-                <h3>2. PRODUCTO PROMOCIONAL Y PARTICIPACIÓN:</h3>
-                <p>Para participar en el sorteo del premio detallado en el punto 4, los interesados deberán adquirir la <strong>"Mini-Guía Digital: Trucos para Sacarle el Jugo a tu Smartphone"</strong>.</p>
-                <ul>
-                    <li><strong>Producto Principal:</strong> "Mini-Guía Digital: Trucos para Sacarle el Jugo a tu Smartphone" (en formato PDF). Precio: <strong>$2.00 (Dos dólares americanos)</strong>. Por la compra de cada Mini-Guía Digital, el cliente recibirá <strong>UNA (1) participación gratuita</strong> para el sorteo del premio mayor.</li>
-                    <li><strong>Paquetes Promocionales:</strong>
-                        <ul>
-                            <li><strong>Pack Básico:</strong> Por la compra de la Mini-Guía Digital a un precio especial de <strong>$12.00</strong>, el cliente recibirá <strong>SEIS (6) participaciones gratuitas</strong>.</li>
-                            <li><strong>Combo Ganador:</strong> Por la compra de la Mini-Guía Digital a un precio especial de <strong>$28.00</strong>, el cliente recibirá <strong>QUINCE (15) participaciones gratuitas</strong>.</li>
-                            <li><strong>Fortuna MAX (Mejor Oferta):</strong> Por la compra de la Mini-Guía Digital a un precio especial de <strong>$55.00</strong>, el cliente recibirá <strong>TREINTA (30) participaciones gratuitas</strong>.</li>
-                        </ul>
-                    </li>
-                    <li><em>Nota: En todos los casos, el cliente adquiere una (1) copia de la "Mini-Guía Digital". El valor de los paquetes refleja un precio promocional por la guía que incluye un mayor número de participaciones gratuitas para el sorteo.</em></li>
-                </ul>
-                <p>La participación en el sorteo es un incentivo adicional y gratuito por la compra de la Mini-Guía Digital (ya sea individualmente o como parte de un paquete promocional) y no implica un costo adicional para el cliente más allá del precio del producto/paquete adquirido. La Mini-Guía Digital será entregada vía correo electrónico al cliente una vez confirmada su compra.</p>
+                <li>
+                    <h2>NOTIFICACIÓN Y ENTREGA DEL PREMIO</h2>
+                    <p>El ganador será anunciado públicamente durante la transmisión en vivo y en nuestras redes. Adicionalmente, será contactado de forma privada a través de los datos proporcionados (teléfono o email) en un plazo no mayor a 48 horas.</p>
+                    <p>El ganador tendrá un plazo de <strong>7 días calendario</strong> desde la fecha del sorteo para reclamar su premio y coordinar la entrega. Para reclamarlo, deberá presentar su documento de identidad original y vigente. Si el ganador reside fuera de Santo Domingo, los costos y la logística del envío se coordinarán directamente entre las partes.</p>
+                </li>
 
-                <h3>3. ÁMBITO TERRITORIAL Y DURACIÓN DE LA PROMOCIÓN:</h3>
-                <ul>
-                    <li><strong>Ámbito:</strong> La presente promoción es válida únicamente dentro de la ciudad de Santo Domingo y/o la provincia de Santo Domingo de los Tsáchilas, Ecuador (o el ámbito que definas).</li>
-                    <li><strong>Vigencia para Adquirir la Mini-Guía y Obtener Participaciones:</strong> Desde el [Fecha de Inicio - DD/MM/AAAA] hasta el [Fecha de Fin - DD/MM/AAAA] a las [Hora Fin] (hora de Ecuador continental).</li>
-                    <li><strong>Fecha del Sorteo:</strong> El sorteo se realizará el día [Fecha del Sorteo - DD/MM/AAAA] a las [Hora del Sorteo].</li>
-                </ul>
+                <li>
+                    <h2>USO DE IMAGEN Y DATOS</h2>
+                    <p>Al aceptar el premio, el ganador autoriza al Organizador a utilizar y difundir su nombre, imagen y voz en fotografías y/o videos en cualquier medio publicitario (incluyendo redes sociales) con fines promocionales, sin derecho a compensación alguna. El tratamiento de datos se realiza en conformidad con la Ley Orgánica de Protección de Datos Personales del Ecuador.</p>
+                </li>
 
-                <h3>4. PREMIO:</h3>
-                <p>Se sorteará un (1) premio consistente en:</p>
-                <ul>
-                    <li><strong>Un (1) Smartphone de Última Generación, modelo [Nombre EXACTO del Celular del Sorteo Actual, ej: iPhone 15 128GB Color Negro].</strong></li>
-                    <li>Características principales: [Menciona 2-3 características destacadas del premio].</li>
-                    <li>El premio es nuevo y se entregará en su empaque original.</li>
-                    <li>El premio no es transferible ni canjeable por dinero en efectivo u otros bienes o servicios.</li>
-                </ul>
-
-                <h3>5. MECÁNICA DE PARTICIPACIÓN Y REGISTRO:</h3>
-                <ol>
-                    <li>Los interesados deberán adquirir la "Mini-Guía Digital: Trucos para Sacarle el Jugo a tu Smartphone" (individualmente o mediante un paquete promocional) a través del canal de WhatsApp oficial de MOVIL WIN: [Tu Número de WhatsApp con enlace wa.me si es posible].</li>
-                    <li>Al momento de la compra, el cliente deberá proporcionar de forma clara y veraz sus datos personales: Nombre completo, número de Cédula de Identidad (CI), ciudad de residencia, número de celular de contacto y <strong>dirección de correo electrónico</strong> para la entrega de la Mini-Guía Digital.</li>
-                    <li>Por cada Mini-Guía Digital adquirida según lo establecido en el punto 2, se asignará el número correspondiente de participaciones gratuitas al cliente.</li>
-                    <li>EL ORGANIZADOR registrará cada participación con los datos del cliente en un sistema interno para el sorteo.</li>
-                </ol>
-
-                <h3>6. MECÁNICA DEL SORTEO Y SELECCIÓN DEL GANADOR:</h3>
-                <ol>
-                    <li>El sorteo se realizará en la fecha y hora indicadas en el punto 3.</li>
-                    <li>El método de selección del ganador será [Describe el método: ej: "a través de una herramienta digital de selección aleatoria (como el tambor virtual de la página web)"].</li>
-                    <li>El sorteo podrá ser [Describe si será transmitido en vivo, grabado, o si se realizará ante notario público si aplica. Ej: "transmitido en vivo a través de la página de Facebook de MOVIL WIN ([Link a tu Facebook])"].</li>
-                    <li>Se seleccionará un (1) ganador titular y dos (2) ganadores suplentes, en ese orden.</li>
-                    <li>Si el ganador titular no pudiese ser contactado o no cumpliera con los requisitos para reclamar el premio según estas bases, se procederá a contactar al primer suplente, y así sucesivamente.</li>
-                </ol>
-
-                <h3>7. NOTIFICACIÓN Y ENTREGA DEL PREMIO:</h3>
-                <ol>
-                    <li>El ganador será notificado por EL ORGANIZADOR a través de una llamada telefónica y/o mensaje de WhatsApp al número de celular proporcionado al momento de su participación, dentro de las [Número, ej: 48] horas hábiles siguientes a la realización del sorteo.</li>
-                    <li>El nombre del ganador también podrá ser publicado en la página web y redes sociales de MOVIL WIN.</li>
-                    <li>Para reclamar el premio, el ganador deberá presentar su Cédula de Identidad original y vigente que coincida con los datos registrados.</li>
-                    <li>La entrega del premio se coordinará directamente con el ganador y se realizará en [Lugar de Entrega, ej: "un lugar público y seguro en la ciudad de Santo Domingo"] dentro de los [Número, ej: 15] días calendario siguientes a la notificación.</li>
-                    <li>Si el ganador reside fuera de la ciudad de Santo Domingo (pero dentro del ámbito territorial de la promoción), los costos de envío del premio correrán por cuenta de [Definir: EL ORGANIZADOR o EL GANADOR].</li>
-                    <li>Si el ganador no reclama su premio dentro de los [Número, ej: 30] días calendario posteriores a la primera notificación, o no cumple con los requisitos, perderá su derecho al premio y se procederá a contactar al primer suplente.</li>
-                </ol>
-
-                <h3>8. PROTECCIÓN DE DATOS PERSONALES:</h3>
-                <p>Al participar en esta promoción, los participantes autorizan expresamente a EL ORGANIZADOR a utilizar sus datos personales (nombre, CI, ciudad, celular, correo electrónico) con el fin de gestionar su compra del producto digital, entregar dicho producto, administrar su participación en el sorteo, contactar al ganador, entregar el premio y para fines publicitarios relacionados con esta y futuras promociones de MOVIL WIN, de conformidad con la Ley Orgánica de Protección de Datos Personales del Ecuador. Los datos no serán compartidos con terceros no relacionados con la ejecución de esta promoción sin el consentimiento previo del participante. El participante puede ejercer sus derechos de acceso, rectificación, cancelación y oposición contactando a [Tu Email o Medio de Contacto para Datos].</p>
-
-                <h3>9. ACEPTACIÓN DE LAS BASES:</h3>
-                <p>La adquisición del producto promocional y la consecuente participación en esta promoción implica el conocimiento y la aceptación íntegra e incondicional de las presentes bases y condiciones, así como de las decisiones que EL ORGANIZADOR pueda adoptar sobre cualquier cuestión no prevista en las mismas, siempre que estén justificadas y no perjudiquen los derechos de los participantes.</p>
-
-                <h3>10. MODIFICACIONES, CANCELACIÓN O SUSPENSIÓN:</h3>
-                <p>EL ORGANIZADOR se reserva el derecho de modificar, cancelar, suspender o ampliar la presente promoción o estas bases en cualquier momento, por circunstancias imprevistas o de fuerza mayor que así lo justifiquen, sin que ello genere derecho a reclamo o indemnización alguna a favor de los participantes. Cualquier modificación será debidamente comunicada a través de la página web y/o redes sociales de MOVIL WIN.</p>
-
-                <h3>11. RESPONSABILIDAD:</h3>
-                <p>EL ORGANIZADOR no se responsabiliza por ningún daño o perjuicio que pudiera sufrir el ganador o terceros con motivo u ocasión de la participación en la presente promoción y/o del uso o disfrute del premio otorgado, ni por fallas en la red de internet, líneas telefónicas, o cualquier otra circunstancia ajena a su control que pudiera afectar la participación o la entrega del producto digital.</p>
-
-                <h3>12. LEGISLACIÓN APLICABLE Y JURISDICCIÓN:</h3>
-                <p>Para cualquier controversia que pudiera surgir en relación con esta promoción y sus bases, las partes se someten a la legislación de la República del Ecuador y a la jurisdicción de los jueces competentes de la ciudad de Santo Domingo.</p>
-
-                <h3>13. CONSULTAS:</h3>
-                <p>Para cualquier duda o consulta sobre la presente promoción, los interesados pueden contactar a MOVIL WIN a través de WhatsApp al [Tu Número de WhatsApp] o al correo electrónico [Tu Email de Contacto].</p>
-                <p>Santo Domingo, [Fecha de Publicación de las Bases - DD de Mes de AAAA].</p>
-            </div>
+                <li>
+                    <h2>CONDICIONES GENERALES</h2>
+                    <ul>
+                        <li>Cualquier intento de fraude resultará en la descalificación inmediata del participante.</li>
+                        <li>El Organizador se reserva el derecho de modificar estas bases o cancelar el sorteo por motivos de fuerza mayor, comunicando cualquier cambio de forma oportuna.</li>
+                        <li>Este sorteo no está patrocinado ni administrado por Meta (Facebook, Instagram, WhatsApp) o cualquier otra red social.</li>
+                    </ul>
+                </li>
+                
+                <li>
+                    <h2>CONTACTO</h2>
+                    <p>Para cualquier duda sobre estas bases, puede contactarnos al correo: <strong>ceo@movilwin.com</strong> o a nuestro WhatsApp oficial.</p>
+                </li>
+            </ol>
         </section>
     </main>
-
+    
     <footer class="site-footer">
         <p>&copy; 2025 MOVIL WIN | Todos los derechos reservados.</p>
         <div class="social-links-footer">
-            <a href="https://wa.me/593963135510" target="_blank" rel="noopener noreferrer" aria-label="Contáctanos en WhatsApp"><i class="fab fa-whatsapp"></i></a>
-            <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Facebook"><i class="fab fa-facebook-f"></i></a>
-            <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://wa.me/593963135510" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
         </div>
     </footer>
     <script src="script.js"></script>

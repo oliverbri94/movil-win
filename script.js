@@ -159,7 +159,8 @@ function initializeRafflePage() {
     }
 
 
-    function iniciarContadorSincronizado(tiempoFinalizacion) {
+
+    function iniciarContadorSincronizado(tiempoFinalizacion, sorteoIdDelContador) {
         const countdownContainer = document.getElementById('topCountdownBanner');
         const timerDiv = document.getElementById('countdownTimer');
         if (!countdownContainer || !timerDiv) return;
@@ -170,15 +171,30 @@ function initializeRafflePage() {
 
         const actualizar = () => {
             const restante = tiempoFinalizacion - new Date().getTime();
+            
             if (restante < 0) {
                 clearInterval(window.countdownInterval);
                 countdownContainer.classList.add('oculto');
-                // Opcional: refrescar la página para mostrar el sorteo como activo
-                // location.reload(); 
+
+                // --- INICIO DE LA LÓGICA PARA GIRAR LA RUEDA ---
+                console.log(`¡Contador para sorteo ID ${sorteoIdDelContador} ha terminado!`);
+                
+                // Verificamos si el slide que se está mostrando es el del sorteo que acaba de terminar.
+                const sorteoVisible = sorteosDisponibles[premioActualIndex];
+                if (sorteoVisible && sorteoVisible.id_sorteo == sorteoIdDelContador) {
+                    console.log("El slide correcto está visible. Iniciando giro automático...");
+                    if (!estaGirando) { // Doble chequeo para evitar giros múltiples
+                    girarRuedaFrontView(true);
+                    }
+                } else {
+                    console.log("El slide del sorteo no está visible. Refrescando la página para sincronizar el estado.");
+                    // Si el usuario está viendo otro slide, un refresco es la forma más segura de sincronizar todo.
+                    location.reload();
+                }
+                // --- FIN DE LA LÓGICA ---
                 return;
             }
             
-            // Esta es la línea corregida y limpia
             const horas = Math.floor(restante / (1000 * 60 * 60));
             const minutos = Math.floor((restante % (1000 * 60 * 60)) / (1000 * 60));
             const segundos = Math.floor((restante % (1000 * 60)) / 1000);
@@ -737,7 +753,7 @@ function initializeRafflePage() {
                 
                 ${!esProximo ? `
                 <div class="contenedor-sorteo content-section">
-                    <h2 class="titulo-dorado" data-text="¡A GIRAR!">¡A GIRAR!</h2>
+                    <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
                     <p class="rueda-subtitulo">¡Mucha Suerte a Todos los Participantes!</p>
                     <div class="price-is-right-wheel-frame">
                         <div class="wheel-price-is-right-container">
@@ -904,17 +920,19 @@ function initializeRafflePage() {
     } catch (error) {
         console.error("Error inicializando animaciones de scroll:", error);
     }
+
     async function chequearEstadoGlobal() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/countdown-status`);
             const data = await response.json();
             if (data.isActive) {
-                iniciarContadorSincronizado(data.endTime);
+                // Ahora pasamos tanto la hora de finalización como el ID del sorteo
+                iniciarContadorSincronizado(data.endTime, data.sorteoId);
             }
         } catch(error) {
             console.error("Error chequeando estado del contador:", error);
         }
-    }    
+    }
     // --- Llamadas de Arranque ---
     cargarSorteosVisibles();
     mostrarGanadoresAnteriores();
