@@ -721,74 +721,54 @@ app.get('/api/admin/participantes-activos', requireAdminLogin, (req, res) => {
 
 // **RUTA POST PARTICIPANTES CON LÓGICA DE EMAIL/WHATSAPP**
 app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
-    console.log("-> Petición recibida para añadir participante:", req.body);
     const { id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, quantity, sorteo_id } = req.body;
-
     if (!id_documento || !nombre || !sorteo_id || !quantity) return res.status(400).json({ error: 'Datos incompletos' });
-    const numQuantity = parseInt(quantity, 10);
-    if (!sorteoInfo) {
-        return res.status(404).json({ error: "Sorteo no encontrado", message: `El sorteo con ID ${sorteo_id} no existe.` });
-    }
-    // 1. Forzamos que todos los valores sean números enteros antes de la operación matemática.
-    const meta_participaciones = parseInt(sorteoInfo.meta_participaciones, 10);
-    const participantes_actuales = parseInt(sorteoInfo.participantes_actuales, 10);
+    
     const cantidad_a_anadir = parseInt(quantity, 10);
-
-    // 2. Ahora la comparación matemática será correcta.
-    if ((participantes_actuales + cantidad_a_anadir) > meta_participaciones) {
-        const boletosRestantes = meta_participaciones - participantes_actuales;
-        return res.status(409).json({
-            error: "Cupo excedido",
-            message: `No se pueden añadir ${cantidad_a_anadir} boletos. Solo quedan ${boletosRestantes} cupos disponibles.`
-        });
-    }
-    if (!sorteoInfo) {
-        throw new Error(`El sorteo con ID ${sorteo_id} no existe.`);
-    }
-    if (!sorteoInfo.nombre_base_archivo_guia || sorteoInfo.nombre_base_archivo_guia.trim() === '') {
-        throw new Error(`El sorteo '${sorteoInfo.nombre_premio_display}' no tiene un 'Nombre Base Archivo Guía' asignado.`);
-    }
-
     const client = await dbClient.connect();
 
     try {
-        await client.query('BEGIN');
-
+        // --- INICIO DE LA CORRECCIÓN ---
+        // 1. OBTENEMOS LA INFORMACIÓN DEL SORTEO (ESTA PARTE FALTABA)
         const sorteoInfoSql = `SELECT *, (SELECT COUNT(*) FROM participaciones WHERE id_sorteo_config_fk = $1) as participantes_actuales FROM sorteos_config WHERE id_sorteo = $1`;
         const sorteoRes = await client.query(sorteoInfoSql, [sorteo_id]);
         const sorteoInfo = sorteoRes.rows[0];
-        
 
-        const sqlUpsertUnico = `
-            INSERT INTO datos_unicos_participantes (id_documento, nombre, ciudad, celular, email) 
-            VALUES ($1, $2, $3, $4, $5) 
-            ON CONFLICT(id_documento) DO UPDATE SET 
-                nombre = EXCLUDED.nombre, ciudad = EXCLUDED.ciudad, celular = EXCLUDED.celular, email = EXCLUDED.email;
-        `;
-        await client.query(sqlUpsertUnico, [id_documento, nombre, ciudad, celular, email]);
-
-        const nuevosBoletosIds = [];        
-        for (let i = 0; i < cantidad_a_anadir; i++) {
-            const result = await client.query(sqlInsertParticipacion, [id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, sorteo_id]);
-            nuevosBoletosIds.push(result.rows[0].orden_id);
+        // 2. REALIZAMOS LAS VALIDACIONES NECESARIAS
+        if (!sorteoInfo) {
+            throw new Error("El sorteo seleccionado no existe.");
         }
-        // 1. Obtenemos el número de boleto más alto para ESTE sorteo específico
+        const meta_participaciones = parseInt(sorteoInfo.meta_participaciones, 10);
+        const participantes_actuales = parseInt(sorteoInfo.participantes_actuales, 10);
+        if ((participantes_actuales + cantidad_a_anadir) > meta_participaciones) {
+            const boletosRestantes = meta_participaciones - participantes_actuales;
+            return res.status(409).json({
+                error: "Cupo excedido",
+                message: `No se pueden añadir ${cantidad_a_anadir} boletos. Solo quedan ${boletosRestantes} cupos disponibles.`
+            });
+        }
+        // --- FIN DE LA CORRECCIÓN ---
+
+        await client.query('BEGIN');
+        
+        const sqlUpsertUnico = `INSERT INTO datos_unicos_participantes (id_documento, nombre, ciudad, celular, email) VALUES ($1, $2, $3, $4, $5) ON CONFLICT(id_documento) DO UPDATE SET nombre = EXCLUDED.nombre, ciudad = EXCLUDED.ciudad, celular = EXCLUDED.celular, email = EXCLUDED.email;`;
+        await client.query(sqlUpsertUnico, [id_documento, nombre, ciudad, celular, email]);
+        
         const maxTicketSql = 'SELECT MAX(numero_boleto_sorteo) as max_num FROM participaciones WHERE id_sorteo_config_fk = $1';
         const maxTicketRes = await client.query(maxTicketSql, [sorteo_id]);
         let nextTicketNumber = (maxTicketRes.rows[0].max_num || 0) + 1;
 
-        // 2. Preparamos para guardar el nuevo número
         const sqlInsertParticipacion = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk, numero_boleto_sorteo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING numero_boleto_sorteo;`;
-        
         const nuevosBoletosNumeros = [];
         for (let i = 0; i < cantidad_a_anadir; i++) {
             const params = [id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, sorteo_id, nextTicketNumber];
             const result = await client.query(sqlInsertParticipacion, params);
             nuevosBoletosNumeros.push(result.rows[0].numero_boleto_sorteo);
-            nextTicketNumber++; // Incrementamos para el siguiente boleto
+            nextTicketNumber++;
         }
-        await client.query('COMMIT');
         
+        await client.query('COMMIT');
+
         const boletosTexto = `Tus números de boleto son: ${nuevosBoletosNumeros.join(', ')}.`;
 
         let linkWhatsApp = null;
