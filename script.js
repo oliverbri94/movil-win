@@ -158,6 +158,7 @@ function initializeRafflePage() {
         context.fillText(line, x, y);
     }
 
+
     function iniciarContadorSincronizado(tiempoFinalizacion) {
         const countdownContainer = document.getElementById('topCountdownBanner');
         const timerDiv = document.getElementById('countdownTimer');
@@ -165,7 +166,6 @@ function initializeRafflePage() {
 
         countdownContainer.classList.remove('oculto');
 
-        // Limpiamos cualquier intervalo anterior para evitar duplicados
         if (window.countdownInterval) clearInterval(window.countdownInterval);
 
         const actualizar = () => {
@@ -173,20 +173,23 @@ function initializeRafflePage() {
             if (restante < 0) {
                 clearInterval(window.countdownInterval);
                 countdownContainer.classList.add('oculto');
-                // Podrías añadir una lógica para que la página se refresque sola
+                // Opcional: refrescar la página para mostrar el sorteo como activo
                 // location.reload(); 
                 return;
             }
+            
+            // Esta es la línea corregida y limpia
             const horas = Math.floor(restante / (1000 * 60 * 60));
             const minutos = Math.floor((restante % (1000 * 60 * 60)) / (1000 * 60));
             const segundos = Math.floor((restante % (1000 * 60)) / 1000);
-            timerDiv.textContent = `<span class="math-inline">\{horas\.toString\(\)\.padStart\(2, '0'\)\}\:</span>{minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+            
+            timerDiv.textContent = `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
         };
-
-        actualizar(); // Llama una vez inmediatamente
-        window.countdownInterval = setInterval(actualizar, 1000); // Y luego cada segundo
-    }
         
+        actualizar();
+        window.countdownInterval = setInterval(actualizar, 1000);
+    }
+            
     function getMotivationalMessage(percentage) {
         if (percentage >= 100) return "¡Meta alcanzada! El sorteo será pronto.";
         if (percentage >= 95) return "¡Estamos a un paso! Tu oportunidad es AHORA.";
@@ -662,9 +665,6 @@ function initializeRafflePage() {
 
     // --- Funciones de Carga de Datos y Construcción de UI ---
     
-// Pega esta función completa en script.js, reemplazando la versión anterior.
-
-// En script.js, reemplaza tu función generarSlidesDelCarrusel completa por esta
 
 // En script.js, reemplaza tu función generarSlidesDelCarrusel completa por esta:
 
