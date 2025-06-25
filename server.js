@@ -831,11 +831,13 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
             transporter.sendMail(mailOptions).catch(emailError => console.error("⚠️ ERROR EN TAREA DE EMAIL:", emailError));
         }
         
-        // 5. ENVIAMOS LA RESPUESTA DE ÉXITO AL FRONTEND
+        // 5. ENVIAMOS LA RESPUESTA DE ÉXITO AL FRONTEND CON TODOS LOS DATOS
         res.status(201).json({ 
             message: `¡${cantidad_a_anadir} boleto(s) añadido(s) con éxito!`, 
-            boletos: nuevosBoletosNumeros
+            boletos: nuevosBoletosNumeros,
+            whatsappLink: linkWhatsApp // Se incluye el enlace para el botón
         });
+        // --- FIN DEL CÓDIGO RESTAURADO ---
 
     } catch (error) {
         await client.query('ROLLBACK');
