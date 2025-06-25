@@ -863,8 +863,19 @@ function initializeRafflePage() {
     } catch (error) {
         console.error("Error inicializando animaciones de scroll:", error);
     }
+    async function chequearEstadoGlobal() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/countdown-status`);
+            const data = await response.json();
+            if (data.isActive) {
+                iniciarContadorSincronizado(data.endTime);
+            }
+        } catch(error) {
+            console.error("Error chequeando estado del contador:", error);
+        }
+    }    
     // --- Llamadas de Arranque ---
     cargarSorteosVisibles();
     mostrarGanadoresAnteriores();
-    checkMainPageCountdownStatus();
+    chequearEstadoGlobal(); 
 }
