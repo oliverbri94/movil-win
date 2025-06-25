@@ -609,6 +609,19 @@ function initializeRafflePage() {
         }
     }
 
+    function mostrarBannerGanador(ganadorInfo) {
+        const countdownContainer = document.getElementById('topCountdownBanner');
+        const timerDiv = document.getElementById('countdownTimer');
+        const textDiv = document.getElementById('countdownText'); // Asumiendo que el texto tiene este ID
+
+        if (!countdownContainer || !timerDiv || !textDiv) return;
+
+        if (window.countdownInterval) clearInterval(window.countdownInterval);
+
+        textDiv.textContent = `¡Felicidades al ganador del ${ganadorInfo.nombre_premio_display}!`;
+        timerDiv.innerHTML = `<span class="winner-banner-name">🎉 ${formatNameForWheel(ganadorInfo.nombre)} 🎉</span>`;
+        countdownContainer.classList.remove('oculto');
+    }
 
     function finalizarGiroFrontView(ganador) {
         sorteoFinalizado = true;
@@ -915,16 +928,23 @@ function initializeRafflePage() {
         console.error("Error inicializando animaciones de scroll:", error);
     }
 
+
     async function chequearEstadoGlobal() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/countdown-status`);
             const data = await response.json();
+
             if (data.isActive) {
-                // Ahora pasamos tanto la hora de finalización como el ID del sorteo
-                iniciarContadorSincronizado(data.endTime, data.sorteoId);
+                if (data.mode === 'countdown') {
+                    // Si es un contador, lo iniciamos
+                    iniciarContadorSincronizado(data.endTime, data.sorteoId);
+                } else if (data.mode === 'winner') {
+                    // Si es un ganador, mostramos el banner persistente
+                    mostrarBannerGanador(data.ganador);
+                }
             }
         } catch(error) {
-            console.error("Error chequeando estado del contador:", error);
+            console.error("Error chequeando estado del banner:", error);
         }
     }
     // --- Llamadas de Arranque ---

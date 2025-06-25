@@ -440,27 +440,39 @@ app.post('/api/admin/start-countdown', requireAdminLogin, async (req, res) => {
     }
 });
 
-// RUTA PÚBLICA PARA OBTENER EL ESTADO DE LA CUENTA REGRESIVA
 app.get('/api/countdown-status', async (req, res) => {
-    // Buscamos si hay algún sorteo en estado 'countdown'
-    const sql = `SELECT id_sorteo, nombre_premio_display, countdown_end_time FROM sorteos_config WHERE status_sorteo = 'countdown' LIMIT 1`;
-    db.get(sql, [], (err, sorteo) => {
-        if (err) {
-            return res.status(500).json({ error: "Error en la base de datos." });
+    const client = await dbClient.connect();
+    try {
+        // Buscamos si hay algún sorteo en estado 'countdown'
+        const countdownSql = `SELECT id_sorteo, countdown_end_time FROM sorteos_config WHERE status_sorteo = 'countdown' LIMIT 1`;
+        const countdownRes = await client.query(countdownSql);
+
+        if (countdownRes.rows.length > 0) {
+            const sorteo = countdownRes.rows[0];
+            if (sorteo.countdown_end_time > new Date().getTime()) {
+                return res.json({ isActive: true, mode: 'countdown', endTime: sorteo.countdown_end_time, sorteoId: sorteo.id_sorteo });
+            }
         }
-        if (sorteo && sorteo.countdown_end_time > new Date().getTime()) {
-            // Si existe y el tiempo no ha expirado, enviamos los datos
-            res.json({
-                isActive: true,
-                endTime: sorteo.countdown_end_time,
-                sorteoId: sorteo.id_sorteo,
-                premio: sorteo.nombre_premio_display
-            });
-        } else {
-            // Si no hay ninguno o ya expiró, enviamos que no está activo
-            res.json({ isActive: false });
+
+        // --- INICIO DE LA NUEVA LÓGICA ---
+        // Si no hay contador, buscamos si hay un ganador reciente ('finalizado')
+        const winnerSql = `SELECT g.nombre, s.nombre_premio_display FROM ganadores g JOIN sorteos_config s ON g.id_sorteo_config_fk = s.id_sorteo WHERE s.status_sorteo = 'finalizado' ORDER BY g.id_ganador DESC LIMIT 1`;
+        const winnerRes = await client.query(winnerSql);
+
+        if (winnerRes.rows.length > 0) {
+            return res.json({ isActive: true, mode: 'winner', ganador: winnerRes.rows[0] });
         }
-    });
+        // --- FIN DE LA NUEVA LÓGICA ---
+
+        // Si no hay ni contador ni ganador reciente, no se muestra nada
+        res.json({ isActive: false });
+
+    } catch(error) {
+        console.error("Error en /api/countdown-status:", error);
+        res.status(500).json({ error: "Error en la base de datos." });
+    } finally {
+        client.release();
+    }
 });
 app.post('/api/admin/sorteos', requireAdminLogin, async (req, res) => {
     try {
@@ -974,48 +986,50 @@ app.get('/api/admin/sorteo-participantes/:id_sorteo', requireAdminLogin, (req, r
 
 // En server.js, reemplaza esta ruta completa
 
+// En server.js, reemplaza esta ruta completa
+
 app.post('/api/admin/realizar-sorteo', requireAdminLogin, async (req, res) => {
     const { sorteo_id, premio_actual } = req.body;
-    if (!sorteo_id) {
-        return res.status(400).json({ error: "Falta el ID del sorteo." });
-    }
+    if (!sorteo_id) return res.status(400).json({ error: "Falta el ID del sorteo." });
 
     const client = await dbClient.connect();
     try {
-        // --- NUEVA LÓGICA DE VERIFICACIÓN ---
-        // 1. Revisamos si ya existe un ganador para este sorteo
+        await client.query('BEGIN'); // Inicia una transacción
+
         const checkWinnerSql = 'SELECT * FROM ganadores WHERE id_sorteo_config_fk = $1';
         const winnerResult = await client.query(checkWinnerSql, [sorteo_id]);
 
         if (winnerResult.rows.length > 0) {
-            // Si ya hay un ganador, lo devolvemos sin sortear de nuevo
-            console.log(`Un ganador ya existe para el sorteo ${sorteo_id}. Devolviendo datos existentes.`);
+            // Si ya hay un ganador, lo devolvemos sin hacer nada más
+            await client.query('ROLLBACK'); // No se necesita, pero es buena práctica
             const orden_id_ganador = winnerResult.rows[0].orden_id_participacion;
-            const participanteSql = 'SELECT orden_id, id_documento, nombre FROM participaciones WHERE orden_id = $1';
-            const participanteRes = await client.query(participanteSql, [orden_id_ganador]);
-            
-            return res.json({ success: true, ganador: participanteRes.rows[0], message: "Sorteo ya había finalizado." });
+            const pSql = 'SELECT orden_id, id_documento AS id, nombre FROM participaciones WHERE orden_id = $1';
+            const pRes = await client.query(pSql, [orden_id_ganador]);
+            return res.json({ success: true, ganador: pRes.rows[0], message: "Sorteo ya había finalizado." });
         }
-        // --- FIN DE LA LÓGICA DE VERIFICACIÓN ---
 
-        // 2. Si no hay ganador, procedemos con el sorteo como antes
-        const sqlSelect = "SELECT orden_id, id_documento, nombre, ciudad FROM participaciones WHERE id_sorteo_config_fk = $1";
+        const sqlSelect = "SELECT orden_id, id_documento AS id, nombre, ciudad FROM participaciones WHERE id_sorteo_config_fk = $1";
         const participacionesRes = await client.query(sqlSelect, [sorteo_id]);
         const participaciones = participacionesRes.rows;
-        
-        if (!participaciones || participaciones.length === 0) {
-            return res.status(400).json({ error: 'No hay participantes para este sorteo.' });
-        }
+        if (!participaciones || participaciones.length === 0) throw new Error('No hay participantes para este sorteo.');
 
         const ganador = participaciones[Math.floor(Math.random() * participaciones.length)];
         const fechaSorteo = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: 'long', day: 'numeric' });
 
         const sqlInsert = `INSERT INTO ganadores (nombre, ciudad, id_participante, orden_id_participacion, premio, fecha, id_sorteo_config_fk) VALUES ($1, $2, $3, $4, $5, $6, $7)`;
-        await client.query(sqlInsert, [ganador.nombre, ganador.ciudad || "N/A", ganador.id_documento, ganador.orden_id, premio_actual, fechaSorteo, sorteo_id]);
-        
+        await client.query(sqlInsert, [ganador.nombre, ganador.ciudad || "N/A", ganador.id, ganador.orden_id, premio_actual, fechaSorteo, sorteo_id]);
+
+        // --- INICIO DE LA MODIFICACIÓN ---
+        // Actualizamos el estado del sorteo a 'finalizado' para que el banner persista
+        const updateStatusSql = `UPDATE sorteos_config SET status_sorteo = 'finalizado' WHERE id_sorteo = $1`;
+        await client.query(updateStatusSql, [sorteo_id]);
+        // --- FIN DE LA MODIFICACIÓN ---
+
+        await client.query('COMMIT'); // Confirma todos los cambios
         res.json({ success: true, ganador: ganador, message: `¡Sorteo realizado con éxito!` });
 
     } catch(error) {
+        await client.query('ROLLBACK'); // Revierte todo si algo falla
         console.error("Error realizando el sorteo:", error);
         res.status(500).json({ error: "Error de servidor al realizar el sorteo." });
     } finally {
