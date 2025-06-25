@@ -486,6 +486,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (participantListUl) participantListUl.innerHTML = '';
             if (currentCountSpan) currentCountSpan.textContent = '0';
             if (tbodyListaSorteos) tbodyListaSorteos.innerHTML = '';
+
+            // --- AÑADE ESTE CÓDIGO ---
+            if (e.target.closest('.btn-eliminar')) {
+                const boton = e.target.closest('.btn-eliminar');
+                const sorteoId = boton.dataset.id;
+                const sorteoNombre = boton.dataset.nombre;
+
+                // Se pide una confirmación doble para evitar errores
+                const confirmacion1 = prompt(`¡ACCIÓN IRREVERSIBLE!\n\nEstás a punto de eliminar el sorteo "${sorteoNombre}" y TODOS sus boletos asociados. Esta acción no se puede deshacer.\n\nPara confirmar, escribe la palabra ELIMINAR en mayúsculas:`);
+
+                if (confirmacion1 === "ELIMINAR") {
+                    const confirmacion2 = confirm("¿Estás absolutamente seguro?");
+                    if (confirmacion2) {
+                        handleEliminarSorteo(sorteoId);
+                    }
+                } else {
+                    alert("Eliminación cancelada.");
+                }
+            }
+            // --- FIN DEL CÓDIGO A AÑADIR ---
         }
     }
 
@@ -696,8 +716,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Lógica de Gestión de Sorteos ---
 
     /**
-     * Carga la lista de todos los sorteos configurados en la tabla.
      */
+    // En admin.js, reemplaza tu función cargarListaSorteos completa
+
     async function cargarListaSorteos() {
         if (!tbodyListaSorteos || !loaderListaSorteos) return;
         loaderListaSorteos.classList.remove('oculto');
@@ -706,6 +727,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`, { credentials: 'include' });
             if (!response.ok) throw new Error((await response.json()).error || 'Error de red');
             const sorteos = await response.json();
+            adminSorteosData = sorteos;
 
             if (sorteos.length === 0) {
                 tbodyListaSorteos.innerHTML = '<tr><td colspan="7">No hay sorteos configurados.</td></tr>';
@@ -713,12 +735,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 sorteos.forEach(sorteo => {
                     const tr = document.createElement('tr');
                     tr.className = sorteo.status_sorteo === 'activo' ? 'sorteo-activo-row' : '';
-                    // HTML con los atributos data-label añadidos 👇
                     tr.innerHTML = `
                         <td data-label="ID">${sorteo.id_sorteo}</td>
                         <td data-label="Premio">${sorteo.nombre_premio_display}</td>
-                        <td data-label="Guía Base">${sorteo.nombre_base_archivo_guia}</td>
-                        <td data-label="Meta">${sorteo.meta_participaciones}</td>
+                        <td data-label="Meta">${sorteo.participantes_actuales} / ${sorteo.meta_participaciones}</td>
                         <td data-label="Status"><span class="status-${sorteo.status_sorteo}">${sorteo.status_sorteo}</span></td>
                         <td data-label="Acciones">
                             <button class="accion-btn btn-editar" data-id="${sorteo.id_sorteo}" title="Editar Sorteo"><i class="fas fa-edit"></i></button>
@@ -728,7 +748,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button class="accion-btn btn-finalizar" data-id="${sorteo.id_sorteo}" title="Finalizar Sorteo" ${sorteo.status_sorteo === 'completado' ? 'disabled' : ''}>
                                 <i class="fas fa-archive"></i>
                             </button>
-                        </td>
+                            <button class="accion-btn btn-eliminar" data-id="${sorteo.id_sorteo}" data-nombre="${sorteo.nombre_premio_display}" title="Eliminar Sorteo">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            </td>
                         <td data-label="Historial">
                             <button class="accion-btn btn-historial" data-id="${sorteo.id_sorteo}" data-premio="${sorteo.nombre_premio_display}" title="Ver Historial" ${sorteo.status_sorteo === 'programado' ? 'disabled' : ''}>
                                 <i class="fas fa-history"></i>
@@ -744,7 +767,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             loaderListaSorteos.classList.add('oculto');
         }
     }
-
     /**
      * Prepara el formulario para editar un sorteo existente.
      * @param {object} sorteo - El objeto del sorteo a editar.
@@ -1037,6 +1059,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
         });
+    }
+
+    async function handleEliminarSorteo(sorteoId) {
+        showGenericStatusMessage(statusGestionSorteo, 'Eliminando sorteo, por favor espera...');
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/sorteos/${sorteoId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || result.error);
+
+            showGenericStatusMessage(statusGestionSorteo, result.message, false);
+            await cargarListaSorteos(); // Recarga la lista para que el sorteo eliminado desaparezca
+
+        } catch (error) {
+            console.error("Error al eliminar sorteo:", error);
+            showGenericStatusMessage(statusGestionSorteo, `Error: ${error.message}`, true);
+        }
     }
     function renderTopAffiliatesList(data) {
         const listElement = document.getElementById('topAffiliatesList');
