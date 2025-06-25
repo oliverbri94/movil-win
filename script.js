@@ -423,7 +423,6 @@ function initializeRafflePage() {
                  drawFrontWheel([]); // Dibuja el estado vacío si el canvas existe pero el sorteo es programado
             }
         }
-        checkMainPageCountdownStatus();
     }
 
     async function cargarSorteosVisibles() {
