@@ -691,7 +691,6 @@ function initializeRafflePage() {
     // --- Funciones de Carga de Datos y Construcción de UI ---
     
 
-// En script.js, reemplaza tu función generarSlidesDelCarrusel completa por esta:
 
     async function generarSlidesDelCarrusel() {
         if (!prizeCarouselTrack) return;
@@ -725,10 +724,7 @@ function initializeRafflePage() {
                 motivationalMessage = getMotivationalMessage(percentage);
             }
 
-            // --- INICIO DE LA MODIFICACIÓN ---
-            // 1. Llamamos a nuestra nueva función para generar el HTML de los mini paquetes
             const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json);
-            // --- FIN DE LA MODIFICACIÓN ---
 
             slideWrapper.innerHTML = `
                 <div class="prize-carousel-slide" data-sorteo-id="${sorteo.id_sorteo || 'proximo'}">
@@ -738,9 +734,7 @@ function initializeRafflePage() {
                     <div class="prize-info-container">
                         <h2 class="prize-title">${tituloMostrado}</h2>
                         
-                        <div class="mini-package-selector" style="${esProximo ? 'display: none;' : ''}">
-                            ${miniPaquetesHTML}
-                        </div>
+                        <div class="mini-package-selector" style="${esProximo ? 'display: none;' : ''}">${miniPaquetesHTML}</div>
 
                         <div class="progress-info-wrapper" style="${esProximo ? 'display: none;' : ''}">
                             <div class="progress-bar-wrapper">
@@ -757,12 +751,22 @@ function initializeRafflePage() {
                             <div class="loader-container oculto"></div>
                             <ol class="top-participants-list"></ol>
                         </div>
-                    </div>
+
+                        <div class="winner-card-container oculto">
+                            <div class="winner-card">
+                                <h3>¡Tenemos un Ganador!</h3>
+                                <p class="winner-prize"></p>
+                                <p class="winner-name"></p>
+                                <p class="winner-id"></p>
+                                <p class="winner-contact-note">¡Nos pondremos en contacto contigo pronto!</p>
+                            </div>
+                        </div>
+                        </div>
                 </div>
                 
                 ${!esProximo ? `
                 <div class="contenedor-sorteo content-section">
-                    <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
+                    <h2 class="titulo-dorado" data-text="¡A GIRAR!">¡A GIRAR!</h2>
                     <p class="rueda-subtitulo">¡Mucha Suerte a Todos los Participantes!</p>
                     <div class="price-is-right-wheel-frame">
                         <div class="wheel-price-is-right-container">
@@ -791,7 +795,6 @@ function initializeRafflePage() {
             });
         }
     }
-
     async function actualizarTopParticipantes(sorteoId, slideElement) {
         const listElement = slideElement.querySelector('.top-participants-list');
         const loader = slideElement.querySelector('.top-participants-wrapper .loader-container');
