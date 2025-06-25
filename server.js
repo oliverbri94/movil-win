@@ -565,6 +565,51 @@ app.post('/api/admin/sorteos/finalizar', requireAdminLogin, (req, res) => {
         res.json({ success: true, message: `Sorteo ID ${sorteo_id} finalizado.` });
     });
 });
+// En server.js, AÑADE esta nueva ruta
+
+// RUTA PARA ELIMINAR UN SORTEO (Y SUS PARTICIPACIONES ASOCIADAS)
+app.delete('/api/admin/sorteos/:id_sorteo', requireAdminLogin, async (req, res) => {
+    const { id_sorteo } = req.params;
+    if (!id_sorteo) {
+        return res.status(400).json({ error: "No se proporcionó un ID de sorteo." });
+    }
+
+    const client = await dbClient.connect();
+
+    try {
+        // --- INICIO DE LA TRANSACCIÓN SEGURA ---
+        await client.query('BEGIN');
+
+        // Paso 1: Eliminar todas las participaciones asociadas a este sorteo.
+        // Esto es crucial para mantener la integridad de la base de datos.
+        const deleteParticipationsSql = `DELETE FROM participaciones WHERE id_sorteo_config_fk = $1`;
+        await client.query(deleteParticipationsSql, [id_sorteo]);
+
+        // Paso 2: Eliminar el sorteo principal de la tabla de configuración.
+        const deleteSorteoSql = `DELETE FROM sorteos_config WHERE id_sorteo = $1`;
+        const result = await client.query(deleteSorteoSql, [id_sorteo]);
+
+        // Si no se eliminó ninguna fila, significa que el sorteo no existía.
+        if (result.rowCount === 0) {
+            throw new Error("Sorteo no encontrado para eliminar.");
+        }
+
+        // Paso 3: Si todo fue bien, confirma la transacción.
+        await client.query('COMMIT');
+        // --- FIN DE LA TRANSACCIÓN ---
+
+        res.json({ success: true, message: `Sorteo ID ${id_sorteo} y todas sus participaciones han sido eliminados.` });
+
+    } catch (error) {
+        // Si algo falla, revierte todos los cambios.
+        await client.query('ROLLBACK');
+        console.error("Error al eliminar el sorteo:", error);
+        res.status(500).json({ error: 'Error en la base de datos al eliminar el sorteo.', message: error.message });
+    } finally {
+        // Libera la conexión a la base de datos.
+        client.release();
+    }
+});
 
 
 // ===============================

@@ -1068,13 +1068,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 method: 'DELETE',
                 credentials: 'include'
             });
-
             const result = await response.json();
             if (!response.ok) throw new Error(result.message || result.error);
-
             showGenericStatusMessage(statusGestionSorteo, result.message, false);
-            await cargarListaSorteos(); // Recarga la lista para que el sorteo eliminado desaparezca
-
+            await cargarListaSorteos();
         } catch (error) {
             console.error("Error al eliminar sorteo:", error);
             showGenericStatusMessage(statusGestionSorteo, `Error: ${error.message}`, true);
@@ -1333,34 +1330,62 @@ document.addEventListener('DOMContentLoaded', async () => {
     sorteoDestinoSelect?.addEventListener('change', updateRaffleStatsDisplay);
 
     // Para la tabla de gestión de sorteos (editar, activar, etc.)
-    tbodyListaSorteos?.addEventListener('click', async (event) => {
-        const target = event.target.closest('button.accion-btn');
-        if (!target) return;
-        
-        const sorteoId = target.dataset.id;
-        if (!sorteoId) return;
 
-        if (target.classList.contains('btn-editar')) {
-            showGenericStatusMessage(statusGestionSorteo, `Cargando datos del sorteo ID ${sorteoId}...`);
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/admin/sorteos`, {
-                    credentials: 'include'
-                });
-                const sorteos = await response.json();
-                if (!response.ok) throw new Error(sorteos.error || "Error cargando sorteo");
-                const sorteoAEditar = sorteos.find(s => s.id_sorteo == sorteoId);
-                if (sorteoAEditar) prepararEdicionSorteo(sorteoAEditar);
-            } catch (error) { showGenericStatusMessage(statusGestionSorteo, `Error: ${error.message}`, true); }
-        } else if (target.classList.contains('btn-activar') || target.classList.contains('btn-desactivar')) {
-            const status = target.dataset.status;
-            await handleToggleActivarSorteo(sorteoId, status);
-        } else if (target.classList.contains('btn-finalizar')) {
-            await handleFinalizarSorteo(sorteoId);
-        } else if (target.classList.contains('btn-historial')) {
-            const premioNombre = target.dataset.premio;
-            await mostrarHistorialParticipantes(sorteoId, premioNombre);
-        }
-    });
+    tbodyListaSorteos?.addEventListener('click', async (event) => {
+        const target = event.target.closest('button.accion-btn');
+        if (!target) return; // Si no se hizo clic en un botón de acción, no hacer nada
+
+        const sorteoId = target.dataset.id;
+
+        // --- Lógica para cada tipo de botón ---
+
+        if (target.classList.contains('btn-editar')) {
+            if (!sorteoId) return;
+            showGenericStatusMessage(statusGestionSorteo, `Cargando datos del sorteo ID ${sorteoId}...`);
+            try {
+                // El adminSorteosData ya lo tenemos cargado, lo buscamos ahí
+                const sorteoAEditar = adminSorteosData.find(s => s.id_sorteo == sorteoId);
+                if (sorteoAEditar) {
+                    prepararEdicionSorteo(sorteoAEditar);
+                } else {
+                    throw new Error("Sorteo no encontrado en los datos locales.");
+                }
+            } catch (error) {
+                showGenericStatusMessage(statusGestionSorteo, `Error: ${error.message}`, true);
+            }
+        } 
+        else if (target.classList.contains('btn-activar') || target.classList.contains('btn-desactivar')) {
+            if (!sorteoId) return;
+            const status = target.dataset.status;
+            await handleToggleActivarSorteo(sorteoId, status);
+        } 
+        else if (target.classList.contains('btn-finalizar')) {
+            if (!sorteoId) return;
+            await handleFinalizarSorteo(sorteoId);
+        } 
+        else if (target.classList.contains('btn-historial')) {
+            if (!sorteoId) return;
+            const premioNombre = target.dataset.premio;
+            await mostrarHistorialParticipantes(sorteoId, premioNombre);
+        }
+        // --- INICIO DE LA LÓGICA DE ELIMINAR INTEGRADA ---
+        else if (target.classList.contains('btn-eliminar')) {
+            if (!sorteoId) return;
+            const sorteoNombre = target.dataset.nombre;
+
+            const confirmacion1 = prompt(`¡ACCIÓN IRREVERSIBLE!\n\nEstás a punto de eliminar el sorteo "${sorteoNombre}" y TODOS sus boletos asociados. Esta acción no se puede deshacer.\n\nPara confirmar, escribe la palabra ELIMINAR en mayúsculas:`);
+
+            if (confirmacion1 === "ELIMINAR") {
+                const confirmacion2 = confirm("¿Estás absolutamente seguro?");
+                if (confirmacion2) {
+                    handleEliminarSorteo(sorteoId);
+                }
+            } else if (confirmacion1 !== null) { // Solo muestra alerta si el usuario escribió algo incorrecto
+                alert("Eliminación cancelada. La palabra no coincidió.");
+            }
+        }
+        // --- FIN DE LA LÓGICA DE ELIMINAR ---
+    });
 
     // Para la tabla de gestión de ganadores (editar foto)
     const winnersTableBody = document.getElementById('tbodyListaGanadores');
