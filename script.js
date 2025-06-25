@@ -519,11 +519,14 @@ function initializeRafflePage() {
 
     // --- Lógica Principal del Sorteo ---
 
+
+
     async function girarRuedaFrontView(isAutomatic = false) {
         if (estaGirando || sorteoFinalizado || !participantes || participantes.length === 0) {
-            console.log("Giro prevenido. Razón:", {estaGirando, sorteoFinalizado});
+            console.log("Giro prevenido. Razón:", { estaGirando, sorteoFinalizado });
             return;
         }
+
         removeWheelEventListeners(wheelCanvas);
         estaGirando = true;
 
@@ -532,28 +535,30 @@ function initializeRafflePage() {
             const response = await fetch(`${API_BASE_URL}/api/admin/realizar-sorteo`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    sorteo_id: sorteoActual.id_sorteo, 
-                    premio_actual: sorteoActual.nombre_premio_display 
+                body: JSON.stringify({
+                    sorteo_id: sorteoActual.id_sorteo,
+                    premio_actual: sorteoActual.nombre_premio_display
                 }),
-                credentials: 'include' 
+                credentials: 'include'
             });
 
             const resultadoSorteo = await response.json();
-            if (!response.ok) throw new Error(resultadoSorteo.error || `Error ${response.status}`);
-            
+            if (!response.ok) {
+                throw new Error(resultadoSorteo.error || `Error ${response.status}`);
+            }
+
             const ganadorDelBackend = resultadoSorteo.ganador;
             const winnerParticipantIndex = participantes.findIndex(p => p.orden_id === ganadorDelBackend.orden_id);
-            if (winnerParticipantIndex === -1) throw new Error("Ganador no sincronizado con la lista local.");
+            if (winnerParticipantIndex === -1) {
+                throw new Error("El ganador devuelto por el servidor no se encontró en la lista local.");
+            }
 
             const totalContentHeight = participantes.length * SEGMENT_HEIGHT_FRONT;
             const pointerCenterY = wheelHeight / 2;
             const targetYOffsetFinal = (winnerParticipantIndex * SEGMENT_HEIGHT_FRONT) + (SEGMENT_HEIGHT_FRONT / 2) - pointerCenterY;
-            
             const vueltasCompletas = 10 + Math.floor(Math.random() * 4);
             const distanciaDeVueltas = vueltasCompletas * totalContentHeight;
             const distanciaHastaGanador = (targetYOffsetFinal - (currentYOffset % totalContentHeight) + totalContentHeight) % totalContentHeight;
-            
             const totalDistanceToTravel = distanciaDeVueltas + distanciaHastaGanador;
             const animationStartTime = Date.now();
             const animationDuration = 20000 + Math.random() * 5000;
@@ -564,29 +569,27 @@ function initializeRafflePage() {
                 const elapsedTime = now - animationStartTime;
                 let progress = Math.min(elapsedTime / animationDuration, 1);
                 const easedProgress = 1 - Math.pow(1 - progress, 4);
-
                 const animatedYOffset = startYOffsetAnim + totalDistanceToTravel * easedProgress;
-
-                // --- LÓGICA DEL MOTION BLUR ---
-                // Mientras la animación no haya llegado al 75%, aplicamos el desenfoque.
+                
                 if (progress < 0.75) {
                     wheelCanvas.classList.add('is-spinning-fast');
                 } else {
                     wheelCanvas.classList.remove('is-spinning-fast');
                 }
-                // --- FIN DE LA LÓGICA ---
-                // --- LÓGICA DE ANIMACIÓN DE LA CLAVIJA ---
+
                 const currentSegmentIndex = Math.floor(animatedYOffset / SEGMENT_HEIGHT_FRONT);
                 if (currentSegmentIndex !== lastSegmentIndex) {
-                    const clacker = wheelCanvas.closest('.sorteo-frame').querySelector('.clacker-container');
-                    if(clacker) {
-                        clacker.classList.remove('hit'); // Quita la clase para poder re-aplicarla
-                        void clacker.offsetWidth; // Truco para forzar al navegador a "refrescar" la animación
-                        clacker.classList.add('hit'); // Vuelve a aplicar la clase para la animación
+                    // --- INICIO DE LA CORRECCIÓN ---
+                    // Se actualiza el selector para que coincida con el HTML y CSS
+                    const clacker = wheelCanvas.closest('.price-is-right-wheel-frame').querySelector('.clacker-container');
+                    // --- FIN DE LA CORRECCIÓN ---
+                    if (clacker) {
+                        clacker.classList.remove('hit');
+                        void clacker.offsetWidth;
+                        clacker.classList.add('hit');
                     }
                     lastSegmentIndex = currentSegmentIndex;
                 }
-                // --- FIN DE LA LÓGICA ---
 
                 drawFrontWheel(participantes, animatedYOffset);
 
@@ -600,7 +603,9 @@ function initializeRafflePage() {
 
         } catch (error) {
             console.error("Error al realizar sorteo:", error);
+            alert(`Hubo un error al realizar el sorteo: ${error.message}`);
             estaGirando = false;
+            addWheelEventListeners(wheelCanvas);
         }
     }
 
