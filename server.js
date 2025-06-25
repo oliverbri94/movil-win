@@ -776,12 +776,15 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
         // 4. PREPARAMOS Y ENVIAMOS LAS NOTIFICACIONES
         const boletosTexto = `Tus números de boleto son: ${nuevosBoletosNumeros.join(', ')}.`;
         
+        // 4. PREPARAMOS Y ENVIAMOS LAS NOTIFICACIONES
+        
         let linkWhatsApp = null;
         if (celular) {
             let numeroFormateado = String(celular).trim().replace(/\D/g, '');
             if (numeroFormateado.length === 10 && numeroFormateado.startsWith('0')) {
                 numeroFormateado = `593${numeroFormateado.substring(1)}`;
             }
+            const boletosTexto = `Tus números de boleto son: ${nuevosBoletosNumeros.join(', ')}.`;
             const mensajeWhatsApp = `¡Hola, ${nombre}! Gracias por tu compra para el sorteo del ${sorteoInfo.nombre_premio_display}. ${boletosTexto} ¡Mucha suerte de parte de MOVIL WIN!`;
             linkWhatsApp = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensajeWhatsApp)}`;
         }
