@@ -535,11 +535,10 @@ function initializeRafflePage() {
             const response = await fetch(`${API_BASE_URL}/api/admin/realizar-sorteo`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    sorteo_id: sorteoActual.id_sorteo,
-                    premio_actual: sorteoActual.nombre_premio_display
-                }),
-                credentials: 'include'
+                body: JSON.stringify({ 
+                    sorteo_id: sorteoActual.id_sorteo, 
+                    premio_actual: sorteoActual.nombre_premio_display 
+                })
             });
 
             const resultadoSorteo = await response.json();

@@ -975,7 +975,7 @@ app.get('/api/admin/sorteo-participantes/:id_sorteo', requireAdminLogin, (req, r
 
 // En server.js, reemplaza esta ruta completa
 
-app.post('/api/admin/realizar-sorteo', requireAdminLogin, async (req, res) => {
+app.post('/api/admin/realizar-sorteo', async (req, res) => {
     const { sorteo_id, premio_actual } = req.body;
     if (!sorteo_id) return res.status(400).json({ error: "Falta el ID del sorteo." });
 
