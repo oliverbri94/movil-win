@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             sorteoData.paquetes_json.forEach(paquete => {
                 const option = document.createElement('option');
                 // Creamos un texto descriptivo para la opción
-                const optionText = `<span class="math-inline">\{paquete\.nombre\} \(</span>{paquete.boletos} x $${paquete.precio})`;
+                const optionText = '<span class="math-inline">\{paquete\.nombre\} \(</span>{paquete.boletos} x $${paquete.precio})';
                 option.value = optionText;
                 option.textContent = optionText;
                 packageSelect.appendChild(option);
