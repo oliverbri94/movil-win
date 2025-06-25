@@ -412,7 +412,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             fetchAndDisplayWinnersForAdmin() 
 
         ]);
-        checkAdminCountdownStatus();
     }
 
     /**
