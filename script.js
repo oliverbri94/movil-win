@@ -157,7 +157,36 @@ function initializeRafflePage() {
         }
         context.fillText(line, x, y);
     }
-    
+
+    function iniciarContadorSincronizado(tiempoFinalizacion) {
+        const countdownContainer = document.getElementById('topCountdownBanner');
+        const timerDiv = document.getElementById('countdownTimer');
+        if (!countdownContainer || !timerDiv) return;
+
+        countdownContainer.classList.remove('oculto');
+
+        // Limpiamos cualquier intervalo anterior para evitar duplicados
+        if (window.countdownInterval) clearInterval(window.countdownInterval);
+
+        const actualizar = () => {
+            const restante = tiempoFinalizacion - new Date().getTime();
+            if (restante < 0) {
+                clearInterval(window.countdownInterval);
+                countdownContainer.classList.add('oculto');
+                // Podrías añadir una lógica para que la página se refresque sola
+                // location.reload(); 
+                return;
+            }
+            const horas = Math.floor(restante / (1000 * 60 * 60));
+            const minutos = Math.floor((restante % (1000 * 60 * 60)) / (1000 * 60));
+            const segundos = Math.floor((restante % (1000 * 60)) / 1000);
+            timerDiv.textContent = `<span class="math-inline">\{horas\.toString\(\)\.padStart\(2, '0'\)\}\:</span>{minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+        };
+
+        actualizar(); // Llama una vez inmediatamente
+        window.countdownInterval = setInterval(actualizar, 1000); // Y luego cada segundo
+    }
+        
     function getMotivationalMessage(percentage) {
         if (percentage >= 100) return "¡Meta alcanzada! El sorteo será pronto.";
         if (percentage >= 95) return "¡Estamos a un paso! Tu oportunidad es AHORA.";
@@ -250,7 +279,7 @@ function initializeRafflePage() {
         // --- INICIO DE LA MODIFICACIÓN ---
         // 1. Dibuja un borde sutil para separar las casillas
         wheelCtx.strokeStyle = 'rgba(0, 0, 0, 0.4)'; // Color del borde (negro semi-transparente)
-        wheelCtx.lineWidth = 2; // Ancho del borde en píxeles
+        wheelCtx.lineWidth = 4; // Ancho del borde en píxeles
         wheelCtx.strokeRect(0, y, wheelWidth, SEGMENT_HEIGHT_FRONT);
         // --- FIN DE LA MODIFICACIÓN ---
 
@@ -803,96 +832,6 @@ function initializeRafflePage() {
     }
 
 
-    // --- Funciones de Cuenta Regresiva ---
-// REEMPLAZA ESTA FUNCIÓN COMPLETA
-// --- REEMPLAZA AMBAS FUNCIONES EN SCRIPT.JS CON ESTE BLOQUE COMPLETO ---
-
-// Primero, declaramos la variable del intervalo fuera de las funciones, 
-// para que ambas puedan "verla" y controlarla.
-let countdownInterval = null;
-
-function checkMainPageCountdownStatus() {
-    console.log("▶️ Verificando estado del contador al cargar la página...");
-    const tEndStorage = localStorage.getItem('sorteoTiempoFinalizacion');
-    const countdownContainer = document.getElementById('topCountdownBanner');
-    if (!countdownContainer) return;
-
-    if (tEndStorage) {
-        const tEnd = parseInt(tEndStorage);
-        // Solo si el tiempo es válido y en el futuro, iniciamos el proceso.
-        if (tEnd > new Date().getTime()) {
-            console.log("   ✅ Tiempo válido encontrado. Iniciando cuenta regresiva.");
-            countdownContainer.classList.remove('oculto');
-            
-            // Limpiamos cualquier intervalo anterior por seguridad
-            if (window.countdownInterval) clearInterval(window.countdownInterval);
-            
-            // Hacemos una llamada inicial para que el contador no espere 1s
-            actualizarDisplayCountdownPrincipal(tEnd);
-            
-            // Iniciamos el intervalo que actualizará el contador cada segundo
-            window.countdownInterval = setInterval(() => {
-                actualizarDisplayCountdownPrincipal(tEnd);
-            }, 1000);
-        }
-    } else {
-        // Si no hay nada en localStorage, nos aseguramos que el banner esté oculto.
-        countdownContainer.classList.add('oculto');
-    }
-}
-
-
-function actualizarDisplayCountdownPrincipal(tiempoFinalizacion) {
-    const timerDiv = document.getElementById('countdownTimer');
-    const countdownContainer = document.getElementById('topCountdownBanner');
-    if (!timerDiv || !countdownContainer) return;
-
-    const restante = tiempoFinalizacion - new Date().getTime();
-
-    // --- LÓGICA CORREGIDA PARA EL GIRO AUTOMÁTICO ---
-    if (restante < 0) {
-        console.log("   🔴 ¡Tiempo terminado! Realizando acciones finales...");
-        
-        // 1. Detenemos el "motor" del contador.
-        if (window.countdownInterval) clearInterval(window.countdownInterval);
-        
-        // 2. Ocultamos el banner.
-        countdownContainer.classList.add('oculto');
-        
-        // 3. Limpiamos todos los datos del localStorage.
-        localStorage.removeItem('sorteoTiempoFinalizacion');
-        localStorage.removeItem('sorteoIniciado');
-        localStorage.removeItem('sorteoIdParaGiro');
-        
-        // 4. LLAMAMOS DIRECTAMENTE AL GIRO DE LA RUEDA (¡YA NO MOSTRAMOS EL BOTÓN!).
-        if (!estaGirando) {
-            console.log("   🚀 ¡Iniciando el giro de la rueda automáticamente!");
-            girarRuedaFrontView(true);
-        }
-        
-        return; // Terminamos la ejecución de esta función aquí.
-    }
-    // --- FIN DE LA LÓGICA CORREGIDA ---
-
-
-    // El resto de la función (actualizar números y colores) se mantiene igual.
-    const horas = Math.floor(restante / (1000 * 60 * 60));
-    const minutos = Math.floor((restante % (1000 * 60 * 60)) / (1000 * 60));
-    const segundos = Math.floor((restante % (1000 * 60)) / 1000);
-    timerDiv.textContent = `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
-
-    const segundosTotales = restante / 1000;
-    if (segundosTotales <= 10) {
-        countdownContainer.classList.add('is-critical');
-        countdownContainer.classList.remove('is-urgent');
-    } else if (segundosTotales <= 30) {
-        countdownContainer.classList.add('is-urgent');
-        countdownContainer.classList.remove('is-critical');
-    } else {
-        countdownContainer.classList.remove('is-urgent');
-        countdownContainer.classList.remove('is-critical');
-    }
-}
     // --- Event Listeners ---
     function handleMouseDown(e) { if (!estaGirando) { isDragging = true; startY_Drag = e.clientY; startYOffset_Drag = currentYOffset; if(wheelCanvas) wheelCanvas.style.cursor = 'grabbing'; }}
     function handleMouseUpOrLeave() { isDragging = false; if(wheelCanvas) wheelCanvas.style.cursor = 'grab'; }

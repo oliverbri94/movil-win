@@ -397,7 +397,52 @@ app.get('/api/admin/sorteos', requireAdminLogin, (req, res) => {
     });
 });
 // --- REEMPLAZA LA RUTA DE AÑADIR SORTEO CON ESTA VERSIÓN ---
+// En server.js, AÑADE estas dos nuevas rutas
 
+// RUTA PARA INICIAR LA CUENTA REGRESIVA (protegida por admin)
+app.post('/api/admin/start-countdown', requireAdminLogin, async (req, res) => {
+    const { sorteo_id } = req.body;
+    if (!sorteo_id) {
+        return res.status(400).json({ error: "Falta el ID del sorteo." });
+    }
+
+    // Definimos la duración en milisegundos (ej: 1 hora = 60 * 60 * 1000)
+    const UNA_HORA_EN_MS = 60 * 60 * 1000;
+    const endTime = new Date().getTime() + UNA_HORA_EN_MS;
+
+    const sql = `UPDATE sorteos_config SET status_sorteo = 'countdown', countdown_end_time = $1 WHERE id_sorteo = $2`;
+    
+    db.run(sql, [endTime, sorteo_id], function(err) {
+        if (err) {
+            console.error("Error al iniciar la cuenta regresiva:", err);
+            return res.status(500).json({ error: "Error en la base de datos." });
+        }
+        res.json({ success: true, message: "Cuenta regresiva iniciada." });
+    });
+});
+
+// RUTA PÚBLICA PARA OBTENER EL ESTADO DE LA CUENTA REGRESIVA
+app.get('/api/countdown-status', async (req, res) => {
+    // Buscamos si hay algún sorteo en estado 'countdown'
+    const sql = `SELECT id_sorteo, nombre_premio_display, countdown_end_time FROM sorteos_config WHERE status_sorteo = 'countdown' LIMIT 1`;
+    db.get(sql, [], (err, sorteo) => {
+        if (err) {
+            return res.status(500).json({ error: "Error en la base de datos." });
+        }
+        if (sorteo && sorteo.countdown_end_time > new Date().getTime()) {
+            // Si existe y el tiempo no ha expirado, enviamos los datos
+            res.json({
+                isActive: true,
+                endTime: sorteo.countdown_end_time,
+                sorteoId: sorteo.id_sorteo,
+                premio: sorteo.nombre_premio_display
+            });
+        } else {
+            // Si no hay ninguno o ya expiró, enviamos que no está activo
+            res.json({ isActive: false });
+        }
+    });
+});
 app.post('/api/admin/sorteos', requireAdminLogin, async (req, res) => {
     try {
         // Añadimos paquetes_json a los datos que recibimos

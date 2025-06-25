@@ -1062,95 +1062,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     /**
      * Maneja el inicio de la cuenta regresiva global.
      */
-    // --- REEMPLAZA TU FUNCIÓN handleIniciarCuentaRegresiva CON ESTA VERSIÓN ---
-
-    // --- REEMPLAZA TU FUNCIÓN handleIniciarCuentaRegresiva EN admin.js CON ESTA ---
 
     async function handleIniciarCuentaRegresiva() {
         const sorteoIdSeleccionado = sorteoParaCuentaRegresivaSelect.value;
         if (!sorteoIdSeleccionado) {
-            showGenericStatusMessage(estadoCuentaRegresivaAdminDiv, 'Debes seleccionar un sorteo activo para iniciar la cuenta regresiva.', true);
-            return;
+            return showGenericStatusMessage(estadoCuentaRegresivaAdminDiv, 'Debes seleccionar un sorteo activo.', true);
         }
 
         const sorteoData = adminSorteosData.find(s => s.id_sorteo == sorteoIdSeleccionado);
-        if (!sorteoData) {
-            showGenericStatusMessage(estadoCuentaRegresivaAdminDiv, 'Error: No se encontraron los datos del sorteo seleccionado.', true);
+        if (!sorteoData || sorteoData.participantes_actuales < sorteoData.meta_participaciones) {
+            return showGenericStatusMessage(estadoCuentaRegresivaAdminDiv, 'No se puede iniciar. La meta de boletos aún no se ha alcanzado.', true, 8000);
+        }
+
+        if (!confirm(`¿Seguro que quieres iniciar la cuenta regresiva de 1 HORA para el sorteo '${sorteoData.nombre_premio_display}'? Esta acción es irreversible y será visible para todos los usuarios.`)) {
             return;
         }
 
-        const meta = sorteoData.meta_participaciones;
-        const actuales = sorteoData.participantes_actuales;
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/start-countdown`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sorteo_id: sorteoIdSeleccionado }),
+                credentials: 'include'
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error);
 
-        if (actuales < meta) {
-            const faltantes = meta - actuales;
-            const mensajeError = `No se puede iniciar el sorteo. La meta es de ${meta} boletos y solo hay ${actuales}. Faltan ${faltantes} boletos.`;
-            showGenericStatusMessage(estadoCuentaRegresivaAdminDiv, mensajeError, true, 10000);
-            return;
-        }
+            showGenericStatusMessage(statusGestionSorteo, "¡Cuenta regresiva iniciada para todos los usuarios!", false);
+            // Opcional: podrías llamar aquí a una función que actualice la UI del admin inmediatamente
 
-        // --- AJUSTE #1: Texto del confirm cambiado a 1 HORA ---
-        if (!confirm(`¿Estás seguro de que quieres iniciar la cuenta regresiva de 1 HORA para el sorteo '${sorteoData.nombre_premio_display}'? Esta acción es irreversible.`)) {
-            return;
-        }
-
-        // --- AJUSTE #2: Cálculo del tiempo cambiado a 1 HORA (60 minutos * 60 segundos * 1000 ms) ---
-        const tiempoFinalizacion = new Date().getTime() + (60 * 60 * 1000);
-
-        localStorage.setItem('sorteoTiempoFinalizacion', tiempoFinalizacion.toString());
-        localStorage.setItem('sorteoIniciado', 'true');
-        localStorage.setItem('sorteoIdParaGiro', sorteoIdSeleccionado.toString());
-        
-        console.log("Cuenta regresiva de 1 HORA iniciada por admin para sorteo ID:", sorteoIdSeleccionado);
-
-        checkAdminCountdownStatus();
-        showGenericStatusMessage(statusGestionSorteo, "¡Cuenta regresiva de 1 HORA iniciada!", false, 10000);
-    }
-
-    /**
-     * Revisa y actualiza el estado de la cuenta regresiva en el panel de admin.
-     */
-    function checkAdminCountdownStatus() {
-        const tiempoFinalizacionStorage = localStorage.getItem('sorteoTiempoFinalizacion');
-        const sorteoIniciadoAdmin = localStorage.getItem('sorteoIniciado');
-        
-        if (sorteoIniciadoAdmin === 'true' && tiempoFinalizacionStorage) {
-            const tiempoFinalizacion = parseInt(tiempoFinalizacionStorage);
-            if (tiempoFinalizacion > new Date().getTime()) {
-                if(btnIniciarCuentaRegresiva) btnIniciarCuentaRegresiva.disabled = true;
-                if(estadoCuentaRegresivaAdminDiv) estadoCuentaRegresivaAdminDiv.classList.remove('oculto');
-                
-                if (cuentaRegresivaIntervalAdmin) clearInterval(cuentaRegresivaIntervalAdmin);
-                cuentaRegresivaIntervalAdmin = setInterval(() => {
-                    actualizarDisplayCuentaRegresivaAdmin(tiempoFinalizacion);
-                }, 1000);
-            } else {
-                localStorage.removeItem('sorteoTiempoFinalizacion');
-                localStorage.removeItem('sorteoIniciado');
-                localStorage.removeItem('sorteoIdParaGiro');
-                if(btnIniciarCuentaRegresiva) btnIniciarCuentaRegresiva.disabled = false;
-            }
+        } catch (error) {
+            showGenericStatusMessage(estadoCuentaRegresivaAdminDiv, `Error: ${error.message}`, true);
         }
     }
 
-    /**
-     * Actualiza el texto del temporizador en el panel.
-     * @param {number} tiempoFinalizacion
-     */
-    function actualizarDisplayCuentaRegresivaAdmin(tiempoFinalizacion) {
-        if (!estadoCuentaRegresivaAdminDiv) return;
-        const restante = tiempoFinalizacion - new Date().getTime();
-
-        if (restante < 0) {
-            estadoCuentaRegresivaAdminDiv.innerHTML = "¡El sorteo debería haber comenzado!";
-            if (btnIniciarCuentaRegresiva) btnIniciarCuentaRegresiva.disabled = false;
-            clearInterval(cuentaRegresivaIntervalAdmin);
-            return;
-        }
-        const minutos = Math.floor((restante % (1000 * 60 * 60)) / (1000 * 60));
-        const segundos = Math.floor((restante % (1000 * 60)) / 1000);
-        estadoCuentaRegresivaAdminDiv.innerHTML = `Sorteo en curso: <span style="color:var(--clr-accent);">${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}</span>`;
-    }
 
 
     /**
