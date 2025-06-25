@@ -2512,3 +2512,25 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     opacity: 0.8;
     font-size: 0.8em;
 }
+
+/* ================================================ */
+/* --- CORRECCIÓN PARA RUEDA EN MÓVILES --- */
+/* ================================================ */
+
+@media (max-width: 767px) {
+    .contenedor-sorteo {
+        display: flex !important; /* Forzamos a que sea visible */
+        flex-direction: column;
+        height: auto !important; /* Altura automática */
+        min-height: 400px; /* Aseguramos una altura mínima para que se vea */
+        padding: 20px 10px !important; /* Restablecemos el padding */
+        margin-top: 20px !important; /* Restablecemos el margen */
+        overflow: visible !important; /* Permitimos que se vea todo el contenido */
+    }
+
+    .price-is-right-wheel-frame {
+        /* Aseguramos que el marco no sea demasiado grande para la pantalla */
+        width: 100%;
+        max-width: 320px; 
+    }
+}

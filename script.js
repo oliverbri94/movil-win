@@ -688,10 +688,14 @@ function initializeRafflePage() {
             console.error("No se encontró el .winner-card-container dentro del slide activo.");
         }
 
-        mostrarGanadoresAnteriores();
-    }
-    // --- Funciones de Carga de Datos y Construcción de UI ---
-    
+    setTimeout(() => {
+        console.log("Actualizando el banner superior con el resultado del ganador...");
+        chequearEstadoGlobal(); 
+    }, 2500); // 2.5 segundos de espera para dar tiempo a la animación
+    // --- FIN DE LA MODIFICACIÓN ---
+
+    mostrarGanadoresAnteriores();
+}
 
 
     async function generarSlidesDelCarrusel() {
@@ -959,3 +963,5 @@ function initializeRafflePage() {
     mostrarGanadoresAnteriores();
     chequearEstadoGlobal(); 
 }
+
+
