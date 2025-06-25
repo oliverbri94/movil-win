@@ -397,28 +397,43 @@ app.get('/api/admin/sorteos', requireAdminLogin, (req, res) => {
     });
 });
 // --- REEMPLAZA LA RUTA DE AÑADIR SORTEO CON ESTA VERSIÓN ---
-// En server.js, AÑADE estas dos nuevas rutas
 
-// RUTA PARA INICIAR LA CUENTA REGRESIVA (protegida por admin)
+
 app.post('/api/admin/start-countdown', requireAdminLogin, async (req, res) => {
-    const { sorteo_id } = req.body;
-    if (!sorteo_id) {
-        return res.status(400).json({ error: "Falta el ID del sorteo." });
-    }
-
-    // Definimos la duración en milisegundos (ej: 1 hora = 60 * 60 * 1000)
-    const UNA_HORA_EN_MS = 60 * 60 * 1000;
-    const endTime = new Date().getTime() + UNA_HORA_EN_MS;
-
-    const sql = `UPDATE sorteos_config SET status_sorteo = 'countdown', countdown_end_time = $1 WHERE id_sorteo = $2`;
-    
-    db.run(sql, [endTime, sorteo_id], function(err) {
-        if (err) {
-            console.error("Error al iniciar la cuenta regresiva:", err);
-            return res.status(500).json({ error: "Error en la base de datos." });
+    try {
+        const { sorteo_id } = req.body;
+        if (!sorteo_id) {
+            return res.status(400).json({ error: "Falta el ID del sorteo." });
         }
+
+        // Definimos la duración en milisegundos (1 hora)
+        const UNA_HORA_EN_MS = 60 * 60 * 1000;
+        const endTime = new Date().getTime() + UNA_HORA_EN_MS;
+
+        const sql = `UPDATE sorteos_config SET status_sorteo = 'countdown', countdown_end_time = $1 WHERE id_sorteo = $2`;
+        const params = [endTime, sorteo_id];
+
+        // Usamos el patrón de Promesa que es más seguro para operaciones asíncronas
+        const result = await new Promise((resolve, reject) => {
+            db.run(sql, params, function(err) {
+                if (err) return reject(err);
+                // 'this' contiene información sobre la operación, como el número de filas cambiadas
+                resolve(this);
+            });
+        });
+
+        // Verificamos si realmente se actualizó un sorteo
+        if (result.changes === 0) {
+            return res.status(404).json({ error: "Sorteo no encontrado para iniciar el conteo." });
+        }
+
         res.json({ success: true, message: "Cuenta regresiva iniciada." });
-    });
+
+    } catch (error) {
+        // Capturamos cualquier error que ocurra durante el proceso
+        console.error("Error al iniciar la cuenta regresiva:", error);
+        res.status(500).json({ error: "Error en la base de datos al iniciar la cuenta regresiva." });
+    }
 });
 
 // RUTA PÚBLICA PARA OBTENER EL ESTADO DE LA CUENTA REGRESIVA
