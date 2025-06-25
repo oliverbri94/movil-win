@@ -238,6 +238,60 @@ function initializeRafflePage() {
         });
     }
 
+    /**
+     * Genera el código HTML para los 2-3 botones de paquetes destacados.
+     * @param {Array<object>} paquetes - El array de paquetes de un sorteo.
+     * @returns {string} El string de HTML con los botones de los paquetes.
+     */
+    function generarHTMLMiniPaquetes(paquetes) {
+        if (!paquetes || paquetes.length === 0) {
+            return ''; // Si no hay paquetes, no devuelve nada.
+        }
+
+        // Buscamos el paquete individual (el que tiene 1 boleto)
+        const paqueteIndividual = paquetes.find(p => p.boletos === 1);
+
+        // Buscamos el paquete de "mejor valor" (el que más boletos tiene)
+        const paquetesMultiples = paquetes.filter(p => p.boletos > 1);
+        const paqueteMejorValor = paquetesMultiples.length > 0
+            ? paquetesMultiples.reduce((max, p) => (p.boletos > max.boletos ? p : max), paquetesMultiples[0])
+            : null;
+
+        let html = '';
+
+        // Creamos el botón para el paquete individual, si existe
+        if (paqueteIndividual) {
+            const mensaje = `Hola, quiero el paquete "${paqueteIndividual.nombre}" de ${paqueteIndividual.boletos} boleto(s) por $${paqueteIndividual.precio} para el sorteo MOVIL WIN!`;
+            html += `
+                <a href="https://wa.me/593963135510?text=${encodeURIComponent(mensaje)}" target="_blank" class="mini-package-btn">
+                    <strong>${paqueteIndividual.boletos} Boleto</strong>
+                    <span>por $${paqueteIndividual.precio}</span>
+                </a>
+            `;
+        }
+
+        // Creamos el botón para el paquete de mejor valor, si existe
+        if (paqueteMejorValor) {
+            const mensaje = `Hola, quiero el paquete "${paqueteMejorValor.nombre}" de ${paqueteMejorValor.boletos} boletos por $${paqueteMejorValor.precio} para el sorteo MOVIL WIN!`;
+            html += `
+                <a href="https://wa.me/593963135510?text=${encodeURIComponent(mensaje)}" target="_blank" class="mini-package-btn popular">
+                    <strong>${paqueteMejorValor.boletos} Boletos</strong>
+                    <span>por $${paqueteMejorValor.precio}</span>
+                    <span class="popular-tag">¡Recomendado!</span>
+                </a>
+            `;
+        }
+
+        // Siempre añadimos el botón "Ver Todos"
+        html += `
+            <a href="#paquetes-section" class="mini-package-btn all-packages">
+                <strong>Ver Todos</strong>
+                <span><i class="fas fa-arrow-down"></i></span>
+            </a>
+        `;
+
+        return html;
+    }
     // --- 3. FUNCIONES DE DIBUJO DE LA RULETA ---
 
 
@@ -612,6 +666,8 @@ function initializeRafflePage() {
 
 // En script.js, reemplaza tu función generarSlidesDelCarrusel completa por esta
 
+// En script.js, reemplaza tu función generarSlidesDelCarrusel completa por esta:
+
     async function generarSlidesDelCarrusel() {
         if (!prizeCarouselTrack) return;
         prizeCarouselTrack.innerHTML = '';
@@ -621,30 +677,22 @@ function initializeRafflePage() {
             slideWrapper.className = 'slide-wrapper';
             slideWrapper.style.cssText = 'width: 100%; flex-shrink: 0;';
             
-            // --- INICIO DE LA NUEVA LÓGICA ---
-            
-            // 1. Verificamos si el sorteo es 'programado'
             const esProximo = sorteo.status_sorteo === 'programado';
-
-            // 2. Definimos qué título y qué imagen se van a mostrar
+            
             let tituloMostrado = sorteo.nombre_premio_display;
             let mediaParaRenderizar = sorteo;
 
             if (esProximo) {
-                // Si es un sorteo programado, forzamos el texto y la imagen genéricos
                 tituloMostrado = "Próximo Gran Premio";
                 mediaParaRenderizar = {
                     imagen_url: 'images/proximo_sorteo.png',
                     nombre_premio_display: 'Próximo Sorteo',
-                    esProximo: true // Propiedad para que renderMedia aplique el filtro grayscale
+                    esProximo: true
                 };
             }
             
-            // --- FIN DE LA NUEVA LÓGICA ---
-
             let percentage = 0;
             let motivationalMessage = "¡El sorteo ha comenzado!";
-            
             if (!esProximo) {
                 const currentCount = sorteo.participantes_actuales || 0;
                 const goal = sorteo.meta_participaciones || 200;
@@ -652,33 +700,27 @@ function initializeRafflePage() {
                 motivationalMessage = getMotivationalMessage(percentage);
             }
 
+            // --- INICIO DE LA MODIFICACIÓN ---
+            // 1. Llamamos a nuestra nueva función para generar el HTML de los mini paquetes
+            const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json);
+            // --- FIN DE LA MODIFICACIÓN ---
+
             slideWrapper.innerHTML = `
                 <div class="prize-carousel-slide" data-sorteo-id="${sorteo.id_sorteo || 'proximo'}">
                     <div class="prize-image-container">
-                        ${renderMedia(mediaParaRenderizar)} 
+                        ${renderMedia(mediaParaRenderizar)}
                     </div>
                     <div class="prize-info-container">
                         <h2 class="prize-title">${tituloMostrado}</h2>
-
+                        
                         <div class="mini-package-selector" style="${esProximo ? 'display: none;' : ''}">
-                            <a href="https://wa.me/593963135510?text=Hola%2C%20quiero%20comprar%201%20boleto%20individual%20por%20%242." target="_blank" class="mini-package-btn">
-                                <strong>1 Boleto</strong>
-                                <span>por $2</span>
-                            </a>
-                            <a href="https://wa.me/593963135510?text=Hola%2C%20estoy%20interesado%20en%20el%20Pack%20Ahorro%20de%2015%20boletos%20por%20%2428." target="_blank" class="mini-package-btn popular">
-                                <strong>30 Boletos</strong>
-                                <span>por $55</span>
-                                <span class="popular-tag">¡Popular!</span>
-                            </a>
-                            <a href="#paquetes-section" class="mini-package-btn all-packages">
-                                <strong>Ver Todos</strong>
-                                <span><i class="fas fa-arrow-down"></i></span>
-                            </a>
+                            ${miniPaquetesHTML}
                         </div>
+
                         <div class="progress-info-wrapper" style="${esProximo ? 'display: none;' : ''}">
                             <div class="progress-bar-wrapper">
                                 <div class="progress-bar-fill" style="width: ${percentage.toFixed(2)}%;"></div>
-                                <span class="progress-bar-text">${percentage.toFixed(2)}%</span>
+                                <span class="progress-bar-text">${percentage.toFixed(0)}%</span>
                             </div>
                             <p class="motivational-text-integrated">${motivationalMessage}</p>
                         </div>
@@ -695,7 +737,7 @@ function initializeRafflePage() {
                 
                 ${!esProximo ? `
                 <div class="contenedor-sorteo content-section">
-                    <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
+                    <h2 class="titulo-dorado" data-text="¡A GIRAR!">¡A GIRAR!</h2>
                     <p class="rueda-subtitulo">¡Mucha Suerte a Todos los Participantes!</p>
                     <div class="price-is-right-wheel-frame">
                         <div class="wheel-price-is-right-container">
