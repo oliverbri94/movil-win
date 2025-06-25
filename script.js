@@ -609,15 +609,13 @@ function initializeRafflePage() {
         }
     }
 
-    function finalizarGiroFrontView(ganador) {
-        sorteoFinalizado = true; // <<<--- AÑADE ESTA LÍNEA AQUÍ ARRIBA
-        console.log("-> Giro finalizado. Ganador:", ganador);
-        estaGirando = false;
-        drawFrontWheel(participantes); // Vuelve a dibujar la rueda sin blur y con la barra de scroll
-        
-        const sorteoDelGanador = sorteosDisponibles[premioActualIndex];
-        finalWinnerInfo = { ...ganador, sorteo_id: sorteoDelGanador.id_sorteo };
 
+    function finalizarGiroFrontView(ganador) {
+        sorteoFinalizado = true;
+        console.log("-> Giro finalizado. El ganador es:", ganador);
+        estaGirando = false;
+
+        // Redibuja la rueda una última vez para asegurar que se centra en el ganador
         const winnerIndex = participantes.findIndex(p => p.orden_id === ganador.orden_id);
         if (winnerIndex !== -1) {
             const centerOfView = wheelHeight / 2;
@@ -626,68 +624,52 @@ function initializeRafflePage() {
             drawFrontWheel(participantes);
         }
 
+        const sorteoDelGanador = sorteosDisponibles[premioActualIndex];
         const activeSlide = prizeCarouselTrack.children[premioActualIndex];
         if (!activeSlide) {
             console.error("No se pudo encontrar el slide activo para mostrar el ganador.");
             return;
         }
+        
         const winnerCardContainer = activeSlide.querySelector('.winner-card-container');
         
         if (winnerCardContainer) {
             console.log("✅ Contenedor del ganador encontrado. Mostrando panel...");
-            // Llenamos la tarjeta con los datos del ganador
-            winnerCardContainer.querySelector('.winner-prize').textContent = `Se ha ganado un ${sorteoDelGanador.nombre_premio_display}`;
-            winnerCardContainer.querySelector('.winner-name').textContent = ganador.name;
-            winnerCardContainer.querySelector('.winner-id').textContent = `CI: ${formatConfidentialId(ganador.id)}`;
+            
+            // --- INICIO DE LA LÓGICA DE RELLENO ---
+            // Buscamos cada elemento y le asignamos el texto correcto
+            const prizeElement = winnerCardContainer.querySelector('.winner-prize');
+            const nameElement = winnerCardContainer.querySelector('.winner-name');
+            const idElement = winnerCardContainer.querySelector('.winner-id');
 
+            if (prizeElement) prizeElement.textContent = `Se ha ganado un ${sorteoDelGanador.nombre_premio_display}`;
+            if (nameElement) nameElement.textContent = formatNameForWheel(ganador.name);
+            if (idElement) idElement.textContent = formatConfidentialId(ganador.id);
+            // --- FIN DE LA LÓGICA DE RELLENO ---
+
+            winnerCardContainer.classList.remove('oculto');
+
+            // Lógica del confeti
             setTimeout(() => {
-                winnerCardContainer.classList.remove('oculto');
-            }, 500);
-
-
-            setTimeout(() => {
-                if (typeof confetti !== 'function') return; // Si la librería no cargó, no hacemos nada
-
-                console.log("🎉 Lanzando celebración de confeti...");
-
-                const duration = 5 * 1000; // 5 segundos de duración
+                if (typeof confetti !== 'function') return;
+                const duration = 5 * 1000;
                 const animationEnd = Date.now() + duration;
-                
-                // --- Cañonazos iniciales desde los lados ---
                 confetti({ particleCount: 80, spread: 60, origin: { x: 0 } });
                 confetti({ particleCount: 80, spread: 60, origin: { x: 1 } });
-
-                // --- Lluvia de confeti continua ---
-                const interval = setInterval(function() {
+                const interval = setInterval(() => {
                     const timeLeft = animationEnd - Date.now();
-
-                    // Si se acaba el tiempo, detenemos el intervalo
-                    if (timeLeft <= 0) {
-                        return clearInterval(interval);
-                    }
-
+                    if (timeLeft <= 0) return clearInterval(interval);
                     const particleCount = 50 * (timeLeft / duration);
-                    
-                    // Lanzamos dos chorros desde posiciones aleatorias en la parte superior
                     confetti({ particleCount, startVelocity: 30, spread: 360, origin: { x: Math.random(), y: Math.random() - 0.2 } });
-                    confetti({ particleCount, startVelocity: 30, spread: 360, origin: { x: Math.random(), y: Math.random() - 0.2 } });
+                }, 250);
+            }, 1000);
 
-                }, 250); // Cada 250ms lanzamos más confeti
-
-            }, 1000); // La celebración comienza 1 segundo después de que la rueda se detiene);
-
-            setTimeout(() => {
-                // Silenciamos el sonido para evitar el error NotAllowedError
-                // winnerSound.play();
-                console.log("Sonido de victoria omitido para mantener giro automático.");
-            }, 1200);
         } else {
-            console.error("❌ No se encontró el .winner-card-container dentro del slide activo.");
+            console.error("No se encontró el .winner-card-container dentro del slide activo.");
         }
 
         mostrarGanadoresAnteriores();
     }
-
     // --- Funciones de Carga de Datos y Construcción de UI ---
     
 

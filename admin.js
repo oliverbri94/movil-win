@@ -186,6 +186,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             anadirFilaPaquete({ nombre: 'Individual', precio: 2, boletos: 1 });
         }
     }
+    // En admin.js, AÑADE esta nueva función
+
+    /**
+     * Actualiza el menú desplegable de paquetes basándose en el sorteo seleccionado.
+     * @param {string} sorteoId - El ID del sorteo que el usuario ha seleccionado.
+     */
+    function actualizarDropdownPaquetesAdmin(sorteoId) {
+        const packageSelect = document.getElementById('packageChosen');
+        if (!packageSelect) return;
+
+        packageSelect.innerHTML = '<option value="">-- Seleccionar Paquete (si aplica) --</option>';
+
+        if (!sorteoId) return; // Si no se selecciona sorteo, dejarlo vacío
+
+        // Buscamos los datos del sorteo seleccionado en nuestro array de datos
+        const sorteoData = adminSorteosData.find(s => s.id_sorteo == sorteoId);
+
+        if (sorteoData && sorteoData.paquetes_json && sorteoData.paquetes_json.length > 0) {
+            sorteoData.paquetes_json.forEach(paquete => {
+                const option = document.createElement('option');
+                // Creamos un texto descriptivo para la opción
+                const optionText = `<span class="math-inline">\{paquete\.nombre\} \(</span>{paquete.boletos} x $${paquete.precio})`;
+                option.value = optionText;
+                option.textContent = optionText;
+                packageSelect.appendChild(option);
+            });
+        }
+    }
     /**
      * Actualiza el panel de estadísticas del sorteo seleccionado.
      */
@@ -1327,8 +1355,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     participantListUl?.addEventListener('click', handleDeleteParticipant);
     
     // Para el selector de sorteo (actualizar las estadísticas)
-    sorteoDestinoSelect?.addEventListener('change', updateRaffleStatsDisplay);
-
+    sorteoDestinoSelect?.addEventListener('change', (e) => {
+        // Al cambiar el sorteo, actualizamos tanto las estadísticas como el dropdown de paquetes.
+        updateRaffleStatsDisplay();
+        actualizarDropdownPaquetesAdmin(e.target.value);
+    });
     // Para la tabla de gestión de sorteos (editar, activar, etc.)
 
     tbodyListaSorteos?.addEventListener('click', async (event) => {
