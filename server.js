@@ -259,20 +259,36 @@ app.get('/api/sorteos-visibles', async (req, res) => {
     }
 });
 // CÓDIGO CORREGIDO
+
 app.get('/api/participantes', (req, res) => {
     const sorteoIdQuery = req.query.sorteoId;
     if (!sorteoIdQuery) {
         return res.json([]);
     }
-    // Corregimos la sintaxis de la consulta para PostgreSQL
-    const sql = `SELECT orden_id, id_documento, nombre FROM participaciones WHERE id_sorteo_config_fk = $1 ORDER BY orden_id DESC`;
+
+    // 1. AÑADIMOS 'numero_boleto_sorteo' a la consulta SQL
+    const sql = `
+        SELECT orden_id, id_documento, nombre, numero_boleto_sorteo 
+        FROM participaciones 
+        WHERE id_sorteo_config_fk = $1 
+        ORDER BY orden_id DESC
+    `;
     
     db.all(sql, [sorteoIdQuery], (err, rows) => {
         if (err) {
             console.error("Error fetching public participants:", err.message);
             return res.status(500).json({ error: 'Error interno del servidor.' });
         }
-        res.json(rows.map(row => ({ orden_id: row.orden_id, name: row.nombre, id: row.id_documento })));
+
+        // 2. AÑADIMOS 'numero_boleto_sorteo' a la respuesta JSON que se envía al frontend
+        const responseData = rows.map(row => ({
+            orden_id: row.orden_id,
+            name: row.nombre,
+            id: row.id_documento,
+            numero_boleto_sorteo: row.numero_boleto_sorteo 
+        }));
+        
+        res.json(responseData);
     });
 });
 
@@ -457,7 +473,7 @@ app.get('/api/countdown-status', async (req, res) => {
         
         // --- INICIO DE LA CORRECCIÓN ---
         // Se cambió "ORDER BY g.id_ganador" por "ORDER BY g.id"
-        const winnerSql = `SELECT g.nombre, s.nombre_premio_display, g.orden_id_participacion FROM ganadores g JOIN sorteos_config s ON g.id_sorteo_config_fk = s.id_sorteo WHERE s.status_sorteo = 'finalizado' ORDER BY g.id DESC LIMIT 1`;
+        const winnerSql = `SELECT g.nombre, s.nombre_premio_display, g.numero_boleto_ganador FROM ganadores g JOIN sorteos_config s ON g.id_sorteo_config_fk = s.id_sorteo WHERE s.status_sorteo = 'finalizado' ORDER BY g.id DESC LIMIT 1`;
 
         // --- FIN DE LA CORRECCIÓN ---
         
@@ -708,9 +724,7 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
     console.log("-> Petición recibida para añadir participante:", req.body);
     const { id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, quantity, sorteo_id } = req.body;
 
-    if (!id_documento || !nombre || !sorteo_id || !quantity) {
-        return res.status(400).json({ error: 'Datos incompletos', message: 'Faltan datos requeridos para el registro.' });
-    }
+    if (!id_documento || !nombre || !sorteo_id || !quantity) return res.status(400).json({ error: 'Datos incompletos' });
     const numQuantity = parseInt(quantity, 10);
 
     const client = await dbClient.connect();
@@ -755,17 +769,29 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
         `;
         await client.query(sqlUpsertUnico, [id_documento, nombre, ciudad, celular, email]);
 
-        const nuevosBoletosIds = [];
-        const sqlInsertParticipacion = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING orden_id;`;
-        
+        const nuevosBoletosIds = [];        
         for (let i = 0; i < cantidad_a_anadir; i++) {
             const result = await client.query(sqlInsertParticipacion, [id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, sorteo_id]);
             nuevosBoletosIds.push(result.rows[0].orden_id);
         }
+        // 1. Obtenemos el número de boleto más alto para ESTE sorteo específico
+        const maxTicketSql = 'SELECT MAX(numero_boleto_sorteo) as max_num FROM participaciones WHERE id_sorteo_config_fk = $1';
+        const maxTicketRes = await client.query(maxTicketSql, [sorteo_id]);
+        let nextTicketNumber = (maxTicketRes.rows[0].max_num || 0) + 1;
+
+        // 2. Preparamos para guardar el nuevo número
+        const sqlInsertParticipacion = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk, numero_boleto_sorteo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING numero_boleto_sorteo;`;
         
+        const nuevosBoletosNumeros = [];
+        for (let i = 0; i < cantidad_a_anadir; i++) {
+            const params = [id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, sorteo_id, nextTicketNumber];
+            const result = await client.query(sqlInsertParticipacion, params);
+            nuevosBoletosNumeros.push(result.rows[0].numero_boleto_sorteo);
+            nextTicketNumber++; // Incrementamos para el siguiente boleto
+        }
         await client.query('COMMIT');
         
-        const boletosTexto = `Tus números de boleto son: ${nuevosBoletosIds.join(', ')}.`;
+        const boletosTexto = `Tus números de boleto son: ${nuevosBoletosNumeros.join(', ')}.`;
 
         let linkWhatsApp = null;
         if (celular) {
@@ -822,7 +848,7 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
         res.status(201).json({
             message: `¡${cantidad_a_anadir} boleto(s) añadido(s) con éxito!`,
             whatsappLink: linkWhatsApp,
-            boletos: nuevosBoletosIds // Enviamos los IDs al frontend también
+            boletos: nuevosBoletosNumeros // Enviamos los nuevos números al frontend
         });
         // --- FIN DE LA MODIFICACIÓN #1 ---
 
@@ -995,7 +1021,7 @@ app.post('/api/admin/realizar-sorteo', async (req, res) => {
             return res.json({ success: true, ganador: pRes.rows[0], message: "Sorteo ya había finalizado." });
         }
 
-        const sqlSelect = "SELECT orden_id, id_documento AS id, nombre, ciudad FROM participaciones WHERE id_sorteo_config_fk = $1";
+        const sqlSelect = "SELECT orden_id, id_documento AS id, nombre, ciudad, numero_boleto_sorteo FROM participaciones WHERE id_sorteo_config_fk = $1";
         const participacionesRes = await client.query(sqlSelect, [sorteo_id]);
         const participaciones = participacionesRes.rows;
         if (!participaciones || participaciones.length === 0) throw new Error('No hay participantes para este sorteo.');
@@ -1003,7 +1029,7 @@ app.post('/api/admin/realizar-sorteo', async (req, res) => {
         const ganador = participaciones[Math.floor(Math.random() * participaciones.length)];
         const fechaSorteo = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        const sqlInsert = `INSERT INTO ganadores (nombre, ciudad, id_participante, orden_id_participacion, premio, fecha, id_sorteo_config_fk) VALUES ($1, $2, $3, $4, $5, $6, $7)`;
+        const sqlInsert = `INSERT INTO ganadores (..., orden_id_participacion, numero_boleto_ganador, ...) VALUES (..., $4, $5, ...)`;
         await client.query(sqlInsert, [ganador.nombre, ganador.ciudad || "N/A", ganador.id, ganador.orden_id, premio_actual, fechaSorteo, sorteo_id]);
 
         // --- INICIO DE LA MODIFICACIÓN ---

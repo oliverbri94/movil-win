@@ -337,7 +337,7 @@ function initializeRafflePage() {
 
         const formattedName = formatNameForWheel(participant.name);
         const confidentialId = formatConfidentialId(participant.id);
-        const ticketId = participant.orden_id;
+        const ticketId = participant.numero_boleto_sorteo;
 
         // Dibuja el fondo del área principal
         wheelCtx.fillStyle = segmentColor;
@@ -620,7 +620,7 @@ function initializeRafflePage() {
 
         const nombreFormateado = formatNameForWheel(ganadorInfo.nombre);
         // El objeto ganadorInfo ahora tiene la propiedad 'orden_id_participacion'
-        const boletoGanador = ganadorInfo.orden_id_participacion;
+        const boletoGanador = ganadorInfo.numero_boleto_ganador;
 
         titleDiv.textContent = `¡Felicidades al ganador del ${ganadorInfo.nombre_premio_display}!`;
         // Creamos un HTML más detallado para el banner
