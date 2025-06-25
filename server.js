@@ -728,16 +728,18 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
     const client = await dbClient.connect();
 
     try {
-        // --- INICIO DE LA CORRECCIÓN ---
-        // 1. OBTENEMOS LA INFORMACIÓN DEL SORTEO (ESTA PARTE FALTABA)
+        // 1. OBTENEMOS LA INFORMACIÓN DEL SORTEO Y VALIDAMOS
         const sorteoInfoSql = `SELECT *, (SELECT COUNT(*) FROM participaciones WHERE id_sorteo_config_fk = $1) as participantes_actuales FROM sorteos_config WHERE id_sorteo = $1`;
         const sorteoRes = await client.query(sorteoInfoSql, [sorteo_id]);
         const sorteoInfo = sorteoRes.rows[0];
 
-        // 2. REALIZAMOS LAS VALIDACIONES NECESARIAS
         if (!sorteoInfo) {
             throw new Error("El sorteo seleccionado no existe.");
         }
+        if (!sorteoInfo.nombre_base_archivo_guia) {
+            throw new Error(`El sorteo '${sorteoInfo.nombre_premio_display}' no tiene un 'Nombre Base Archivo Guía' configurado.`);
+        }
+
         const meta_participaciones = parseInt(sorteoInfo.meta_participaciones, 10);
         const participantes_actuales = parseInt(sorteoInfo.participantes_actuales, 10);
         if ((participantes_actuales + cantidad_a_anadir) > meta_participaciones) {
@@ -747,8 +749,8 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
                 message: `No se pueden añadir ${cantidad_a_anadir} boletos. Solo quedan ${boletosRestantes} cupos disponibles.`
             });
         }
-        // --- FIN DE LA CORRECCIÓN ---
 
+        // 2. INICIAMOS LA TRANSACCIÓN EN LA BASE DE DATOS
         await client.query('BEGIN');
         
         const sqlUpsertUnico = `INSERT INTO datos_unicos_participantes (id_documento, nombre, ciudad, celular, email) VALUES ($1, $2, $3, $4, $5) ON CONFLICT(id_documento) DO UPDATE SET nombre = EXCLUDED.nombre, ciudad = EXCLUDED.ciudad, celular = EXCLUDED.celular, email = EXCLUDED.email;`;
@@ -759,7 +761,8 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
         let nextTicketNumber = (maxTicketRes.rows[0].max_num || 0) + 1;
 
         const sqlInsertParticipacion = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk, numero_boleto_sorteo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING numero_boleto_sorteo;`;
-        const nuevosBoletosNumeros = [];
+        
+        const nuevosBoletosNumeros = []; // <--- Se define la variable correcta
         for (let i = 0; i < cantidad_a_anadir; i++) {
             const params = [id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, sorteo_id, nextTicketNumber];
             const result = await client.query(sqlInsertParticipacion, params);
@@ -767,10 +770,12 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
             nextTicketNumber++;
         }
         
+        // 3. CONFIRMAMOS LA TRANSACCIÓN
         await client.query('COMMIT');
-
+        
+        // 4. PREPARAMOS Y ENVIAMOS LAS NOTIFICACIONES
         const boletosTexto = `Tus números de boleto son: ${nuevosBoletosNumeros.join(', ')}.`;
-
+        
         let linkWhatsApp = null;
         if (celular) {
             let numeroFormateado = String(celular).trim().replace(/\D/g, '');
@@ -784,7 +789,7 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
         if (email && transporter) {
             const nombreArchivoGuia = `MiniGuia_${sorteoInfo.nombre_base_archivo_guia.replace(/\s+/g, '_')}.pdf`;
             const rutaGuia = path.join(__dirname, 'guias', nombreArchivoGuia);
-            const boletosTextoEmail = `<p>Para tu referencia, tus números de boleto asignados son:</p><ul style="padding-left: 20px;">${nuevosBoletosIds.map(id => `<li style="margin-bottom: 5px;">Boleto #${id}</li>`).join('')}</ul>`;
+            const boletosTextoEmail = `<p>Para tu referencia, tus números de boleto asignados son:</p><ul style="padding-left: 20px;">${nuevosBoletosNumeros.map(id => `<li style="margin-bottom: 5px;">Boleto #${id}</li>`).join('')}</ul>`;
             const mailOptions = {
                 from: `"MOVIL WIN" <${process.env.EMAIL_USER}>`,
                 to: email,
@@ -823,12 +828,11 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
             transporter.sendMail(mailOptions).catch(emailError => console.error("⚠️ ERROR EN TAREA DE EMAIL:", emailError));
         }
         
-        res.status(201).json({
-            message: `¡${cantidad_a_anadir} boleto(s) añadido(s) con éxito!`,
-            whatsappLink: linkWhatsApp,
-            boletos: nuevosBoletosNumeros // Enviamos los nuevos números al frontend
+        // 5. ENVIAMOS LA RESPUESTA DE ÉXITO AL FRONTEND
+        res.status(201).json({ 
+            message: `¡${cantidad_a_anadir} boleto(s) añadido(s) con éxito!`, 
+            boletos: nuevosBoletosNumeros
         });
-        // --- FIN DE LA MODIFICACIÓN #1 ---
 
     } catch (error) {
         await client.query('ROLLBACK');
