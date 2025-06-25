@@ -440,10 +440,11 @@ app.post('/api/admin/start-countdown', requireAdminLogin, async (req, res) => {
     }
 });
 
+// En server.js, reemplaza esta ruta completa
+
 app.get('/api/countdown-status', async (req, res) => {
     const client = await dbClient.connect();
     try {
-        // Buscamos si hay algún sorteo en estado 'countdown'
         const countdownSql = `SELECT id_sorteo, countdown_end_time FROM sorteos_config WHERE status_sorteo = 'countdown' LIMIT 1`;
         const countdownRes = await client.query(countdownSql);
 
@@ -453,18 +454,24 @@ app.get('/api/countdown-status', async (req, res) => {
                 return res.json({ isActive: true, mode: 'countdown', endTime: sorteo.countdown_end_time, sorteoId: sorteo.id_sorteo });
             }
         }
-
-        // --- INICIO DE LA NUEVA LÓGICA ---
-        // Si no hay contador, buscamos si hay un ganador reciente ('finalizado')
-        const winnerSql = `SELECT g.nombre, s.nombre_premio_display FROM ganadores g JOIN sorteos_config s ON g.id_sorteo_config_fk = s.id_sorteo WHERE s.status_sorteo = 'finalizado' ORDER BY g.id_ganador DESC LIMIT 1`;
+        
+        // --- INICIO DE LA CORRECCIÓN ---
+        // Se cambió "ORDER BY g.id_ganador" por "ORDER BY g.id"
+        const winnerSql = `
+            SELECT g.nombre, s.nombre_premio_display 
+            FROM ganadores g 
+            JOIN sorteos_config s ON g.id_sorteo_config_fk = s.id_sorteo 
+            WHERE s.status_sorteo = 'finalizado' 
+            ORDER BY g.id DESC LIMIT 1
+        `;
+        // --- FIN DE LA CORRECCIÓN ---
+        
         const winnerRes = await client.query(winnerSql);
-
+        
         if (winnerRes.rows.length > 0) {
             return res.json({ isActive: true, mode: 'winner', ganador: winnerRes.rows[0] });
         }
-        // --- FIN DE LA NUEVA LÓGICA ---
 
-        // Si no hay ni contador ni ganador reciente, no se muestra nada
         res.json({ isActive: false });
 
     } catch(error) {
