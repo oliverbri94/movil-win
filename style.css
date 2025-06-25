@@ -2506,3 +2506,9 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     font-style: italic;
     color: var(--clr-dark-text-alt);
 }
+/* Estilo para el número de boleto en el banner del ganador */
+.winner-banner-ticket {
+    font-weight: 400;
+    opacity: 0.8;
+    font-size: 0.8em;
+}

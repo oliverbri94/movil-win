@@ -457,13 +457,8 @@ app.get('/api/countdown-status', async (req, res) => {
         
         // --- INICIO DE LA CORRECCIÓN ---
         // Se cambió "ORDER BY g.id_ganador" por "ORDER BY g.id"
-        const winnerSql = `
-            SELECT g.nombre, s.nombre_premio_display 
-            FROM ganadores g 
-            JOIN sorteos_config s ON g.id_sorteo_config_fk = s.id_sorteo 
-            WHERE s.status_sorteo = 'finalizado' 
-            ORDER BY g.id DESC LIMIT 1
-        `;
+        const winnerSql = `SELECT g.nombre, s.nombre_premio_display, g.orden_id_participacion FROM ganadores g JOIN sorteos_config s ON g.id_sorteo_config_fk = s.id_sorteo WHERE s.status_sorteo = 'finalizado' ORDER BY g.id DESC LIMIT 1`;
+
         // --- FIN DE LA CORRECCIÓN ---
         
         const winnerRes = await client.query(winnerSql);
@@ -760,35 +755,43 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
         `;
         await client.query(sqlUpsertUnico, [id_documento, nombre, ciudad, celular, email]);
 
-        const sqlInsertParticipacion = `
-            INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
-        `;
-        for (let i = 0; i < numQuantity; i++) {
-            await client.query(sqlInsertParticipacion, [id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, sorteo_id]);
+        const nuevosBoletosIds = [];
+        const sqlInsertParticipacion = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING orden_id;`;
+        
+        for (let i = 0; i < cantidad_a_anadir; i++) {
+            const result = await client.query(sqlInsertParticipacion, [id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, sorteo_id]);
+            nuevosBoletosIds.push(result.rows[0].orden_id);
         }
         
         await client.query('COMMIT');
-        console.log(`-> Transacción completada. ${numQuantity} participaciones guardadas.`);
+        
+        const boletosTexto = `Tus números de boleto son: ${nuevosBoletosIds.join(', ')}.`;
 
-        // --- INICIO DE LA LÓGICA DE NOTIFICACIONES ---
-
+        let linkWhatsApp = null;
+        if (celular) {
+            let numeroFormateado = String(celular).trim().replace(/\D/g, '');
+            if (numeroFormateado.length === 10 && numeroFormateado.startsWith('0')) {
+                numeroFormateado = `593${numeroFormateado.substring(1)}`;
+            }
+            const mensajeWhatsApp = `¡Hola, ${nombre}! Gracias por tu compra para el sorteo del ${sorteoInfo.nombre_premio_display}. ${boletosTexto} ¡Mucha suerte de parte de MOVIL WIN!`;
+            linkWhatsApp = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensajeWhatsApp)}`;
+        }
         // 1. Envío de Correo Electrónico (si aplica)
         if (email && transporter) {
             const nombreArchivoGuia = `MiniGuia_${sorteoInfo.nombre_base_archivo_guia.replace(/\s+/g, '_')}.pdf`;
             const rutaGuia = path.join(__dirname, 'guias', nombreArchivoGuia);
-            
+            const boletosTextoEmail = `<p>Para tu referencia, tus números de boleto asignados son:</p><ul style="padding-left: 20px;">${nuevosBoletosIds.map(id => `<li style="margin-bottom: 5px;">Boleto #${id}</li>`).join('')}</ul>`;
             const mailOptions = {
                 from: `"MOVIL WIN" <${process.env.EMAIL_USER}>`,
                 to: email,
-                subject: `¡Gracias por participar en MOVIL WIN por el ${sorteoInfo.nombre_premio_display}!`,
+                subject: `✅ Confirmación de tu participación en el sorteo ${sorteoInfo.nombre_premio_display}`,
                 html: `
                     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
                         <div style="text-align: center; margin-bottom: 20px;">
                             <img src="cid:logo_movilwin" alt="MOVIL WIN Logo" style="max-width: 150px; height: auto;">
                         </div>
                         <h2 style="color: #7f5af0; text-align: center;">¡Hola, ${nombre}!</h2>
-                        <p>¡Gracias por adquirir tu Mini-Guía y obtener <strong>${numQuantity} boleto(s) digital(es)</strong> para el sorteo del <strong>${sorteoInfo.nombre_premio_display}</strong> en MOVIL WIN!</p>
+                        <p>¡Gracias por adquirir tu Mini-Guía y obtener <strong>${numQuantity} boleto(s) digital(es)</strong>.</p>${boletosTextoEmail} para el sorteo del <strong>${sorteoInfo.nombre_premio_display}</strong> en MOVIL WIN!</p>
                         <p>Estamos emocionados de tenerte a bordo. Tu Mini-Guía "${nombreArchivoGuia}" está adjunta a este correo.</p>
                         <p>Recuerda seguirnos en nuestras redes para estar al tanto de todas las novedades y próximos sorteos:</p>
                         <p style="text-align: center; margin: 20px 0;">
@@ -810,41 +813,18 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
                         </p>
                     </div>
                 `,
-                attachments: [
-                    {
-                        filename: 'logo.png',
-                        path: path.join(__dirname, 'images', 'logo.png'),
-                        cid: 'logo_movilwin' // Identificador único para la imagen
-                    }
-                ]
+                attachments: [{ filename: 'logo.png', path: path.join(__dirname, 'images', 'logo.png'), cid: 'logo_movilwin' }]
             };
-
-            if (fs.existsSync(rutaGuia)) {
-                mailOptions.attachments.push({ filename: nombreArchivoGuia, path: rutaGuia });
-            }
-            
-            // Enviamos el email en segundo plano y no detenemos la ejecución si falla
-            transporter.sendMail(mailOptions).catch(emailError => {
-                console.error("⚠️ ERROR EN TAREA DE EMAIL EN SEGUNDO PLANO:", emailError);
-            });
-        }
-
-        // 2. Preparación del enlace de WhatsApp
-        let linkWhatsApp = null;
-        if (celular) {
-            let numeroFormateado = String(celular).trim().replace(/\D/g, '');
-            if (numeroFormateado.length === 10 && numeroFormateado.startsWith('0')) {
-                numeroFormateado = `593${numeroFormateado.substring(1)}`;
-            }
-            const mensajeWhatsApp = `¡Hola, ${nombre}! Gracias por tu(s) ${numQuantity} boleto(s) digital(es) para el sorteo del ${sorteoInfo.nombre_premio_display}. Ya puedes ver tus boletos añadidos en www.movilwin.com ¡Mucha suerte!`;
-            linkWhatsApp = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensajeWhatsApp)}`;
+            if (fs.existsSync(rutaGuia)) mailOptions.attachments.push({ filename: nombreArchivoGuia, path: rutaGuia });
+            transporter.sendMail(mailOptions).catch(emailError => console.error("⚠️ ERROR EN TAREA DE EMAIL:", emailError));
         }
         
-        // 3. Respuesta final al cliente
         res.status(201).json({
-            message: `¡${numQuantity} boleto(s) digital(es) para ${nombre} añadidos con éxito!`,
-            whatsappLink: linkWhatsApp
+            message: `¡${cantidad_a_anadir} boleto(s) añadido(s) con éxito!`,
+            whatsappLink: linkWhatsApp,
+            boletos: nuevosBoletosIds // Enviamos los IDs al frontend también
         });
+        // --- FIN DE LA MODIFICACIÓN #1 ---
 
     } catch (error) {
         await client.query('ROLLBACK');

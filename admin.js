@@ -683,10 +683,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
             let successMessageContent = `<p>${result.message}</p>`;
 
+            if (result.boletos && result.boletos.length > 0) {
+                successMessageContent += `<p style="margin-top: 10px; font-weight: 600;">Boletos Asignados: ${result.boletos.join(', ')}</p>`;
+            }
+
             if (result.whatsappLink) {
                 successMessageContent += `<a href="${result.whatsappLink}" target="_blank" class="whatsapp-action-link" style="margin-top: 15px;"><i class="fab fa-whatsapp"></i> Enviar Confirmación por WhatsApp</a>`;
             }
-
             showGenericStatusMessage(statusMessage, successMessageContent, false, 20000);
             
             const sorteoAfectado = adminSorteosData.find(s => s.id_sorteo == payload.sorteo_id);

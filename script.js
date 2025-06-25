@@ -609,20 +609,27 @@ function initializeRafflePage() {
         }
     }
 
+// En script.js, reemplaza esta función
+
     function mostrarBannerGanador(ganadorInfo) {
         const countdownContainer = document.getElementById('topCountdownBanner');
         const timerDiv = document.getElementById('countdownTimer');
-        const textDiv = document.getElementById('countdownText'); // Asumiendo que el texto tiene este ID
-
-        if (!countdownContainer || !timerDiv || !textDiv) return;
+        const titleDiv = document.getElementById('countdownTitle');
+        if (!countdownContainer || !timerDiv || !titleDiv) return;
 
         if (window.countdownInterval) clearInterval(window.countdownInterval);
 
-        textDiv.textContent = `¡Felicidades al ganador del ${ganadorInfo.nombre_premio_display}!`;
-        timerDiv.innerHTML = `<span class="winner-banner-name">🎉 ${formatNameForWheel(ganadorInfo.nombre)} 🎉</span>`;
-        countdownContainer.classList.remove('oculto');
-    }
+        const nombreFormateado = formatNameForWheel(ganadorInfo.nombre);
+        // El objeto ganadorInfo ahora tiene la propiedad 'orden_id_participacion'
+        const boletoGanador = ganadorInfo.orden_id_participacion;
 
+        titleDiv.textContent = `¡Felicidades al ganador del ${ganadorInfo.nombre_premio_display}!`;
+        // Creamos un HTML más detallado para el banner
+        timerDiv.innerHTML = `<span class="winner-banner-name">🎉 ${nombreFormateado} | <span class="winner-banner-ticket">Boleto #${boletoGanador}</span> 🎉</span>`;
+        
+        countdownContainer.classList.remove('oculto');
+        countdownContainer.classList.remove('is-urgent', 'is-critical');
+    }
     function finalizarGiroFrontView(ganador) {
         sorteoFinalizado = true;
         console.log("-> Giro finalizado. El ganador es:", ganador);
