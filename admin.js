@@ -189,6 +189,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // En admin.js, AÑADE esta nueva función
 
     /**
+// En admin.js, reemplaza la función completa por esta versión limpia
+
+/**
      * Actualiza el menú desplegable de paquetes basándose en el sorteo seleccionado.
      * @param {string} sorteoId - El ID del sorteo que el usuario ha seleccionado.
      */
@@ -196,18 +199,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         const packageSelect = document.getElementById('packageChosen');
         if (!packageSelect) return;
 
+        // Limpia las opciones anteriores y añade la opción por defecto
         packageSelect.innerHTML = '<option value="">-- Seleccionar Paquete (si aplica) --</option>';
 
-        if (!sorteoId) return; // Si no se selecciona sorteo, dejarlo vacío
+        if (!sorteoId) return; // Si no se selecciona un sorteo, deja el menú con solo la opción por defecto
 
-        // Buscamos los datos del sorteo seleccionado en nuestro array de datos
+        // Busca los datos del sorteo seleccionado en nuestro array de datos locales
         const sorteoData = adminSorteosData.find(s => s.id_sorteo == sorteoId);
 
+        // Si encontramos el sorteo y tiene paquetes definidos, los añadimos al menú
         if (sorteoData && sorteoData.paquetes_json && sorteoData.paquetes_json.length > 0) {
             sorteoData.paquetes_json.forEach(paquete => {
                 const option = document.createElement('option');
-                // Creamos un texto descriptivo para la opción
-                const optionText = '<span class="math-inline">\{paquete\.nombre\} \(</span>{paquete.boletos} x $${paquete.precio})';
+                
+                // Creamos un texto descriptivo para la opción, ej: "Pack Básico (5 x $10)"
+                const optionText = `${paquete.nombre} (${paquete.boletos} x $${paquete.precio})`;
+                
                 option.value = optionText;
                 option.textContent = optionText;
                 packageSelect.appendChild(option);
