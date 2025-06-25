@@ -800,7 +800,7 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
                             <img src="cid:logo_movilwin" alt="MOVIL WIN Logo" style="max-width: 150px; height: auto;">
                         </div>
                         <h2 style="color: #7f5af0; text-align: center;">¡Hola, ${nombre}!</h2>
-                        <p>¡Gracias por adquirir tu Mini-Guía y obtener <strong>${numQuantity} boleto(s) digital(es)</strong>.</p>${boletosTextoEmail} para el sorteo del <strong>${sorteoInfo.nombre_premio_display}</strong> en MOVIL WIN!</p>
+                        <p>¡Gracias por adquirir tu Mini-Guía y obtener <strong>${quantity} boleto(s) digital(es)</strong>.</p>${boletosTextoEmail} para el sorteo del <strong>${sorteoInfo.nombre_premio_display}</strong> en MOVIL WIN!</p>
                         <p>Estamos emocionados de tenerte a bordo. Tu Mini-Guía "${nombreArchivoGuia}" está adjunta a este correo.</p>
                         <p>Recuerda seguirnos en nuestras redes para estar al tanto de todas las novedades y próximos sorteos:</p>
                         <p style="text-align: center; margin: 20px 0;">
