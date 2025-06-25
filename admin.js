@@ -638,6 +638,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      * Maneja el envío del formulario para añadir nuevos boletos.
      * @param {Event} event 
      */
+
     async function handleAddParticipant(event) {
         event.preventDefault();
 
@@ -660,9 +661,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             showGenericStatusMessage(statusMessage, 'Cédula, Nombre y Sorteo de Destino son obligatorios.', true);
             return;
         }
-        if (!/^\d{10}$/.test(payload.id_documento)) { showGenericStatusMessage(statusMessage, 'La cédula debe contener 10 dígitos.', true); return; }
-        if (payload.celular && !/^\d{9,10}$/.test(payload.celular)) { showGenericStatusMessage(statusMessage, 'El celular debe tener 9 o 10 dígitos.', true); return; }
-        if (isNaN(payload.quantity) || payload.quantity < 1 || payload.quantity > 500) { showGenericStatusMessage(statusMessage, 'Cantidad inválida (debe ser entre 1 y 500).', true); return; }
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/participantes`, {
@@ -681,30 +679,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const result = await response.json();
+            
+            // --- INICIO DE LA LÓGICA QUE CONSTRUYE EL MENSAJE DE ÉXITO ---
+            
             let successMessageContent = `<p>${result.message}</p>`;
 
+            // Muestra los números de boleto asignados
             if (result.boletos && result.boletos.length > 0) {
                 successMessageContent += `<p style="margin-top: 10px; font-weight: 600;">Boletos Asignados: ${result.boletos.join(', ')}</p>`;
             }
 
+            // Si el servidor generó un enlace de WhatsApp, crea y añade el botón
             if (result.whatsappLink) {
                 successMessageContent += `<a href="${result.whatsappLink}" target="_blank" class="whatsapp-action-link" style="margin-top: 15px;"><i class="fab fa-whatsapp"></i> Enviar Confirmación por WhatsApp</a>`;
             }
-            showGenericStatusMessage(statusMessage, successMessageContent, false, 20000);
+            
+            // --- FIN DE LA LÓGICA ---
+
+            showGenericStatusMessage(statusMessage, successMessageContent, false, 30000);
             
             const sorteoAfectado = adminSorteosData.find(s => s.id_sorteo == payload.sorteo_id);
             if (sorteoAfectado) {
-                // --- INICIO DE LA CORRECCIÓN DE LA SUMA ---
-                // Forzamos ambos valores a número antes de sumar para evitar la concatenación de texto
                 sorteoAfectado.participantes_actuales = parseInt(sorteoAfectado.participantes_actuales, 10) + payload.quantity;
-                // --- FIN DE LA CORRECCIÓN DE LA SUMA ---
             }
             
             updateRaffleStatsDisplay();
             fetchAndDisplayParticipants();
             cargarDashboardStats();
 
-            // Lógica para mantener o limpiar el formulario
             const mantenerDatosCheckbox = document.getElementById('mantenerDatos');
             if (mantenerDatosCheckbox && mantenerDatosCheckbox.checked) {
                 participantIdInput.value = '';
