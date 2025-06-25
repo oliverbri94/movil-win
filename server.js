@@ -522,7 +522,7 @@ app.put('/api/admin/sorteos/activar/:id_sorteo', requireAdminLogin, (req, res) =
     // Determinamos cuál será el nuevo estado basado en la acción
     const nuevoStatus = activar ? 'activo' : 'programado';
 
-    const sql = "UPDATE sorteos_config SET status_sorteo = ? WHERE id_sorteo = ?";
+    const sql = "UPDATE sorteos_config SET status_sorteo = $1 WHERE id_sorteo = $2";
 
     // Ejecutamos una única y simple actualización a la base de datos
     db.run(sql, [nuevoStatus, id_sorteo], function(err) {
@@ -540,11 +540,28 @@ app.put('/api/admin/sorteos/activar/:id_sorteo', requireAdminLogin, (req, res) =
     });
 });
 
+// En server.js, reemplaza la ruta completa por esta:
+
 app.post('/api/admin/sorteos/finalizar', requireAdminLogin, (req, res) => {
     const { sorteo_id } = req.body;
-    const sql = "UPDATE sorteos_config SET status_sorteo = 'completado' WHERE id_sorteo = ?";
+    if (!sorteo_id) {
+        return res.status(400).json({ error: "No se proporcionó un ID de sorteo." });
+    }
+
+    // Se corrige el placeholder de '?' a '$1' para que sea compatible con PostgreSQL
+    const sql = "UPDATE sorteos_config SET status_sorteo = 'completado' WHERE id_sorteo = $1";
+    
     db.run(sql, [sorteo_id], function(err) {
-        if (err) return res.status(500).json({ error: 'Error al finalizar.' });
+        if (err) {
+            console.error("Error al finalizar el sorteo:", err);
+            return res.status(500).json({ error: 'Error en la base de datos al finalizar el sorteo.' });
+        }
+        
+        // Añadimos una verificación para saber si realmente se actualizó una fila
+        if (this.changes === 0) {
+            return res.status(404).json({ error: "Sorteo no encontrado para finalizar." });
+        }
+        
         res.json({ success: true, message: `Sorteo ID ${sorteo_id} finalizado.` });
     });
 });
@@ -884,7 +901,7 @@ app.get('/api/admin/dashboard-avanzado', requireAdminLogin, async (req, res) => 
 });
 app.get('/api/admin/sorteo-participantes/:id_sorteo', requireAdminLogin, (req, res) => {
     const { id_sorteo } = req.params;
-    const sql = `SELECT * FROM participaciones WHERE id_sorteo_config_fk = ? ORDER BY orden_id ASC`;
+    const sql = `SELECT * FROM participaciones WHERE id_sorteo_config_fk = $1 ORDER BY orden_id ASC`;
     db.all(sql, [id_sorteo], (err, rows) => {
         if (err) res.status(500).json({ error: 'Error al obtener la lista.' });
         else res.json(rows);
@@ -896,7 +913,7 @@ app.post('/api/admin/realizar-sorteo', requireAdminLogin, (req, res) => {
     if (!sorteo_id) {
         return res.status(400).json({ error: 'No se especificó un ID de sorteo para realizar.' });
     }
-    const sqlSelect = "SELECT orden_id, id_documento, nombre, ciudad FROM participaciones WHERE id_sorteo_config_fk = ?";
+    const sqlSelect = "SELECT orden_id, id_documento, nombre, ciudad FROM participaciones WHERE id_sorteo_config_fk = $1";
     db.all(sqlSelect, [sorteo_id], (err, participaciones) => {
         if (err) return res.status(500).json({ error: 'Error al obtener participantes.' });
         if (!participaciones || participaciones.length === 0) {
@@ -932,7 +949,7 @@ app.put('/api/admin/ganadores/:id', requireAdminLogin, (req, res) => {
     const { id } = req.params;
     const { imagenUrl } = req.body;
 
-    const sql = "UPDATE ganadores SET imagenUrl = ? WHERE id = ?";
+    const sql = "UPDATE ganadores SET imagenUrl $1 WHERE id = $2";
     db.run(sql, [imagenUrl, id], function(err) {
         if (err) return res.status(500).json({ error: "Error al actualizar el ganador." });
         if (this.changes === 0) return res.status(404).json({ error: "Ganador no encontrado." });
