@@ -676,6 +676,42 @@ app.get('/api/admin/afiliados', requireAdminLogin, (req, res) => {
     });
 });
 
+app.get('/api/global-stats', async (req, res) => {
+    try {
+        const client = await dbClient.connect();
+        try {
+            // Ejecutamos todas las consultas en paralelo para máxima eficiencia
+            const [
+                sorteosData,
+                boletosData,
+                participantesData,
+                afiliadosData
+            ] = await Promise.all([
+                client.query("SELECT COUNT(*) FROM sorteos_config WHERE status_sorteo = 'completado'"),
+                client.query("SELECT COUNT(*) FROM participaciones"),
+                client.query("SELECT COUNT(DISTINCT id_documento) FROM participaciones"),
+                client.query("SELECT COUNT(*) FROM afiliados")
+            ]);
+
+            // Construimos el objeto de respuesta
+            const stats = {
+                sorteosRealizados: parseInt(sorteosData.rows[0].count, 10),
+                totalBoletos: parseInt(boletosData.rows[0].count, 10),
+                totalParticipantes: parseInt(participantesData.rows[0].count, 10),
+                totalAfiliados: parseInt(afiliadosData.rows[0].count, 10)
+            };
+
+            res.json({ success: true, stats: stats });
+
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error("Error obteniendo estadísticas globales:", error);
+        res.status(500).json({ success: false, error: 'Error interno del servidor.' });
+    }
+});
+
 // AÑADIR UN NUEVO AFILIADO
 app.post('/api/admin/afiliados', requireAdminLogin, async (req, res) => {
     try {
