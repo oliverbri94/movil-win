@@ -205,6 +205,34 @@ function initializeRafflePage() {
         actualizar();
         window.countdownInterval = setInterval(actualizar, 1000);
     }
+
+
+    async function cargarEstadisticasGlobales() {
+        const tickerContainer = document.getElementById('ticker-move');
+        if (!tickerContainer) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/global-stats`);
+            const data = await response.json();
+
+            if (data.success) {
+                const stats = data.stats;
+                const statsHTML = `
+                    <div class="ticker-item"><i class="fas fa-trophy"></i> <span>Sorteos Realizados:</span> <strong>${stats.sorteosRealizados}</strong></div>
+                    <div class="ticker-item"><i class="fas fa-ticket-alt"></i> <span>Boletos Vendidos:</span> <strong>${stats.totalBoletos}</strong></div>
+                    <div class="ticker-item"><i class="fas fa-users"></i> <span>Participantes Únicos:</span> <strong>${stats.totalParticipantes}</strong></div>
+                    <div class="ticker-item"><i class="fas fa-handshake"></i> <span>Afiliados Activos:</span> <strong>${stats.totalAfiliados}</strong></div>
+                `;
+                // Duplicamos el contenido para que la animación de bucle sea perfecta y sin cortes
+                tickerContainer.innerHTML = statsHTML + statsHTML;
+            } else {
+                tickerContainer.innerHTML = '<div class="ticker-item"><span>No se pudieron cargar las estadísticas.</span></div>';
+            }
+        } catch (error) {
+            console.error("Error al cargar estadísticas globales:", error);
+            tickerContainer.innerHTML = '<div class="ticker-item"><span>Cargando estadísticas...</span></div>';
+        }
+    }
             
     function getMotivationalMessage(percentage) {
         if (percentage >= 100) return "¡Meta alcanzada! El sorteo será pronto.";
@@ -961,6 +989,7 @@ function initializeRafflePage() {
     cargarSorteosVisibles();
     mostrarGanadoresAnteriores();
     chequearEstadoGlobal(); 
+    cargarEstadisticasGlobales(); 
 }
 
 
