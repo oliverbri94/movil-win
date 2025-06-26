@@ -95,7 +95,7 @@ body.dark-theme {
 }
 /* --- Header --- */
 .site-header {
-    background: #ba1d15;
+    background: linear-gradient(135deg, #1f2123 0%, #2a2d30 100%);
     color: var(--clr-white);
     text-align: center;
     padding: 8px 6px; /* Padding ajustado */
@@ -211,9 +211,6 @@ body.dark-theme {
     object-fit: contain;
     border-radius: var(--border-radius-medium);
     box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    animation: float-animation 6s ease-in-out infinite;
-
-
 }
 .prize-image-container img.grayscale {
     filter: grayscale(100%) contrast(0.7) brightness(0.8);
@@ -2356,195 +2353,13 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     line-height: 1.7;
 }
 
-/* ================================================= */
-/* --- ESTILOS PARA PÁGINAS DE TEXTO (BASES, FAQ) --- */
-/* ================================================= */
-
-.page-text-container {
-    max-width: 800px; /* Ancho ideal para lectura */
-    text-align: left;
-    margin: 40px auto;
-    padding: 20px;
-}
-
-.page-text-container h1 {
-    font-size: clamp(2em, 5vw, 2.8em);
-    font-weight: 700;
-    color: var(--clr-primary);
-    margin-bottom: 10px;
-    text-align: center;
-    line-height: 1.2;
-}
-
-.page-text-container .last-updated {
-    display: block;
-    text-align: center;
-    font-style: italic;
-    color: var(--clr-dark-text-alt);
-    margin-bottom: 40px;
-    font-size: 0.9em;
-}
-
-/* Estilo para la lista ordenada (los números) */
-.page-text-container ol {
-    list-style: none;
-    counter-reset: term-counter; /* Inicia nuestro propio contador */
-    padding-left: 0;
-}
-
-.page-text-container ol > li {
-    counter-increment: term-counter; /* Aumenta el contador en cada item */
-    margin-bottom: 30px;
-    padding-left: 50px; /* Espacio para nuestro número personalizado */
-    position: relative;
-}
-
-/* Estilo para el número personalizado de cada cláusula */
-.page-text-container ol > li::before {
-    content: counter(term-counter); /* Muestra el valor del contador */
-    position: absolute;
-    left: 0;
-    top: 2px;
-    font-size: 1.5em;
-    font-weight: 700;
-    color: var(--clr-secondary);
-    background-color: rgba(var(--clr-secondary-rgb), 0.1);
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-}
-
-.page-text-container h2 {
-    font-size: 1.4em;
-    font-weight: 600;
-    color: var(--clr-dark-text);
-    margin-bottom: 10px;
-    padding-bottom: 0;
-    border: none;
-}
-
-.page-text-container p, 
-.page-text-container ul {
-    color: var(--clr-dark-text-alt);
-    line-height: 1.8;
-    margin-bottom: 15px;
-}
-
-.page-text-container ul {
-    padding-left: 25px;
-    list-style-type: disc; /* Viñetas de disco estándar */
-}
-
-.page-text-container strong {
-    color: var(--clr-dark-text);
-    font-weight: 600;
-}
-/* ================================================= */
-/* --- ESTILOS PARA TARJETA DEL GANADOR --- */
-/* ================================================= */
-
-/* Animación para que la tarjeta aparezca suavemente */
-@keyframes fadeInSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.winner-card-container {
-    margin-top: 20px;
-    /* Se activa la animación cuando se quita la clase .oculto */
-    animation: fadeInSlideUp 0.6s ease-out forwards;
-}
-
-.winner-card {
-    max-width: 500px;
-    margin: 0 auto;
-    background: linear-gradient(145deg, var(--clr-dark-bg-alt), var(--clr-dark-bg));
-    border: 1px solid var(--clr-primary);
-    border-radius: var(--border-radius-large);
-    padding: 25px 30px;
-    text-align: center;
-    box-shadow: 0 0 30px rgba(var(--clr-primary-rgb), 0.4);
-}
-
-.winner-card h3 {
-    font-size: 1.8em;
-    font-weight: 700;
-    color: var(--clr-dark-text);
-    margin-bottom: 5px;
-}
-
-.winner-card .winner-prize {
-    font-size: 1.1em;
-    font-weight: 500;
-    color: var(--clr-dark-text-alt);
-    margin-bottom: 20px;
-}
-
-.winner-card .winner-name {
-    font-size: 2.5em;
-    font-weight: 800;
-    color: var(--clr-primary);
-    line-height: 1.1;
-    margin-bottom: 8px;
-}
-
-.winner-card .winner-id {
-    font-size: 1em;
-    color: var(--clr-dark-text-alt);
-    margin-bottom: 20px;
-}
-
-.winner-card .winner-contact-note {
-    font-size: 0.9em;
-    font-style: italic;
-    color: var(--clr-dark-text-alt);
-}
-/* Estilo para el número de boleto en el banner del ganador */
-.winner-banner-ticket {
-    font-weight: 400;
-    opacity: 0.8;
-    font-size: 0.8em;
-}
-
-/* ================================================ */
-/* --- CORRECCIÓN PARA RUEDA EN MÓVILES --- */
-/* ================================================ */
-
-@media (max-width: 767px) {
-    .contenedor-sorteo {
-        display: flex !important; /* Forzamos a que sea visible */
-        flex-direction: column;
-        height: auto !important; /* Altura automática */
-        min-height: 400px; /* Aseguramos una altura mínima para que se vea */
-        padding: 20px 10px !important; /* Restablecemos el padding */
-        margin-top: 20px !important; /* Restablecemos el margen */
-        overflow: visible !important; /* Permitimos que se vea todo el contenido */
-    }
-
-    .price-is-right-wheel-frame {
-        /* Aseguramos que el marco no sea demasiado grande para la pantalla */
-        width: 100%;
-        max-width: 320px; 
-    }
-}
-
 
 /* ================================================= */
 /* --- ESTILOS PARA NUEVO HEADER (HERO SECTION) --- */
 /* ================================================= */
 
 .hero-section {
-    padding: 60px 20px 0 20px; /* Sin padding abajo para que el ticker se pegue */
+    padding: 60px 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2641,8 +2456,17 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     margin-right: 8px;
 }
 
+.hero-image {
+    position: relative;
+}
 
-
+.hero-image img {
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+    /* Efecto de "flotación" */
+    animation: float-animation 6s ease-in-out infinite;
+}
 
 /* Animación para que la imagen flote suavemente */
 @keyframes float-animation {
@@ -2650,10 +2474,6 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     50% { transform: translateY(-20px); }
     100% { transform: translateY(0px); }
 }
-/* ================================================= */
-/* --- ESTILOS PARA NUEVO HEADER CON TICKER --- */
-/* ================================================= */
-
 
 
 /* El contenedor principal del Ticker */
