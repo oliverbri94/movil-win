@@ -199,19 +199,7 @@ body.dark-theme {
     }
 }
 
-.prize-image-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.prize-image-container img {
-    max-width: 100%;
-    max-height: 450px;
-    object-fit: contain;
-    border-radius: var(--border-radius-medium);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-}
+
 .prize-image-container img.grayscale {
     filter: grayscale(100%) contrast(0.7) brightness(0.8);
 }
@@ -2376,12 +2364,7 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     width: 100%;
 }
 
-/* En pantallas grandes, usamos dos columnas */
-@media (min-width: 992px) {
-    .hero-content {
-        grid-template-columns: 1fr 1fr;
-    }
-}
+
 
 .hero-text {
     text-align: center; /* Centrado en móvil */
@@ -2538,3 +2521,28 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 .ticker-item:last-child::after {
     content: ''; /* El último elemento no necesita separador */
 }
+
+/* ================================================= */
+/* --- APLICAR ANIMACIÓN FLOTANTE AL PREMIO DEL CARRUSEL --- */
+/* ================================================= */
+
+.prize-image-container {
+    /* Añadimos perspectiva para un efecto 3D sutil en la animación */
+    perspective: 1000px;
+}
+
+.prize-image-container img {
+    /* Reutilizamos la misma animación que en el header */
+    animation: float-animation 6s ease-in-out infinite;
+    
+    /* Añadimos una transición suave para otros efectos como hover */
+    transition: transform 0.3s ease;
+}
+
+/* Opcional: un pequeño efecto al pasar el mouse por encima */
+.prize-image-container img:hover {
+    transform: scale(1.05); /* Ligeramente más grande */
+}
+
+/* No necesitas volver a definir @keyframes float-animation, 
+   ya que existe en tu CSS desde la creación del header. */
