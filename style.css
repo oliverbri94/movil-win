@@ -95,7 +95,7 @@ body.dark-theme {
 }
 /* --- Header --- */
 .site-header {
-    background: linear-gradient(135deg, #1f2123 0%, #2a2d30 100%);
+    background: #ba1d15;
     color: var(--clr-white);
     text-align: center;
     padding: 8px 6px; /* Padding ajustado */
