@@ -220,8 +220,8 @@ function initializeRafflePage() {
                 const statsHTML = `
                     <div class="ticker-item"><i class="fas fa-trophy"></i> <span>Sorteos Realizados:</span> <strong>${stats.sorteosRealizados}</strong></div>
                     <div class="ticker-item"><i class="fas fa-ticket-alt"></i> <span>Boletos Vendidos:</span> <strong>${stats.totalBoletos}</strong></div>
-                    <div class="ticker-item"><i class="fas fa-users"></i> <span>Participantes Únicos:</span> <strong>${stats.totalParticipantes}</strong></div>
-                    <div class="ticker-item"><i class="fas fa-handshake"></i> <span>Afiliados Activos:</span> <strong>${stats.totalAfiliados}</strong></div>
+                    <div class="ticker-item"><i class="fas fa-users"></i> <span>Participantes:</span> <strong>${stats.totalParticipantes}</strong></div>
+                    <div class="ticker-item"><i class="fas fa-handshake"></i> <span>Afiliados:</span> <strong>${stats.totalAfiliados}</strong></div>
                 `;
                 // Duplicamos el contenido para que la animación de bucle sea perfecta y sin cortes
                 tickerContainer.innerHTML = statsHTML + statsHTML;
@@ -279,7 +279,7 @@ function initializeRafflePage() {
                 }
             }
             const esPopular = (paquete === paquetePopular);
-            const mensajeWhatsApp = `Hola, quiero el paquete "${paquete.nombre}" de ${paquete.boletos} boletos por $${paquete.precio} para el sorteo MOVIL WIN!`;
+            const mensajeWhatsApp = `Hola, quiero el paquete "${paquete.nombre}" de ${paquete.boletos} boletos digitaltes por $${paquete.precio} para el sorteo MOVIL WIN!`;
             const paqueteHTML = `<div class="paquete-item ${esPopular ? 'popular' : ''}">${esPopular ? '<span class="etiqueta-popular">Más Popular</span>' : ''}<div class="paquete-icono"><i class="fas fa-rocket"></i></div><h4>${paquete.nombre}</h4><div class="paquete-precio">$${paquete.precio} ${valorRealHTML}</div><div class="paquete-cantidad">${paquete.boletos} Boleto(s) Digital(es)</div>${boletosGratisHTML}<p class="paquete-descripcion">Aumenta tus probabilidades de ganar con este increíble paquete.</p><a href="https://wa.me/593963135510?text=${encodeURIComponent(mensajeWhatsApp)}" target="_blank" class="boton-paquete">Elegir Paquete</a></div>`;
             contenedor.innerHTML += paqueteHTML;
         });
@@ -763,10 +763,9 @@ function initializeRafflePage() {
                 <div class="prize-carousel-slide" data-sorteo-id="${sorteo.id_sorteo || 'proximo'}">
                     <div class="prize-image-container">
                         ${renderMedia(mediaParaRenderizar)}
+                        <h2 class="prize-title">${tituloMostrado}</h2>
                     </div>
                     <div class="prize-info-container">
-                        <h2 class="prize-title">${tituloMostrado}</h2>
-                        
                         <div class="mini-package-selector" style="${esProximo ? 'display: none;' : ''}">${miniPaquetesHTML}</div>
 
                         <div class="progress-info-wrapper" style="${esProximo ? 'display: none;' : ''}">

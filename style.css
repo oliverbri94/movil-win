@@ -1399,10 +1399,7 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 /* --- AÑADE ESTO AL FINAL DE STYLE.CSS --- */
 
-/* Contenedor de la imagen del premio necesita ser un punto de referencia */
-.prize-image-container {
-    position: relative;
-}
+/* Contenedor de la imagen del premio necesita ser un punto de referencia 
 
 /* Estilos para el contador como una capa superpuesta (overlay) */
 .countdown-overlay {
@@ -2523,6 +2520,7 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 .prize-image-container {
     /* Añadimos perspectiva para un efecto 3D sutil en la animación */
     perspective: 1000px;
+    position: relative;
 }
 
 .prize-image-container img {
