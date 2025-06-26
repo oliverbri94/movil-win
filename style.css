@@ -2476,56 +2476,65 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 }
 
 
-/* El contenedor principal del Ticker */
+
+/* El contenedor principal del Ticker con el nuevo estilo */
 .ticker-wrap {
     width: 100%;
     overflow: hidden;
-    background-color: var(--clr-primary);
-    padding: 15px 0;
+    /* Efecto de cristal esmerilado */
+    background: rgba(var(--clr-dark-bg-rgb), 0.5); /* Fondo oscuro semi-transparente */
+    backdrop-filter: blur(10px); /* El desenfoque clave del "glassmorphism" */
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(var(--clr-primary-rgb), 0.5); /* Borde superior sutil */
+    padding: 18px 0;
     position: relative;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
 }
 
-/* El contenedor que se moverá */
+/* El contenedor que se moverá (sin cambios en la animación) */
 .ticker-move {
-    display: inline-flex; /* Usa flex para alinear los items */
+    display: inline-flex;
     white-space: nowrap;
-    /* La magia de la animación */
     animation: scroll-left 30s linear infinite;
 }
 
-/* La animación que mueve el texto */
 @keyframes scroll-left {
     0% { transform: translateX(0%); }
-    100% { transform: translateX(-50%); } /* Se mueve hasta la mitad para un bucle perfecto */
+    100% { transform: translateX(-50%); }
 }
 
-/* Cada elemento dentro del ticker */
+/* Cada elemento dentro del ticker, con un nuevo estilo */
 .ticker-item {
     font-size: 1.1em;
-    color: rgba(255, 255, 255, 0.9);
-    padding: 0 30px;
+    font-weight: 500;
+    color: var(--clr-dark-text-alt);
+    padding: 0 35px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
+
 .ticker-item i {
-    color: var(--clr-white);
-    font-size: 1.2em;
+    color: var(--clr-primary); /* Icono con el color primario para que destaque */
+    font-size: 1.3em;
+    opacity: 0.9;
 }
-.ticker-item span {
-    color: rgba(0,0,0,0.4);
-    font-weight: 500;
-}
+
 .ticker-item strong {
-    color: var(--clr-white);
+    color: var(--clr-white); /* El número en blanco para máximo contraste */
     font-weight: 700;
+    font-size: 1.2em;
+    margin-left: 4px;
 }
-/* Un separador visual */
+
+/* Un nuevo separador visual más elegante */
 .ticker-item::after {
-    content: '•';
-    color: rgba(0,0,0,0.3);
-    margin-left: 60px;
+    content: '|';
+    color: rgba(var(--clr-primary-rgb), 0.3);
+    margin-left: 70px;
+    font-weight: 100;
 }
+
 .ticker-item:last-child::after {
     content: ''; /* El último elemento no necesita separador */
 }
