@@ -2310,7 +2310,7 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     align-items: flex-start;
     gap: 20px;
     background-color: var(--clr-dark-bg);
-    padding: 20px;
+    padding: 10px;
     border-radius: var(--border-radius-medium);
 }
 
@@ -2347,7 +2347,7 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 /* ================================================= */
 
 .hero-section {
-    padding: 60px 20px;
+    padding: 20px 20px 0 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2368,11 +2368,6 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 .hero-text {
     text-align: center; /* Centrado en móvil */
-}
-@media (min-width: 992px) {
-    .hero-text {
-        text-align: left; /* A la izquierda en escritorio */
-    }
 }
 
 .hero-text .main-title {
