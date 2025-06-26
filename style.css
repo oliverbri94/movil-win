@@ -2357,7 +2357,6 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 .hero-content {
     display: grid;
-    grid-template-columns: 1fr; /* Una columna por defecto en móvil */
     align-items: center;
     gap: 40px;
     max-width: 1100px;
