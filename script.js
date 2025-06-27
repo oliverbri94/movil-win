@@ -300,21 +300,29 @@ function initializeRafflePage() {
         return `<img src="${url}" alt="${sorteo.nombre_premio_display}" class="${classes}">`;
     }
 
+
     function renderizarPaquetesPublicos(paquetes, contenedor) {
         if (!contenedor) return;
         contenedor.innerHTML = '';
+
         if (!paquetes || paquetes.length === 0) {
-            contenedor.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">No hay paquetes de boletos disponibles para este sorteo en este momento.</p>';
+            contenedor.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">No hay paquetes de boletos disponibles para este sorteo.</p>';
             return;
         }
+
         const paqueteIndividual = paquetes.find(p => p.boletos === 1);
         const precioIndividual = paqueteIndividual ? paqueteIndividual.precio : null;
+
         const paquetesMultiples = paquetes.filter(p => p.boletos > 1);
-        const paquetePopular = paquetesMultiples.length > 0 ? paquetesMultiples.reduce((max, p) => (p.boletos > max.boletos ? p : max), paquetesMultiples[0]) : null;
+        const paquetePopular = paquetesMultiples.length > 0
+            ? paquetesMultiples.reduce((max, p) => (p.boletos > max.boletos ? p : max), paquetesMultiples[0])
+            : null;
 
         paquetes.forEach(paquete => {
+            const esPopular = (paquete === paquetePopular);
             let valorRealHTML = '';
             let boletosGratisHTML = '';
+
             if (precioIndividual && paquete.boletos > 1) {
                 const valorReal = precioIndividual * paquete.boletos;
                 const ahorro = valorReal - paquete.precio;
@@ -326,13 +334,37 @@ function initializeRafflePage() {
                     }
                 }
             }
-            const esPopular = (paquete === paquetePopular);
-            const mensajeWhatsApp = `Hola, quiero el paquete "${paquete.nombre}" de ${paquete.boletos} boletos digitaltes por $${paquete.precio} para el sorteo MOVIL WIN!`;
-            const paqueteHTML = `<div class="paquete-item ${esPopular ? 'popular' : ''}">${esPopular ? '<span class="etiqueta-popular">Más Popular</span>' : ''}<div class="paquete-icono"><i class="fas fa-rocket"></i></div><h4>${paquete.nombre}</h4><div class="paquete-precio">$${paquete.precio} ${valorRealHTML}</div><div class="paquete-cantidad">${paquete.boletos} Boleto(s) Digital(es)</div>${boletosGratisHTML}<p class="paquete-descripcion">Aumenta tus probabilidades de ganar con este increíble paquete.</p><a href="https://wa.me/593963135510?text=${encodeURIComponent(mensajeWhatsApp)}" target="_blank" class="boton-paquete">Elegir Paquete</a></div>`;
+            
+            // --- INICIO DE LA MODIFICACIÓN ---
+            // 1. Lógica para generar una descripción dinámica para cada paquete
+            let descripcion = "Una excelente opción para aumentar tus probabilidades de ganar."; // Descripción por defecto
+
+            if (paquete.boletos === 1) {
+                descripcion = "La forma perfecta de entrar en el sorteo y probar tu suerte.";
+            } else if (esPopular) {
+                descripcion = "¡La mejor relación precio-oportunidad! El paquete preferido por la comunidad.";
+            }
+            // --- FIN DE LA MODIFICACIÓN ---
+
+            const mensajeWhatsApp = `Hola, quiero el paquete "${paquete.nombre}" de ${paquete.boletos} boletos por $${paquete.precio} para el sorteo MOVIL WIN!`;
+            
+            const paqueteHTML = `
+                <div class="paquete-item ${esPopular ? 'popular' : ''}">
+                    ${esPopular ? '<span class="etiqueta-popular">Más Popular</span>' : ''}
+                    <div class="paquete-icono"><i class="fas fa-rocket"></i></div>
+                    <h4>${paquete.nombre}</h4>
+                    <div class="paquete-precio">$${paquete.precio} ${valorRealHTML}</div>
+                    <div class="paquete-cantidad">${paquete.boletos} Boleto(s) Digital(es)</div>
+                    ${boletosGratisHTML}
+
+                    <p class="paquete-descripcion">${descripcion}</p>
+
+                    <a href="https://wa.me/593963135510?text=${encodeURIComponent(mensajeWhatsApp)}" target="_blank" class="boton-paquete">Elegir Paquete</a>
+                </div>
+            `;
             contenedor.innerHTML += paqueteHTML;
         });
     }
-
     /**
      * Genera el código HTML para los 2-3 botones de paquetes destacados.
      * @param {Array<object>} paquetes - El array de paquetes de un sorteo.
