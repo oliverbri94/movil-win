@@ -557,20 +557,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             </table>
         `;
     }
+
     async function fetchAndDisplayAffiliates() {
         const loader = document.getElementById('loaderListaAfiliados');
         const tbody = document.getElementById('tbodyListaAfiliados');
-        if (!loader || !tbody) return;
+        if (!loader || !tbody) {
+            console.error("No se encontraron los elementos de la tabla de afiliados.");
+            return;
+        }
         
         loader.classList.remove('oculto');
         tbody.innerHTML = '';
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`, { credentials: 'include' });
+            if (!response.ok) {
+                throw new Error((await response.json()).error || 'Error de red');
+            }
             const afiliados = await response.json();
 
             const affiliateSelect = document.getElementById('affiliateSelect');
-            if(affiliateSelect) affiliateSelect.innerHTML = '<option value="">-- Sin Afiliado --</option>';
+            if(affiliateSelect) {
+                affiliateSelect.innerHTML = '<option value="">-- Sin Afiliado --</option>';
+            }
 
             if (afiliados.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6">No hay afiliados registrados.</td></tr>';
@@ -583,16 +592,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                         affiliateSelect.appendChild(option);
                     }
 
-                    tbodyListaAfiliados.appendChild(tr);
+                    // --- ORDEN CORRECTO ---
+                    // 1. PRIMERO se crea el elemento de la fila (tr)
                     const tr = document.createElement('tr');
+
+                    // 2. LUEGO se le asignan clases y propiedades
                     const esActivo = afiliado.estado === 'activo';
                     tr.className = esActivo ? 'afiliado-activo-row' : 'afiliado-inactivo-row';
 
-                    // Estimación de ingresos (no cambia)
                     const precioPromedioBoleto = 2.5;
                     const ingresosGenerados = (parseInt(afiliado.boletos_totales, 10) * precioPromedioBoleto).toFixed(2);
 
-                    // --- HTML de la fila actualizado para incluir el teléfono ---
+                    // 3. DESPUÉS se le añade el contenido HTML
                     tr.innerHTML = `
                         <td data-label="Nombre">${afiliado.nombre_afiliado}</td>
                         <td data-label="Teléfono">${afiliado.celular_afiliado || 'N/A'}</td>
@@ -606,9 +617,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button class="accion-btn btn-eliminar-afiliado" data-id="${afiliado.id_afiliado}" title="Eliminar Afiliado" style="background-color:var(--clr-red);"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     `;
+                    // 4. FINALMENTE, se añade la fila completa a la tabla
                     tbody.appendChild(tr);
                 });
-                document.getElementById('affiliateCount').textContent = afiliados.length;
+                
+                // Actualiza el contador en el título del acordeón
+                const affiliateCountSpan = document.getElementById('affiliateCount');
+                if (affiliateCountSpan) {
+                    affiliateCountSpan.textContent = afiliados.length;
+                }
             }
         } catch (error) {
             tbody.innerHTML = `<tr><td colspan="6" class="error-message">${error.message}</td></tr>`;
