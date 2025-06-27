@@ -318,6 +318,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      * Obtiene y muestra la lista de afiliados en la tabla de gestión.
      */
     // admin.js
+
     async function fetchAndDisplayAffiliates() {
         const loader = document.getElementById('loaderListaAfiliados');
         const tbody = document.getElementById('tbodyListaAfiliados');
@@ -325,32 +326,60 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("No se encontraron los elementos de la tabla de afiliados.");
             return;
         }
+        
         loader.classList.remove('oculto');
-        tbody.innerHTML = ''; 
+        tbody.innerHTML = '';
+
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`,{ credentials: 'include' });
+            const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`, { credentials: 'include' });
             if (!response.ok) {
-                throw new Error(`Error del servidor: ${response.status}`);
+                throw new Error((await response.json()).error || 'Error de red');
             }
             const afiliados = await response.json();
+
+            // Limpiamos el dropdown de "Añadir Participante" antes de volver a llenarlo
+            const affiliateSelect = document.getElementById('affiliateSelect');
+            if(affiliateSelect) {
+                affiliateSelect.innerHTML = '<option value="">-- Sin Afiliado --</option>';
+            }
+
             if (afiliados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4">No hay afiliados registrados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6">No hay afiliados registrados.</td></tr>';
             } else {
-                const tuNumeroWhatsApp = '593963135510';
-                afiliados.forEach(af => {
+                afiliados.forEach(afiliado => {
+                    // Rellenamos el dropdown solo con los afiliados activos
+                    if (afiliado.estado === 'activo' && affiliateSelect) {
+                        const option = document.createElement('option');
+                        option.value = afiliado.id_afiliado;
+                        option.textContent = afiliado.nombre_afiliado; // Corregido: usar nombre_afiliado
+                        affiliateSelect.appendChild(option);
+                    }
+
                     const tr = document.createElement('tr');
-                    const mensaje = `Hola MOVIL WIN, quiero participar en el sorteo. Mi afiliado es ${af.nombre_completo}.`;
-                    const mensajeCodificado = encodeURIComponent(mensaje);
-                    const enlaceAfiliado = `https://wa.me/${tuNumeroWhatsApp}?text=${mensajeCodificado}`;
-                    // HTML con los atributos data-label añadidos 👇
+                    const esActivo = afiliado.estado === 'activo';
+                    tr.className = esActivo ? 'afiliado-activo-row' : 'afiliado-inactivo-row';
+
+                    // Estimamos los ingresos generados (puedes ajustar el precio promedio)
+                    const precioPromedioBoleto = 2.5;
+                    const ingresosGenerados = (parseInt(afiliado.boletos_totales, 10) * precioPromedioBoleto).toFixed(2);
+
                     tr.innerHTML = `
-                        <td data-label="ID">${af.id_afiliado}</td>
-                        <td data-label="Nombre">${af.nombre_completo}</td>
-                        <td data-label="Teléfono">${af.telefono || 'N/A'}</td>
-                        <td data-label="Enlace">
-                            <a href="${enlaceAfiliado}" target="_blank" title="Abrir enlace en WhatsApp" style="margin-right: 10px; color: var(--clr-primary); font-weight: 500;">Probar</a>
-                            <button class="accion-btn btn-copiar" data-link="${enlaceAfiliado}" title="Copiar enlace">
-                                <i class="fas fa-copy"></i>
+                        <td data-label="Nombre">${afiliado.nombre_afiliado}</td>
+                        <td data-label="Estado">
+                            <span class="status-${esActivo ? 'activo' : 'inactivo'}">${esActivo ? 'Activo' : 'Inactivo'}</span>
+                        </td>
+                        <td data-label="Boletos (Activo)" class="stat-number">${afiliado.boletos_sorteo_activo}</td>
+                        <td data-label="Boletos (Total)" class="stat-number">${afiliado.boletos_totales}</td>
+                        <td data-label="Ingresos" class="stat-number">$${ingresosGenerados}</td>
+                        <td data-label="Acciones">
+                            <button class="accion-btn btn-editar-afiliado" data-id="${afiliado.id_afiliado}" title="Editar Afiliado">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="accion-btn btn-copiar-link" data-nombre="${afiliado.nombre_afiliado}" title="Copiar Link de Afiliado">
+                                <i class="fas fa-link"></i>
+                            </button>
+                            <button class="accion-btn ${esActivo ? 'btn-desactivar-afiliado' : 'btn-activar-afiliado'}" data-id="${afiliado.id_afiliado}" title="${esActivo ? 'Desactivar' : 'Activar'}">
+                                <i class="fas ${esActivo ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
                             </button>
                         </td>
                     `;
@@ -358,8 +387,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             }
         } catch (error) {
-            console.error('Error al cargar la lista de afiliados:', error);
-            tbody.innerHTML = '<tr><td colspan="4">Error al cargar la lista de afiliados. Intenta de nuevo.</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="6" class="error-message">${error.message}</td></tr>`;
+            console.error("Error al cargar la lista de afiliados:", error);
         } finally {
             loader.classList.add('oculto');
         }

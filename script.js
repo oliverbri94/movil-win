@@ -12,6 +12,7 @@ console.log("VERSIÓN DEL SCRIPT: 24 DE JUNIO - ACTUALIZADA");
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    inicializarComponentesGlobales();
 
     // --- LÓGICA DEL MENÚ DE NAVEGACIÓN (GLOBAL) ---
     try {
@@ -28,17 +29,40 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Error al inicializar el menú de navegación:", error);
     }
 
-    // --- LÓGICA DE LA PÁGINA PRINCIPAL (INDEX.HTML) ---
-    // Verificamos si estamos en la página principal buscando un elemento clave.
-    const prizeCarouselContainer = document.getElementById('prizeCarouselContainer');
-    if (prizeCarouselContainer) {
+    if (document.getElementById('prizeCarouselContainer')) {
         try {
             initializeRafflePage();
         } catch (error) {
             console.error("Error al inicializar la página del sorteo:", error);
         }
     }
+    
+    // --- CÓDIGO PARA PÁGINA CLUB DE AFILIADOS (club-afiliados.html) ---
+    if (document.querySelector(".instructivo-tabs")) {
+        try {
+            initializeAffiliateTabs();
+        } catch(error) {
+            console.error("Error al inicializar las pestañas de afiliados:", error);
+        }
+    }
+
 });
+
+function inicializarComponentesGlobales() {
+    try {
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const fullScreenMenu = document.getElementById('fullScreenMenu');
+        const closeMenuButton = document.getElementById('closeMenuButton');
+
+        if (mobileMenuButton && fullScreenMenu && closeMenuButton) {
+            const toggleFullScreenMenu = () => fullScreenMenu.classList.toggle('hidden');
+            mobileMenuButton.addEventListener('click', toggleFullScreenMenu);
+            closeMenuButton.addEventListener('click', toggleFullScreenMenu);
+        }
+    } catch (error) {
+        console.error("Error al inicializar el menú de navegación:", error);
+    }
+}
 
 
 /**

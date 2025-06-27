@@ -666,14 +666,43 @@ app.delete('/api/admin/sorteos/:id_sorteo', requireAdminLogin, async (req, res) 
 // ===============================
 
 // OBTENER TODOS LOS AFILIADOS
-app.get('/api/admin/afiliados', requireAdminLogin, (req, res) => {
-    const sql = "SELECT * FROM afiliados ORDER BY nombre_completo ASC";
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: "Error al obtener la lista de afiliados." });
+// En server.js, reemplaza tu ruta GET /api/admin/afiliados completa por esta:
+
+app.get('/api/admin/afiliados', requireAdminLogin, async (req, res) => {
+    try {
+        const client = await dbClient.connect();
+        try {
+            // Esta consulta es más compleja: une afiliados con participaciones para contar los boletos
+            const sql = `
+                SELECT 
+                    a.id_afiliado,
+                    a.nombre_afiliado,
+                    a.celular_afiliado,
+                    a.estado,
+                    a.fecha_registro,
+                    COUNT(p.orden_id) AS boletos_totales,
+                    SUM(CASE WHEN s.status_sorteo = 'activo' THEN 1 ELSE 0 END) AS boletos_sorteo_activo
+                FROM 
+                    afiliados a
+                LEFT JOIN 
+                    participaciones p ON a.nombre_afiliado = p.nombre_afiliado
+                LEFT JOIN
+                    sorteos_config s ON p.id_sorteo_config_fk = s.id_sorteo
+                GROUP BY
+                    a.id_afiliado
+                ORDER BY
+                    a.nombre_afiliado;
+            `;
+            const result = await client.query(sql);
+            res.json(result.rows);
+
+        } finally {
+            client.release();
         }
-        res.json(rows);
-    });
+    } catch (error) {
+        console.error("Error al obtener la lista de afiliados con estadísticas:", error);
+        res.status(500).json({ error: "Error interno del servidor." });
+    }
 });
 
 app.get('/api/global-stats', async (req, res) => {
