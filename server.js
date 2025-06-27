@@ -782,6 +782,41 @@ app.put('/api/admin/afiliados/:id_afiliado', requireAdminLogin, async (req, res)
         res.status(500).json({ error: 'Error interno del servidor.' });
     }
 });
+// En server.js, AÑADE esta nueva ruta
+
+app.get('/api/admin/reporte-comisiones', requireAdminLogin, async (req, res) => {
+    const { sorteo_id } = req.query;
+    if (!sorteo_id) {
+        return res.status(400).json({ error: "Se requiere un ID de sorteo." });
+    }
+
+    try {
+        const client = await dbClient.connect();
+        try {
+            const sql = `
+                SELECT 
+                    p.nombre_afiliado, 
+                    COUNT(p.orden_id) as total_boletos
+                FROM 
+                    participaciones p
+                WHERE 
+                    p.id_sorteo_config_fk = $1 AND p.nombre_afiliado IS NOT NULL AND p.nombre_afiliado != ''
+                GROUP BY 
+                    p.nombre_afiliado
+                ORDER BY 
+                    total_boletos DESC;
+            `;
+            const result = await client.query(sql, [sorteo_id]);
+            res.json({ success: true, reporte: result.rows });
+
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error("Error generando reporte de comisiones:", error);
+        res.status(500).json({ success: false, error: "Error interno del servidor." });
+    }
+});
 app.get('/api/global-stats', async (req, res) => {
     try {
         const client = await dbClient.connect();

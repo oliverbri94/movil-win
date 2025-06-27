@@ -74,6 +74,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
     const statusAffiliateMessage = document.getElementById('statusAffiliateMessage');
 
+
+    const btnGenerarReporte = document.getElementById('btnGenerarReporte');
+    btnGenerarReporte?.addEventListener('click', async () => {
+        const sorteoId = document.getElementById('reporteSorteoSelect').value;
+        const comision = parseFloat(document.getElementById('reporteComisionInput').value);
+        const precioBoleto = parseFloat(document.getElementById('reportePrecioBoleto').value);
+        const container = document.getElementById('reporteResultadoContainer');
+
+        if (!sorteoId || isNaN(comision) || isNaN(precioBoleto)) {
+            alert("Por favor, selecciona un sorteo y define la comisión y precio promedio.");
+            return;
+        }
+
+        container.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/reporte-comisiones?sorteo_id=${sorteoId}`);
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error);
+
+            renderizarReporteComisiones(data.reporte, comision, precioBoleto);
+        } catch (error) {
+            container.innerHTML = `<p class="error-message">Error al generar el reporte: ${error.message}</p>`;
+        }
+    });
     // Opciones de Sorteo (Countdown)
     const btnIniciarCuentaRegresiva = document.getElementById('btnIniciarCuentaRegresiva');
     const estadoCuentaRegresivaAdminDiv = document.getElementById('estadoCuentaRegresivaAdmin');
@@ -433,6 +458,71 @@ document.addEventListener('DOMContentLoaded', async () => {
      * Obtiene y muestra la lista de afiliados en la tabla de gestión.
      */
 
+    function poblarDropdownSorteosCompletados() {
+        const select = document.getElementById('reporteSorteoSelect');
+        if (!select) return;
+        
+        select.innerHTML = '<option value="">-- Elige un sorteo --</option>';
+        const sorteosCompletados = adminSorteosData.filter(s => s.status_sorteo === 'completado');
+        
+        sorteosCompletados.forEach(sorteo => {
+            const option = document.createElement('option');
+            option.value = sorteo.id_sorteo;
+            option.textContent = `${sorteo.id_sorteo} - ${sorteo.nombre_premio_display}`;
+            select.appendChild(option);
+        });
+    }
+
+    function renderizarReporteComisiones(reporte, comision, precioBoleto) {
+        const container = document.getElementById('reporteResultadoContainer');
+        if (!container) return;
+
+        let totalGeneralBoletos = 0;
+        let totalGeneralIngresos = 0;
+        let totalGeneralComision = 0;
+
+        const filas = reporte.map(item => {
+            const totalBoletos = parseInt(item.total_boletos, 10);
+            const ingresosGenerados = totalBoletos * precioBoleto;
+            const comisionAPagar = ingresosGenerados * (comision / 100);
+
+            totalGeneralBoletos += totalBoletos;
+            totalGeneralIngresos += ingresosGenerados;
+            totalGeneralComision += comisionAPagar;
+
+            return `
+                <tr>
+                    <td>${item.nombre_afiliado}</td>
+                    <td class="stat-number">${totalBoletos}</td>
+                    <td class="stat-number">$${ingresosGenerados.toFixed(2)}</td>
+                    <td class="stat-number comision-final">$${comisionAPagar.toFixed(2)}</td>
+                </tr>
+            `;
+        }).join('');
+
+        container.innerHTML = `
+            <h3 style="margin-top: 30px; margin-bottom: 10px;">Reporte de Comisiones</h3>
+            <table class="tabla-sorteos">
+                <thead>
+                    <tr>
+                        <th>Afiliado</th>
+                        <th>Boletos Vendidos</th>
+                        <th>Ingresos Generados</th>
+                        <th>Comisión a Pagar (${comision}%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filas}
+                    <tr class="fila-total">
+                        <td><strong>TOTAL</strong></td>
+                        <td class="stat-number"><strong>${totalGeneralBoletos}</strong></td>
+                        <td class="stat-number"><strong>$${totalGeneralIngresos.toFixed(2)}</strong></td>
+                        <td class="stat-number comision-final"><strong>$${totalGeneralComision.toFixed(2)}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+    }
     async function fetchAndDisplayAffiliates() {
         const loader = document.getElementById('loaderListaAfiliados');
         const tbody = document.getElementById('tbodyListaAfiliados');
@@ -895,6 +985,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.ok) throw new Error((await response.json()).error || 'Error de red');
             const sorteos = await response.json();
             adminSorteosData = sorteos;
+            poblarDropdownSorteosCompletados(); 
 
             if (sorteos.length === 0) {
                 tbodyListaSorteos.innerHTML = '<tr><td colspan="7">No hay sorteos configurados.</td></tr>';

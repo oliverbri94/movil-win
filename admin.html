@@ -393,15 +393,33 @@
                                         <th>Estado</th>
                                         <th>Boletos (Sorteo Activo)</th>
                                         <th>Boletos (Total)</th>
-                                        <th>Ingresos Generados</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbodyListaAfiliados"></tbody>
                             </table>
                         </section>
+                        <section class="admin-section">
+                            <h2><i class="fas fa-file-invoice-dollar"></i> Generador de Reporte de Comisiones</h2>
+                            <div id="reporte-controles" class="reporte-controles">
+                                <div class="form-group">
+                                    <label for="reporteSorteoSelect">Selecciona un Sorteo (solo finalizados):</label>
+                                    <select id="reporteSorteoSelect"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reporteComisionInput">Porcentaje de Comisión (%):</label>
+                                    <input type="number" id="reporteComisionInput" value="20" placeholder="Ej: 20">
+                                </div>
+                                <div class="form-group">
+                                    <label for="reportePrecioBoleto">Precio Promedio por Boleto ($):</label>
+                                    <input type="number" id="reportePrecioBoleto" value="2.5" step="0.1" placeholder="Ej: 2.5">
+                                </div>
+                                <button id="btnGenerarReporte" class="admin-button">Generar Reporte</button>
+                            </div>
+                            <div id="reporteResultadoContainer" class="reporte-resultado-container">
+                                </div>
+                        </section>
                     </div>
-
                     <div id="page-calculadora" class="admin-page">
                         <section class="admin-section">
                             <h2><i class="fas fa-calculator"></i> Calculadora de Rentabilidad del Sorteo</h2>
