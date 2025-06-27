@@ -1,4 +1,4 @@
-console.log("VERSIÓN DEL SCRIPT: 24 DE JUNIO - ACTUALIZADA"); 
+console.log("VERSIÓN DEL SCRIPT: 27 DE JUNIO - ACTUALIZADA"); 
 
 // =================================================================================
 // ARCHIVO JAVASCRIPT CONSOLIDADO PARA MOVIL WIN
@@ -14,21 +14,10 @@ console.log("VERSIÓN DEL SCRIPT: 24 DE JUNIO - ACTUALIZADA");
 document.addEventListener('DOMContentLoaded', () => {
     inicializarComponentesGlobales();
 
-    // --- LÓGICA DEL MENÚ DE NAVEGACIÓN (GLOBAL) ---
-    try {
-        const mobileMenuButton = document.getElementById('mobileMenuButton');
-        const fullScreenMenu = document.getElementById('fullScreenMenu');
-        const closeMenuButton = document.getElementById('closeMenuButton');
+    // --- CÓDIGO GLOBAL (Se ejecuta en TODAS las páginas) ---
+    inicializarComponentesGlobales();
 
-        if (mobileMenuButton && fullScreenMenu && closeMenuButton) {
-            const toggleFullScreenMenu = () => fullScreenMenu.classList.toggle('hidden');
-            mobileMenuButton.addEventListener('click', toggleFullScreenMenu);
-            closeMenuButton.addEventListener('click', toggleFullScreenMenu);
-        }
-    } catch (error) {
-        console.error("Error al inicializar el menú de navegación:", error);
-    }
-
+    // --- CÓDIGO SOLO PARA PÁGINA PRINCIPAL (index.html) ---
     if (document.getElementById('prizeCarouselContainer')) {
         try {
             initializeRafflePage();
@@ -37,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // --- CÓDIGO PARA PÁGINA CLUB DE AFILIADOS (club-afiliados.html) ---
+    // --- CÓDIGO SOLO PARA PÁGINA CLUB DE AFILIADOS (club-afiliados.html) ---
     if (document.querySelector(".instructivo-tabs")) {
         try {
             initializeAffiliateTabs();
@@ -45,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error al inicializar las pestañas de afiliados:", error);
         }
     }
-
 });
 
 function inicializarComponentesGlobales() {
