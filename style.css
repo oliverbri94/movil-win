@@ -2572,3 +2572,33 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 .affiliate-search-bar {
     margin-bottom: 20px;
 }
+/* ================================================ */
+/* --- ESTILOS PARA BOTONES DE ACCIÓN DE AFILIADOS --- */
+/* ================================================ */
+
+/* Usamos los colores de tu paleta de marca para consistencia */
+
+.btn-editar-afiliado {
+    background-color: var(--clr-secondary); /* Morado para "Editar" */
+}
+
+.btn-copiar-link {
+    background-color: var(--clr-accent); /* Naranja para una acción secundaria */
+}
+
+.btn-activar-afiliado {
+    background-color: var(--clr-primary); /* Verde para "Activar" */
+}
+
+.btn-desactivar-afiliado {
+    background-color: var(--clr-dark-text-alt); /* Gris para "Desactivar" */
+}
+
+.btn-eliminar-afiliado {
+    background-color: var(--clr-red); /* Rojo para "Eliminar" */
+}
+
+/* Efecto hover para todos los botones de acción para oscurecerlos un poco */
+.accion-btn:hover {
+    filter: brightness(90%);
+}

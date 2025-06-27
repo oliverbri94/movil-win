@@ -73,6 +73,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnGuardarAfiliado = document.getElementById('btnGuardarAfiliado');
     const btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
     const statusAffiliateMessage = document.getElementById('statusAffiliateMessage');
+    const tbodyListaAfiliados = document.getElementById('tbodyListaAfiliados');
+    const quickAddAffiliateBtn = document.getElementById('quickAddAffiliateBtn');
+    const quickAffiliateModal = document.getElementById('quickAffiliateModal');
+    const closeAffiliateModalBtn = document.getElementById('closeAffiliateModal');
+    const quickAffiliateForm = document.getElementById('quickAffiliateForm');
 
 
     const btnGenerarReporte = document.getElementById('btnGenerarReporte');
@@ -614,7 +619,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button class="accion-btn btn-editar-afiliado" data-id="${afiliado.id_afiliado}" title="Editar Afiliado"><i class="fas fa-edit"></i></button>
                             <button class="accion-btn btn-copiar-link" data-nombre="${afiliado.nombre_afiliado}" title="Copiar Link de Afiliado"><i class="fas fa-link"></i></button>
                             <button class="accion-btn ${esActivo ? 'btn-desactivar-afiliado' : 'btn-activar-afiliado'}" data-id="${afiliado.id_afiliado}" title="${esActivo ? 'Desactivar' : 'Activar'}"><i class="fas ${esActivo ? 'fa-toggle-on' : 'fa-toggle-off'}"></i></button>
-                            <button class="accion-btn btn-eliminar-afiliado" data-id="${afiliado.id_afiliado}" title="Eliminar Afiliado" style="background-color:var(--clr-red);"><i class="fas fa-trash-alt"></i></button>
+                            <button class="accion-btn btn-eliminar-afiliado" data-id="${afiliado.id_afiliado}" title="Eliminar Afiliado"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     `;
                     // 4. FINALMENTE, se añade la fila completa a la tabla
