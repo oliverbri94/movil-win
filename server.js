@@ -668,16 +668,25 @@ app.delete('/api/admin/sorteos/:id_sorteo', requireAdminLogin, async (req, res) 
 // OBTENER TODOS LOS AFILIADOS
 // En server.js, reemplaza tu ruta GET /api/admin/afiliados completa por esta:
 
+// En server.js, reemplaza tu ruta GET /api/admin/afiliados completa por esta:
+
 app.get('/api/admin/afiliados', requireAdminLogin, async (req, res) => {
     try {
+        if (!dbClient) {
+            throw new Error("La conexión a la base de datos no está disponible.");
+        }
         const client = await dbClient.connect();
         try {
-            // Esta consulta es más compleja: une afiliados con participaciones para contar los boletos
+            // --- INICIO DE LA CORRECCIÓN ---
+            // Se han corregido los nombres de las columnas:
+            // a.nombre_afiliado -> a.nombre_completo
+            // a.celular_afiliado -> a.telefono
+            // El JOIN ahora usa a.nombre_completo = p.nombre_afiliado
             const sql = `
                 SELECT 
                     a.id_afiliado,
-                    a.nombre_afiliado,
-                    a.celular_afiliado,
+                    a.nombre_completo,
+                    a.telefono,
                     a.estado,
                     a.fecha_registro,
                     COUNT(p.orden_id) AS boletos_totales,
@@ -685,16 +694,26 @@ app.get('/api/admin/afiliados', requireAdminLogin, async (req, res) => {
                 FROM 
                     afiliados a
                 LEFT JOIN 
-                    participaciones p ON a.nombre_afiliado = p.nombre_afiliado
+                    participaciones p ON a.nombre_completo = p.nombre_afiliado
                 LEFT JOIN
                     sorteos_config s ON p.id_sorteo_config_fk = s.id_sorteo
                 GROUP BY
                     a.id_afiliado
                 ORDER BY
-                    a.nombre_afiliado;
+                    a.nombre_completo;
             `;
+            // --- FIN DE LA CORRECCIÓN ---
+
             const result = await client.query(sql);
-            res.json(result.rows);
+            
+            // Adaptamos la respuesta para que el frontend siga funcionando sin cambios
+            const afiliadosProcesados = result.rows.map(af => ({
+                ...af,
+                nombre_afiliado: af.nombre_completo, // Mantenemos el nombre de la propiedad para el frontend
+                celular_afiliado: af.telefono
+            }));
+            
+            res.json(afiliadosProcesados);
 
         } finally {
             client.release();
@@ -704,7 +723,6 @@ app.get('/api/admin/afiliados', requireAdminLogin, async (req, res) => {
         res.status(500).json({ error: "Error interno del servidor." });
     }
 });
-
 app.get('/api/global-stats', async (req, res) => {
     try {
         const client = await dbClient.connect();
