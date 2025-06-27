@@ -14,9 +14,6 @@ console.log("VERSIÓN DEL SCRIPT: 27 DE JUNIO - ACTUALIZADA");
 document.addEventListener('DOMContentLoaded', () => {
     inicializarComponentesGlobales();
 
-    // --- CÓDIGO GLOBAL (Se ejecuta en TODAS las páginas) ---
-    inicializarComponentesGlobales();
-
     // --- CÓDIGO SOLO PARA PÁGINA PRINCIPAL (index.html) ---
     if (document.getElementById('prizeCarouselContainer')) {
         try {
