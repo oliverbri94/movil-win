@@ -99,6 +99,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             container.innerHTML = `<p class="error-message">Error al generar el reporte: ${error.message}</p>`;
         }
     });
+
+    // --- Lógica para el acordeón de afiliados ---
+    const collapsibleHeader = document.querySelector('.collapsible-header');
+    collapsibleHeader?.addEventListener('click', function() {
+        this.classList.toggle('active');
+        const content = this.nextElementSibling;
+        if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+            content.style.maxHeight = '0px';
+            content.classList.remove('active');
+        } else {
+            // Al abrir, se ajusta al alto real del contenido
+            content.style.maxHeight = content.scrollHeight + "px";
+            content.classList.add('active');
+        }
+    });
+
+    // --- Lógica para el buscador de afiliados ---
+    const searchInput = document.getElementById('affiliateSearchInput');
+    searchInput?.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#tbodyListaAfiliados tr');
+
+        rows.forEach(row => {
+            // Buscamos en el nombre (celda 0) y teléfono (celda 1)
+            const nameText = row.cells[0]?.textContent.toLowerCase();
+            const phoneText = row.cells[1]?.textContent.toLowerCase();
+            
+            if (nameText.includes(searchTerm) || phoneText.includes(searchTerm)) {
+                row.style.display = ''; // Muestra la fila
+            } else {
+                row.style.display = 'none'; // Oculta la fila
+            }
+        });
+    });
     // Opciones de Sorteo (Countdown)
     const btnIniciarCuentaRegresiva = document.getElementById('btnIniciarCuentaRegresiva');
     const estadoCuentaRegresivaAdminDiv = document.getElementById('estadoCuentaRegresivaAdmin');
@@ -460,11 +494,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function poblarDropdownSorteosCompletados() {
         const select = document.getElementById('reporteSorteoSelect');
-        if (!select) return;
-        
+        if (!select || !adminSorteosData) return;
+
         select.innerHTML = '<option value="">-- Elige un sorteo --</option>';
         const sorteosCompletados = adminSorteosData.filter(s => s.status_sorteo === 'completado');
-        
+
         sorteosCompletados.forEach(sorteo => {
             const option = document.createElement('option');
             option.value = sorteo.id_sorteo;
@@ -549,6 +583,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         affiliateSelect.appendChild(option);
                     }
 
+                    tbodyListaAfiliados.appendChild(tr);
                     const tr = document.createElement('tr');
                     const esActivo = afiliado.estado === 'activo';
                     tr.className = esActivo ? 'afiliado-activo-row' : 'afiliado-inactivo-row';
@@ -573,6 +608,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `;
                     tbody.appendChild(tr);
                 });
+                document.getElementById('affiliateCount').textContent = afiliados.length;
             }
         } catch (error) {
             tbody.innerHTML = `<tr><td colspan="6" class="error-message">${error.message}</td></tr>`;

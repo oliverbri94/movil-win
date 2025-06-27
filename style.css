@@ -2529,3 +2529,46 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 /* No necesitas volver a definir @keyframes float-animation, 
    ya que existe en tu CSS desde la creación del header. */
+
+/* --- ESTILOS PARA LISTA PLEGABLE Y BUSCADOR DE AFILIADOS --- */
+.collapsible-section {
+    border: 1px solid var(--clr-dark-border);
+    border-radius: var(--border-radius-medium);
+    overflow: hidden;
+    margin-top: 30px;
+}
+.collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 15px 20px;
+    background-color: var(--clr-dark-bg-frame);
+    border: none;
+    cursor: pointer;
+    color: var(--clr-dark-text);
+}
+.collapsible-header h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+}
+.collapsible-header i {
+    transition: transform 0.3s ease;
+}
+.collapsible-header.active i {
+    transform: rotate(180deg);
+}
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+    background-color: var(--clr-dark-bg-alt);
+    padding: 0 20px;
+}
+.collapsible-content.active {
+    max-height: 1500px; /* Un valor alto para permitir que el contenido se expanda */
+    padding: 20px;
+}
+.affiliate-search-bar {
+    margin-bottom: 20px;
+}

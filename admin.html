@@ -382,22 +382,33 @@
                                 <button type="submit" class="admin-button">Añadir Afiliado</button>
                                 <button type="button" id="btnCancelarEdicion" class="admin-button" style="display:none; background-color: var(--clr-dark-text-alt);">Cancelar Edición</button>
                             </form>
-                            <div id="statusAffiliateMessage" class="status-container oculto"></div>
-                            <h3 style="margin-top: 30px; margin-bottom: 10px;">Afiliados Registrados:</h3>
-                            <div class="loader-container oculto" id="loaderListaAfiliados"><div class="loader"></div></div>
-                            <table class="tabla-sorteos">
-                                <thead>
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th>Teléfono</th>
-                                        <th>Estado</th>
-                                        <th>Boletos (Sorteo Activo)</th>
-                                        <th>Boletos (Total)</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tbodyListaAfiliados"></tbody>
-                            </table>
+                            <div class="collapsible-section">
+                                <button type="button" class="collapsible-header">
+                                    <h3>Afiliados Registrados (<span id="affiliateCount">0</span>)</h3>
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div class="collapsible-content">
+                                    <div class="form-group affiliate-search-bar">
+                                        <label for="affiliateSearchInput">Buscar Afiliado:</label>
+                                        <input type="search" id="affiliateSearchInput" placeholder="Escribe un nombre o teléfono para filtrar...">
+                                    </div>
+                                    <div class="loader-container oculto" id="loaderListaAfiliados"><div class="loader"></div></div>
+                                    <table class="tabla-sorteos">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Teléfono</th>
+                                                <th>Estado</th>
+                                                <th>Boletos (Activo)</th>
+                                                <th>Boletos (Total)</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodyListaAfiliados">
+                                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </section>
                         <section class="admin-section">
                             <h2><i class="fas fa-file-invoice-dollar"></i> Generador de Reporte de Comisiones</h2>
@@ -433,7 +444,7 @@
                                         <div class="form-group"><label for="costoPremio">Costo del Premio (CP)</label><input type="number" id="costoPremio" value="1200" step="50"></div>
                                         <div class="form-group"><label for="costoMarketing">Costos de Marketing (CM)</label><input type="number" id="costoMarketing" value="150" step="10"></div>
                                         <div class="form-group"><label for="gananciaDeseada">Meta de Ganancia Neta (Opcional)</label><input type="number" id="gananciaDeseada" value="500" step="50"></div>
-                                        <div class="form-group"><label for="comisionAfiliado">Comisión de Afiliado (% CA)</label><input type="number" id="comisionAfiliado" value="20" placeholder="Ej: 20 para 20%"></div>
+                                        <div class="form-group"><label for="comisionAfiliado">Comisión de Afiliado (% CA)</label><input type="number" id="comisionAfiliado" value="10" placeholder="Ej: 10 para 10%"></div>
                                         <div class="form-group"><label for="porcentajeVentasAfiliado">Ventas Estimadas por Afiliados (% PVA)</label><input type="number" id="porcentajeVentasAfiliado" value="40" placeholder="Ej: 40 para 40%"></div>
                                         <div class="form-group"><label for="comisionPasarelaVariable">Comisión Pasarela Variable (% CVP)</label><input type="number" id="comisionPasarelaVariable" value="3.5" step="0.1"></div>
                                         <div class="form-group"><label for="comisionPasarelaFija">Comisión Pasarela Fija ($ CFP)</label><input type="number" id="comisionPasarelaFija" value="0.35" step="0.01"></div>
