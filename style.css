@@ -2386,12 +2386,7 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     margin-left: auto;
     margin-right: auto;
 }
-@media (min-width: 992px) {
-    .hero-text .subtitle {
-        margin-left: 0;
-        margin-right: 0;
-    }
-}
+
 
 .hero-cta {
     padding: 15px 40px;
