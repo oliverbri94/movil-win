@@ -63,7 +63,31 @@ function inicializarComponentesGlobales() {
         console.error("Error al inicializar el menú de navegación:", error);
     }
 }
+function initializeAffiliateTabs() {
+    const tabsContainer = document.querySelector(".instructivo-tabs");
+    const panelsContainer = document.querySelector(".instructivo-contenido");
 
+    if (!tabsContainer || !panelsContainer) return;
+
+    tabsContainer.addEventListener("click", (e) => {
+        const clickedTab = e.target.closest(".tab-btn");
+        if (!clickedTab) return;
+
+        tabsContainer.querySelectorAll(".tab-btn").forEach(tab => tab.classList.remove("active"));
+        clickedTab.classList.add("active");
+
+        const targetPanelId = clickedTab.dataset.target;
+        
+        panelsContainer.querySelectorAll(".instructivo-panel").forEach(panel => {
+            panel.classList.remove("active");
+        });
+
+        const targetPanel = document.getElementById(targetPanelId);
+        if(targetPanel) {
+            targetPanel.classList.add("active");
+        }
+    });
+}
 
 /**
  * Esta es la función principal que contiene toda la lógica para la página del sorteo.
