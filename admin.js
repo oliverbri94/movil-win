@@ -67,11 +67,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Formulario y Tabla de Afiliados
     const addAffiliateForm = document.getElementById('addAffiliateForm');
-    const tbodyListaAfiliados = document.getElementById('tbodyListaAfiliados');
-    const quickAddAffiliateBtn = document.getElementById('quickAddAffiliateBtn');
-    const quickAffiliateModal = document.getElementById('quickAffiliateModal');
-    const closeAffiliateModalBtn = document.getElementById('closeAffiliateModal');
-    const quickAffiliateForm = document.getElementById('quickAffiliateForm');
+    const editAffiliateIdInput = document.getElementById('editAffiliateId');
+    const affiliateNameInput = document.getElementById('affiliateNameInput');
+    const affiliatePhoneInput = document.getElementById('affiliatePhoneInput');
+    const btnGuardarAfiliado = document.getElementById('btnGuardarAfiliado');
+    const btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
+    const statusAffiliateMessage = document.getElementById('statusAffiliateMessage');
 
     // Opciones de Sorteo (Countdown)
     const btnIniciarCuentaRegresiva = document.getElementById('btnIniciarCuentaRegresiva');
@@ -151,6 +152,120 @@ document.addEventListener('DOMContentLoaded', async () => {
             fila.remove();
         });
     }
+    // Función para resetear el formulario al estado "Añadir"
+    function resetearFormularioAfiliado() {
+        editAffiliateIdInput.value = '';
+        addAffiliateForm.reset();
+        btnGuardarAfiliado.textContent = 'Añadir Afiliado';
+        btnCancelarEdicion.style.display = 'none';
+    }
+
+    // Listener para el formulario (maneja tanto CREAR como ACTUALIZAR)
+    addAffiliateForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const id = editAffiliateIdInput.value;
+        const esEdicion = id !== '';
+
+        const url = esEdicion ? `${API_BASE_URL}/api/admin/afiliados/${id}` : `${API_BASE_URL}/api/admin/afiliados`;
+        const method = esEdicion ? 'PUT' : 'POST';
+
+        const payload = {
+            nombre_completo: affiliateNameInput.value,
+            telefono: affiliatePhoneInput.value
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json', credentials: 'include' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error);
+
+            showGenericStatusMessage(statusAffiliateMessage, result.message, false);
+            resetearFormularioAfiliado();
+            fetchAndDisplayAffiliates();
+        } catch (error) {
+            showGenericStatusMessage(statusAffiliateMessage, `Error: ${error.message}`, true);
+        }
+    });
+
+    // Listener para el botón "Cancelar Edición"
+    btnCancelarEdicion?.addEventListener('click', resetearFormularioAfiliado);
+
+    // Listener para la tabla de afiliados (maneja Editar, Activar/Desactivar, Copiar Link)
+
+    // --- GESTIÓN DE CLICS EN LA TABLA DE AFILIADOS ---
+    tbodyListaAfiliados?.addEventListener('click', async (e) => {
+        const boton = e.target.closest('button.accion-btn');
+        if (!boton) return;
+
+        const afiliadoId = boton.dataset.id;
+        const fila = boton.closest('tr');
+
+        // --- Lógica para EDITAR ---
+        if (boton.classList.contains('btn-editar-afiliado')) {
+            const nombre = fila.cells[0].textContent;
+            const telefono = fila.cells[1].textContent;
+
+            affiliateNameInput.value = nombre;
+            affiliatePhoneInput.value = (telefono === 'N/A' ? '' : telefono);
+            editAffiliateIdInput.value = afiliadoId;
+            
+            btnGuardarAfiliado.textContent = 'Actualizar Afiliado';
+            btnCancelarEdicion.style.display = 'inline-block';
+            addAffiliateForm.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- Lógica para ACTIVAR/DESACTIVAR ---
+        if (boton.classList.contains('btn-activar-afiliado') || boton.classList.contains('btn-desactivar-afiliado')) {
+            const nuevoEstado = boton.classList.contains('btn-activar-afiliado') ? 'activo' : 'inactivo';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/afiliados/${afiliadoId}/estado`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'credentials': 'include' },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error);
+                showGenericStatusMessage(statusAffiliateMessage, result.message, false);
+                fetchAndDisplayAffiliates();
+            } catch (error) {
+                showGenericStatusMessage(statusAffiliateMessage, `Error: ${error.message}`, true);
+            }
+        }
+
+        // --- Lógica para COPIAR LINK ---
+        if (boton.classList.contains('btn-copiar-link')) {
+            const nombreAfiliado = boton.dataset.nombre;
+            const tuNumeroWhatsApp = '593963135510'; // Asegúrate que este sea tu número de contacto
+            const mensaje = `Hola MOVIL WIN, quiero participar en el sorteo. Mi afiliado es ${nombreAfiliado}.`;
+            const enlaceAfiliado = `https://wa.me/${tuNumeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+
+            navigator.clipboard.writeText(enlaceAfiliado).then(() => {
+                const originalIcon = boton.innerHTML;
+                boton.innerHTML = '<i class="fas fa-check"></i>';
+                boton.style.backgroundColor = 'var(--clr-primary)';
+                setTimeout(() => { 
+                    boton.innerHTML = originalIcon;
+                    boton.style.backgroundColor = ''; // Vuelve al color original
+                }, 2000);
+            }).catch(err => console.error('Error al copiar enlace:', err));
+        }
+        
+        // --- Lógica para ELIMINAR ---
+        if (boton.classList.contains('btn-eliminar-afiliado')) {
+            const nombreAfiliado = fila.cells[0].textContent;
+            if (confirm(`¿Estás seguro de que quieres eliminar permanentemente al afiliado "${nombreAfiliado}"? Esta acción no se puede deshacer.`)) {
+                // Aquí iría la lógica para llamar a una ruta DELETE en el backend
+                console.log(`Eliminar afiliado con ID: ${afiliadoId}`);
+                // await handleEliminarAfiliado(afiliadoId); // Implementaríamos esto en el futuro si es necesario
+                showGenericStatusMessage(statusAffiliateMessage, `FUNCIONALIDAD NO IMPLEMENTADA: Eliminar ID ${afiliadoId}`, true);
+            }
+        }
+    });
 
     /**
      * Lee los datos de todos los inputs de paquetes del editor y los devuelve como un array de objetos.
@@ -317,41 +432,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     /**
      * Obtiene y muestra la lista de afiliados en la tabla de gestión.
      */
-    // admin.js
 
     async function fetchAndDisplayAffiliates() {
         const loader = document.getElementById('loaderListaAfiliados');
         const tbody = document.getElementById('tbodyListaAfiliados');
-        if (!loader || !tbody) {
-            console.error("No se encontraron los elementos de la tabla de afiliados.");
-            return;
-        }
+        if (!loader || !tbody) return;
         
         loader.classList.remove('oculto');
         tbody.innerHTML = '';
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/afiliados`, { credentials: 'include' });
-            if (!response.ok) {
-                throw new Error((await response.json()).error || 'Error de red');
-            }
             const afiliados = await response.json();
 
-            // Limpiamos el dropdown de "Añadir Participante" antes de volver a llenarlo
             const affiliateSelect = document.getElementById('affiliateSelect');
-            if(affiliateSelect) {
-                affiliateSelect.innerHTML = '<option value="">-- Sin Afiliado --</option>';
-            }
+            if(affiliateSelect) affiliateSelect.innerHTML = '<option value="">-- Sin Afiliado --</option>';
 
             if (afiliados.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6">No hay afiliados registrados.</td></tr>';
             } else {
                 afiliados.forEach(afiliado => {
-                    // Rellenamos el dropdown solo con los afiliados activos
                     if (afiliado.estado === 'activo' && affiliateSelect) {
                         const option = document.createElement('option');
                         option.value = afiliado.id_afiliado;
-                        option.textContent = afiliado.nombre_afiliado; // Corregido: usar nombre_afiliado
+                        option.textContent = afiliado.nombre_afiliado;
                         affiliateSelect.appendChild(option);
                     }
 
@@ -359,28 +463,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const esActivo = afiliado.estado === 'activo';
                     tr.className = esActivo ? 'afiliado-activo-row' : 'afiliado-inactivo-row';
 
-                    // Estimamos los ingresos generados (puedes ajustar el precio promedio)
+                    // Estimación de ingresos (no cambia)
                     const precioPromedioBoleto = 2.5;
                     const ingresosGenerados = (parseInt(afiliado.boletos_totales, 10) * precioPromedioBoleto).toFixed(2);
 
+                    // --- HTML de la fila actualizado para incluir el teléfono ---
                     tr.innerHTML = `
                         <td data-label="Nombre">${afiliado.nombre_afiliado}</td>
-                        <td data-label="Estado">
-                            <span class="status-${esActivo ? 'activo' : 'inactivo'}">${esActivo ? 'Activo' : 'Inactivo'}</span>
-                        </td>
+                        <td data-label="Teléfono">${afiliado.celular_afiliado || 'N/A'}</td>
+                        <td data-label="Estado"><span class="status-${esActivo ? 'activo' : 'inactivo'}">${esActivo ? 'Activo' : 'Inactivo'}</span></td>
                         <td data-label="Boletos (Activo)" class="stat-number">${afiliado.boletos_sorteo_activo}</td>
                         <td data-label="Boletos (Total)" class="stat-number">${afiliado.boletos_totales}</td>
-                        <td data-label="Ingresos" class="stat-number">$${ingresosGenerados}</td>
                         <td data-label="Acciones">
-                            <button class="accion-btn btn-editar-afiliado" data-id="${afiliado.id_afiliado}" title="Editar Afiliado">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="accion-btn btn-copiar-link" data-nombre="${afiliado.nombre_afiliado}" title="Copiar Link de Afiliado">
-                                <i class="fas fa-link"></i>
-                            </button>
-                            <button class="accion-btn ${esActivo ? 'btn-desactivar-afiliado' : 'btn-activar-afiliado'}" data-id="${afiliado.id_afiliado}" title="${esActivo ? 'Desactivar' : 'Activar'}">
-                                <i class="fas ${esActivo ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
-                            </button>
+                            <button class="accion-btn btn-editar-afiliado" data-id="${afiliado.id_afiliado}" title="Editar Afiliado"><i class="fas fa-edit"></i></button>
+                            <button class="accion-btn btn-copiar-link" data-nombre="${afiliado.nombre_afiliado}" title="Copiar Link de Afiliado"><i class="fas fa-link"></i></button>
+                            <button class="accion-btn ${esActivo ? 'btn-desactivar-afiliado' : 'btn-activar-afiliado'}" data-id="${afiliado.id_afiliado}" title="${esActivo ? 'Desactivar' : 'Activar'}"><i class="fas ${esActivo ? 'fa-toggle-on' : 'fa-toggle-off'}"></i></button>
+                            <button class="accion-btn btn-eliminar-afiliado" data-id="${afiliado.id_afiliado}" title="Eliminar Afiliado" style="background-color:var(--clr-red);"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     `;
                     tbody.appendChild(tr);

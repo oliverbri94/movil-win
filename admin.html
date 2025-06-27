@@ -376,9 +376,11 @@
                          <section class="admin-section">
                             <h2>Gestionar Afiliados</h2>
                             <form id="addAffiliateForm">
+                                <input type="hidden" id="editAffiliateId">
                                 <div class="form-group"><label for="affiliateNameInput">Nombre Completo del Nuevo Afiliado:</label><input type="text" id="affiliateNameInput" required></div>
                                 <div class="form-group"><label for="affiliatePhoneInput">Teléfono (Opcional):</label><input type="text" id="affiliatePhoneInput"></div>
                                 <button type="submit" class="admin-button">Añadir Afiliado</button>
+                                <button type="button" id="btnCancelarEdicion" class="admin-button" style="display:none; background-color: var(--clr-dark-text-alt);">Cancelar Edición</button>
                             </form>
                             <div id="statusAffiliateMessage" class="status-container oculto"></div>
                             <h3 style="margin-top: 30px; margin-bottom: 10px;">Afiliados Registrados:</h3>
@@ -387,6 +389,7 @@
                                 <thead>
                                     <tr>
                                         <th>Nombre</th>
+                                        <th>Teléfono</th>
                                         <th>Estado</th>
                                         <th>Boletos (Sorteo Activo)</th>
                                         <th>Boletos (Total)</th>

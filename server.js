@@ -723,6 +723,65 @@ app.get('/api/admin/afiliados', requireAdminLogin, async (req, res) => {
         res.status(500).json({ error: "Error interno del servidor." });
     }
 });
+// En server.js, AÑADE esta nueva ruta
+
+// RUTA PARA ACTUALIZAR EL ESTADO DE UN AFILIADO (activo/inactivo)
+app.put('/api/admin/afiliados/:id_afiliado/estado', requireAdminLogin, async (req, res) => {
+    try {
+        const { id_afiliado } = req.params;
+        const { estado } = req.body; // Recibirá 'activo' o 'inactivo'
+
+        if (!estado || !['activo', 'inactivo'].includes(estado)) {
+            return res.status(400).json({ error: 'Estado no válido.' });
+        }
+
+        const sql = `UPDATE afiliados SET estado = $1 WHERE id_afiliado = $2`;
+        const result = await new Promise((resolve, reject) => {
+            db.run(sql, [estado, id_afiliado], function(err) {
+                if (err) return reject(err);
+                resolve(this);
+            });
+        });
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: "Afiliado no encontrado." });
+        }
+        res.json({ success: true, message: `El estado del afiliado ha sido actualizado a '${estado}'.` });
+
+    } catch (error) {
+        console.error("Error al cambiar estado de afiliado:", error);
+        res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+});
+// En server.js, AÑADE esta nueva ruta
+
+// RUTA PARA EDITAR LOS DATOS DE UN AFILIADO
+app.put('/api/admin/afiliados/:id_afiliado', requireAdminLogin, async (req, res) => {
+    try {
+        const { id_afiliado } = req.params;
+        const { nombre_completo, telefono } = req.body;
+
+        if (!nombre_completo) {
+            return res.status(400).json({ error: 'El nombre completo es requerido.' });
+        }
+
+        const sql = `UPDATE afiliados SET nombre_completo = $1, telefono = $2 WHERE id_afiliado = $3`;
+        const result = await new Promise((resolve, reject) => {
+            db.run(sql, [nombre_completo, telefono, id_afiliado], function(err) {
+                if (err) return reject(err);
+                resolve(this);
+            });
+        });
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: "Afiliado no encontrado." });
+        }
+        res.json({ success: true, message: 'Afiliado actualizado con éxito.' });
+    } catch (error) {
+        console.error("Error al editar afiliado:", error);
+        res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+});
 app.get('/api/global-stats', async (req, res) => {
     try {
         const client = await dbClient.connect();
