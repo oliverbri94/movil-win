@@ -301,6 +301,7 @@ function initializeRafflePage() {
     }
 
 
+
     function renderizarPaquetesPublicos(paquetes, contenedor) {
         if (!contenedor) return;
         contenedor.innerHTML = '';
@@ -335,14 +336,23 @@ function initializeRafflePage() {
                 }
             }
             
-            // --- INICIO DE LA MODIFICACIÓN ---
-            // 1. Lógica para generar una descripción dinámica para cada paquete
-            let descripcion = "Una excelente opción para aumentar tus probabilidades de ganar."; // Descripción por defecto
-
+            let descripcion = "Una excelente opción para aumentar tus probabilidades de ganar.";
             if (paquete.boletos === 1) {
                 descripcion = "La forma perfecta de entrar en el sorteo y probar tu suerte.";
             } else if (esPopular) {
-                descripcion = "¡La mejor relación precio-oportunidad! El paquete preferido por la comunidad.";
+                descripcion = "¡La mejor relación precio-oportunidad! El paquete preferido por nuestros participantes.";
+            }
+            
+            // --- INICIO DE LA MODIFICACIÓN ---
+            // 1. Lógica para elegir un ícono dinámico basado en el paquete
+            let iconoHTML = '<i class="fas fa-layer-group"></i>'; // Icono por defecto para paquetes intermedios
+
+            if (paquete.boletos === 1) {
+                iconoHTML = '<i class="fas fa-ticket-alt"></i>'; // Icono para boleto individual
+            } else if (esPopular) {
+                iconoHTML = '<i class="fas fa-rocket"></i>'; // Icono para el paquete más popular/grande
+            } else if (paquete.boletos > 15) { // Un umbral para paquetes "premium"
+                iconoHTML = '<i class="fas fa-gem"></i>'; // Icono de gema para paquetes de alto valor
             }
             // --- FIN DE LA MODIFICACIÓN ---
 
@@ -351,14 +361,14 @@ function initializeRafflePage() {
             const paqueteHTML = `
                 <div class="paquete-item ${esPopular ? 'popular' : ''}">
                     ${esPopular ? '<span class="etiqueta-popular">Más Popular</span>' : ''}
-                    <div class="paquete-icono"><i class="fas fa-rocket"></i></div>
+
+                    <div class="paquete-icono">${iconoHTML}</div>
+                    
                     <h4>${paquete.nombre}</h4>
                     <div class="paquete-precio">$${paquete.precio} ${valorRealHTML}</div>
                     <div class="paquete-cantidad">${paquete.boletos} Boleto(s) Digital(es)</div>
                     ${boletosGratisHTML}
-
                     <p class="paquete-descripcion">${descripcion}</p>
-
                     <a href="https://wa.me/593963135510?text=${encodeURIComponent(mensajeWhatsApp)}" target="_blank" class="boton-paquete">Elegir Paquete</a>
                 </div>
             `;
