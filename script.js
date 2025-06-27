@@ -861,7 +861,7 @@ function initializeRafflePage() {
                         <div class="progress-info-wrapper" style="${esProximo ? 'display: none;' : ''}">
                             <div class="progress-bar-wrapper">
                                 <div class="progress-bar-fill" style="width: ${percentage.toFixed(2)}%;"></div>
-                                <span class="progress-bar-text">${percentage.toFixed(0)}%</span>
+                                <span class="progress-bar-text">${percentage.toFixed(2)}%</span>
                             </div>
                             <p class="motivational-text-integrated">${motivationalMessage}</p>
                         </div>
@@ -1024,12 +1024,80 @@ function initializeRafflePage() {
 
 
     // --- Event Listeners ---
+
+    function handleTouchStart(e) {
+        // Prevenimos que la página entera se mueva al tocar la rueda
+        e.preventDefault();
+        if (estaGirando) return;
+        
+        // Guardamos la posición Y inicial del dedo y el offset de la rueda
+        startY_Drag = e.touches[0].clientY;
+        startYOffset_Drag = currentYOffset;
+    }
+
+    function handleTouchMove(e) {
+        e.preventDefault();
+        if (estaGirando) return;
+
+        // Calculamos cuánto ha movido el dedo
+        const deltaY = e.touches[0].clientY - startY_Drag;
+        
+        // Actualizamos el offset de la rueda (restamos porque al arrastrar hacia abajo, el contenido sube)
+        currentYOffset = startYOffset_Drag - deltaY;
+
+        // Nos aseguramos de que no se salga de los límites
+        const maxOffset = Math.max(0, (participantes.length * SEGMENT_HEIGHT_FRONT) - wheelHeight);
+        currentYOffset = Math.max(0, Math.min(currentYOffset, maxOffset));
+
+        // Volvemos a dibujar la rueda en su nueva posición
+        drawFrontWheel(participantes);
+    }
+
+    function handleTouchEnd() {
+        // De momento no hace nada, pero es bueno tenerla para futuras mejoras
+    }
     function handleMouseDown(e) { if (!estaGirando) { isDragging = true; startY_Drag = e.clientY; startYOffset_Drag = currentYOffset; if(wheelCanvas) wheelCanvas.style.cursor = 'grabbing'; }}
     function handleMouseUpOrLeave() { isDragging = false; if(wheelCanvas) wheelCanvas.style.cursor = 'grab'; }
     function handleMouseMove(e) { if (!isDragging || estaGirando) return; e.preventDefault(); const deltaY = e.clientY - startY_Drag; currentYOffset = startYOffset_Drag + deltaY; const maxOffset = Math.max(0, (participantes.length * SEGMENT_HEIGHT_FRONT) - wheelHeight); currentYOffset = Math.max(0, Math.min(currentYOffset, maxOffset)); drawFrontWheel(participantes); }
     function handleWheelScroll(e) { if (estaGirando) return; e.preventDefault(); currentYOffset += e.deltaY * 0.5; const maxOffset = Math.max(0, (participantes.length * SEGMENT_HEIGHT_FRONT) - wheelHeight); currentYOffset = Math.max(0, Math.min(currentYOffset, maxOffset)); drawFrontWheel(participantes); }
-    function addWheelEventListeners(canvas) { if (!canvas) return; canvas.style.cursor = 'grab'; canvas.addEventListener('mousedown', handleMouseDown); canvas.addEventListener('mouseup', handleMouseUpOrLeave); canvas.addEventListener('mouseleave', handleMouseUpOrLeave); canvas.addEventListener('mousemove', handleMouseMove); canvas.addEventListener('wheel', handleWheelScroll); }
-    function removeWheelEventListeners(canvas) { if (!canvas) return; canvas.style.cursor = 'default'; canvas.removeEventListener('mousedown', handleMouseDown); canvas.removeEventListener('mouseup', handleMouseUpOrLeave); canvas.removeEventListener('mouseleave', handleMouseUpOrLeave); canvas.removeEventListener('mousemove', handleMouseMove); canvas.removeEventListener('wheel', handleWheelScroll); }
+
+    function addWheelEventListeners(canvas) {
+        if (!canvas) return;
+        canvas.style.cursor = 'grab';
+
+        // Eventos de Mouse (escritorio)
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mouseup', handleMouseUpOrLeave);
+        canvas.addEventListener('mouseleave', handleMouseUpOrLeave);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('wheel', handleWheelScroll);
+
+        // --- INICIO DE LA MODIFICACIÓN ---
+        // Eventos Táctiles (móviles)
+        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+        canvas.addEventListener('touchend', handleTouchEnd);
+        // --- FIN DE LA MODIFICACIÓN ---
+    }
+
+    function removeWheelEventListeners(canvas) {
+        if (!canvas) return;
+        canvas.style.cursor = 'default';
+
+        // Eventos de Mouse
+        canvas.removeEventListener('mousedown', handleMouseDown);
+        canvas.removeEventListener('mouseup', handleMouseUpOrLeave);
+        canvas.removeEventListener('mouseleave', handleMouseUpOrLeave);
+        canvas.removeEventListener('mousemove', handleMouseMove);
+        canvas.removeEventListener('wheel', handleWheelScroll);
+
+        // --- INICIO DE LA MODIFICACIÓN ---
+        // Eventos Táctiles
+        canvas.removeEventListener('touchstart', handleTouchStart);
+        canvas.removeEventListener('touchmove', handleTouchMove);
+        canvas.removeEventListener('touchend', handleTouchEnd);
+        // --- FIN DE LA MODIFICACIÓN ---
+    }
     const navContainer = document.getElementById('prizeNavContainer');
     if (navContainer) { navContainer.addEventListener('click', (e) => { if (e.target && e.target.classList.contains('prize-nav-panel')) { const slideIndex = parseInt(e.target.dataset.slideTo, 10); if (!isNaN(slideIndex)) moveToSlide(slideIndex); } }); }
     if (prizeCarouselTrack) { prizeCarouselTrack.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }); prizeCarouselTrack.addEventListener('touchend', (e) => { const deltaX = e.changedTouches[0].clientX - touchStartX; if (deltaX < -50) moveToSlide(premioActualIndex + 1); else if (deltaX > 50) moveToSlide(premioActualIndex - 1); }); }
