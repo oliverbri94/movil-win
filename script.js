@@ -826,12 +826,23 @@ function initializeRafflePage() {
             let percentage = 0;
             let motivationalMessage = "¡El sorteo ha comenzado!";
             if (!esProximo) {
-                const currentCount = sorteo.participantes_actuales || 0;
-                const goal = sorteo.meta_participaciones || 200;
+                const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
+                const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
                 percentage = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
-                motivationalMessage = getMotivationalMessage(percentage);
-            }
+                boletosRestantes = goal - currentCount;
 
+                // Asignamos una clase de 'urgencia' según qué tan lleno esté
+                if (percentage >= 90) {
+                    urgenciaClass = 'critico'; // Rojo
+                    motivationalMessage = "¡QUEDAN LOS ÚLTIMOS! No te quedes fuera.";
+                } else if (percentage >= 70) {
+                    urgenciaClass = 'urgente'; // Naranja
+                    motivationalMessage = "¡Se acaban rápido! Asegura tu oportunidad ahora.";
+                } else {
+                    motivationalMessage = "Cada boleto es una nueva oportunidad de ganar.";
+                }
+            }
+            
             const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json);
 
             slideWrapper.innerHTML = `
@@ -844,9 +855,12 @@ function initializeRafflePage() {
                         <div class="mini-package-selector" style="${esProximo ? 'display: none;' : ''}">${miniPaquetesHTML}</div>
 
                         <div class="progress-info-wrapper" style="${esProximo ? 'display: none;' : ''}">
-                            <div class="progress-bar-wrapper">
+                            <div class="boletos-restantes-container">
+                                <span class="boletos-restantes-numero">${boletosRestantes}</span>
+                                <span class="boletos-restantes-texto">Boletos Disponibles</span>
+                            </div>
+                            <div class="progress-bar-wrapper ${urgenciaClass}">
                                 <div class="progress-bar-fill" style="width: ${percentage.toFixed(2)}%;"></div>
-                                <span class="progress-bar-text">${percentage.toFixed(2)}%</span>
                             </div>
                             <p class="motivational-text-integrated">${motivationalMessage}</p>
                         </div>
