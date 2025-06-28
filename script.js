@@ -844,7 +844,7 @@ function initializeRafflePage() {
                     motivationalMessage = "Cada boleto es una nueva oportunidad de ganar.";
                 }
             }
-            
+            const percentageRemaining = 100 - percentageSold;
             const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json);
 
             slideWrapper.innerHTML = `
@@ -890,7 +890,7 @@ function initializeRafflePage() {
                 ${!esProximo ? `
                 <div class="contenedor-sorteo content-section">
                     <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
-                    <p class="rueda-subtitulo">¡Mucha Suerte a Todos los Participantes!</p>
+                    <p class="rueda-subtitulo">¡El sorteo comienza al llegar a la meta de boletos!</p>
                     <div class="price-is-right-wheel-frame">
                         <div class="wheel-price-is-right-container">
                             <canvas class="price-wheel-canvas"></canvas>
