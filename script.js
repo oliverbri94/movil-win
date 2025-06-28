@@ -830,7 +830,7 @@ function initializeRafflePage() {
             if (!esProximo) {
                 const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
                 const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
-                percentage = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
+                percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
                 boletosRestantes = goal - currentCount;
 
                 // Asignamos una clase de 'urgencia' según qué tan lleno esté
