@@ -262,90 +262,12 @@ body.dark-theme {
 
 
 
-/* ================================================= */
-/* --- ESTILOS PARA BARRA DE PROGRESO "NEÓN" Y ESCASEZ --- */
-/* ================================================= */
 
-@keyframes pulse-red {
-    0% { box-shadow: 0 0 4px 0px rgba(var(--clr-red-rgb), 0.7); }
-    50% { box-shadow: 0 0 12px 3px rgba(var(--clr-red-rgb), 0.9); }
-    100% { box-shadow: 0 0 4px 0px rgba(var(--clr-red-rgb), 0.7); }
-}
 
-.progress-info-wrapper {
-    width: 100%;
-}
 
-.boletos-restantes-container {
-    text-align: center;
-    margin-bottom: 15px;
-}
 
-.boletos-restantes-numero {
-    font-family: 'Anton', sans-serif;
-    font-size: 3.5em;
-    line-height: 1;
-    color: var(--clr-primary);
-    display: block;
-    margin-bottom: 5px;
-}
 
-.boletos-restantes-texto {
-    font-size: 1em;
-    font-weight: 500;
-    color: var(--clr-dark-text-alt);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
 
-.progress-bar-wrapper {
-    width: 100%;
-    height: 18px;
-    background-color: var(--clr-dark-bg);
-    border-radius: 9px;
-    border: 1px solid var(--clr-dark-border);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
-    overflow: hidden;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    width: 0%;
-    border-radius: 9px;
-    transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-    
-    /* Estilo por defecto (Verde) */
-    background: linear-gradient(90deg, var(--clr-primary), #52e0a2);
-    box-shadow: 0 0 8px 1px rgba(var(--clr-primary-rgb), 0.6);
-}
-
-/* Estilo para cuando el sorteo está en estado URGENTE */
-.progress-bar-wrapper.urgente .progress-bar-fill {
-    background: linear-gradient(90deg, var(--clr-accent), #ffc266);
-    box-shadow: 0 0 8px 1px rgba(var(--clr-accent-rgb), 0.6);
-}
-.progress-bar-wrapper.urgente .boletos-restantes-numero {
-    color: var(--clr-accent);
-}
-
-/* Estilo para cuando el sorteo está en estado CRÍTICO */
-.progress-bar-wrapper.critico .progress-bar-fill {
-    background: linear-gradient(90deg, var(--clr-red), #ff7890);
-    /* Añadimos la animación de pulso */
-    animation: pulse-red 1.5s infinite;
-}
-.progress-bar-wrapper.critico .boletos-restantes-numero {
-    color: var(--clr-red);
-}
-
-.motivational-text-integrated {
-    font-size: 0.95em;
-    font-weight: 500;
-    min-height: 1.5em;
-    margin-top: 15px; /* Ajustamos el margen */
-    text-align: center;
-    transition: opacity 0.3s ease;
-}
 
 
 
@@ -2687,12 +2609,13 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 .progress-bar-wrapper {
     width: 100%;
-    height: 18px;
+    height: 28px; /* <-- AUMENTAMOS LA ALTURA (antes era 18px) */
     background-color: var(--clr-dark-bg);
-    border-radius: 9px;
+    border-radius: 14px; /* La mitad de la nueva altura */
     border: 1px solid var(--clr-dark-border);
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
     overflow: hidden;
+    position: relative; /* <-- AÑADIMOS ESTO para posicionar el texto */
 }
 
 .progress-bar-fill {
@@ -2704,6 +2627,9 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     /* Estilo por defecto (Verde) */
     background: linear-gradient(90deg, var(--clr-primary), #52e0a2);
     box-shadow: 0 0 8px 1px rgba(var(--clr-primary-rgb), 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Estilo para cuando el sorteo está en estado URGENTE */
@@ -2732,4 +2658,23 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     margin-top: 15px; /* Ajustamos el margen */
     text-align: center;
     transition: opacity 0.3s ease;
+}
+
+/* AÑADE ESTA NUEVA REGLA AL FINAL */
+.progress-bar-percentage-text {
+    font-size: 0.85em;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+    /* Evita que el texto se parta en dos líneas */
+    white-space: nowrap; 
+}
+
+.progress-bar-percentage-text {
+    font-size: 0.85em;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+    /* Evita que el texto se parta en dos líneas */
+    white-space: nowrap; 
 }

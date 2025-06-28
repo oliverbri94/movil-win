@@ -862,7 +862,9 @@ function initializeRafflePage() {
                                 <span class="boletos-restantes-texto">Boletos Disponibles</span>
                             </div>
                             <div class="progress-bar-wrapper ${urgenciaClass}">
-                                <div class="progress-bar-fill" style="width: ${percentage.toFixed(2)}%;"></div>
+                                <div class="progress-bar-fill" style="width: ${percentageRemaining.toFixed(2)}%;">
+                                    <span class="progress-bar-percentage-text">${percentageRemaining.toFixed(1)}% Disponible</span>
+                                </div>
                             </div>
                             <p class="motivational-text-integrated">${motivationalMessage}</p>
                         </div>
