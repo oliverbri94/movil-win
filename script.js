@@ -824,7 +824,9 @@ function initializeRafflePage() {
             }
             
             let percentage = 0;
-            let motivationalMessage = "¡El sorteo ha comenzado!";
+            let motivationalMessage = "¡El sorteo ha comenzado!";   
+            let boletosRestantes = 0;
+            let urgenciaClass = ''; // Clase para cambiar el color de la barra
             if (!esProximo) {
                 const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
                 const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
