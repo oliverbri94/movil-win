@@ -194,7 +194,7 @@ body.dark-theme {
     .prize-carousel-slide {
         /* REEMPLAZA las reglas anteriores por estas: */
         display: grid;
-        grid-template-columns: 4fr 6fr; /* Proporción 40% para la imagen, 60% para el texto */
+        grid-template-columns: 5fr 5fr; /* Proporción 40% para la imagen, 60% para el texto */
         align-items: center;
         gap: 20px; /* Espacio entre las columnas */
         padding: 5px;
