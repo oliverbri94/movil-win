@@ -192,10 +192,12 @@ body.dark-theme {
 }
 @media (min-width: 768px) {
     .prize-carousel-slide {
-        flex-direction: row;
+        /* REEMPLAZA las reglas anteriores por estas: */
+        display: grid;
+        grid-template-columns: 4fr 6fr; /* Proporción 40% para la imagen, 60% para el texto */
         align-items: center;
-        gap: 40px;
-        padding: 40px;
+        gap: 20px; /* Espacio entre las columnas */
+        padding: 5px;
     }
 }
 
