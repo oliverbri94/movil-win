@@ -841,7 +841,9 @@ function initializeRafflePage() {
             }
             const percentageRemaining = 100 - percentageSold;
             const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json);
-
+            const bannerProximoHTML = esProximo
+                ? `<div class="proximo-banner"><i class="fas fa-hourglass-start"></i> PRÓXIMAMENTE</div>`
+                : '';
             slideWrapper.innerHTML = `
                 <div class="prize-carousel-slide" data-sorteo-id="${sorteo.id_sorteo || 'proximo'}">
                     <div class="prize-image-container">
