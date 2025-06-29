@@ -811,18 +811,13 @@ function initializeRafflePage() {
             
             const esProximo = sorteo.status_sorteo === 'programado';
             
-            let tituloMostrado = sorteo.nombre_premio_display;
-            let mediaParaRenderizar = sorteo;
+            const mediaParaRenderizar = {
+                ...sorteo, // Copiamos todos los datos originales del sorteo
+                esProximo: esProximo
+            };
 
-            if (esProximo) {
-                tituloMostrado = "Próximo Gran Premio";
-                mediaParaRenderizar = {
-                    imagen_url: 'images/proximo_sorteo.png',
-                    nombre_premio_display: 'Próximo Sorteo',
-                    esProximo: true
-                };
-            }
-            
+            // 3. El título siempre será el nombre real del premio.
+            const tituloMostrado = sorteo.nombre_premio_display;
             let percentage = 0;
             let motivationalMessage = "¡El sorteo ha comenzado!";   
             let boletosRestantes = 0;
