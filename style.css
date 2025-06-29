@@ -1009,7 +1009,7 @@ body.dark-theme .admin-section h2::after { display: none; }
 /* --- Estilos para los Paneles de Navegación del Carrusel --- */
 .prize-nav-container {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start; 
     gap: 15px; /* Espacio entre las pestañas */
     padding: 0 15px; /* Padding a los lados del contenedor */
     margin-bottom: 25px; /* Espacio entre las pestañas y el carrusel */
@@ -2679,4 +2679,23 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
     /* Evita que el texto se parta en dos líneas */
     white-space: nowrap; 
+}
+
+/* Añade este código al final de style.css */
+
+.prize-nav-container {
+    /* Le añadimos posición relativa para el efecto visual */
+    position: relative;
+}
+
+/* Efecto de desvanecido en el borde derecho para indicar que hay más contenido */
+.prize-nav-container::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(to right, transparent, var(--clr-dark-bg-frame));
+    pointer-events: none; /* Para que no interfiera con el clic */
 }
