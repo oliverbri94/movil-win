@@ -3059,30 +3059,38 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 @media (max-width: 480px) {
     .top-list-item {
-        /* Cambiamos de grid a flexbox en móviles para más control */
-        display: flex;
-        flex-wrap: wrap; /* ¡La clave! Permite que los elementos salten a la siguiente línea */
+        /* Volvemos a un grid, pero con columnas más compactas */
+        display: grid;
+        grid-template-columns: 25px 40px 1fr auto; /* Rango | Avatar | Nombre | Boletos */
+        gap: 10px; /* Reducimos el espacio entre elementos */
+        padding: 8px 10px; /* Reducimos el padding interno */
         align-items: center;
-        gap: 5px 15px; /* Menos espacio entre elementos */
-        padding: 12px;
+    }
+    .participant-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 0.9em; /* Reducimos el texto de las iniciales */
     }
 
     /* El contenedor del nombre ahora ocupa todo el espacio sobrante en la primera línea */
     .participant-details {
-        flex-grow: 1;
-        min-width: 100px; /* Le damos un ancho mínimo para que no se encoja demasiado */
+       min-width: 80px; /* Ancho mínimo para el nombre */
     }
 
+
     .participant-name {
-        font-size: 1.1em; /* Hacemos el nombre un poco más grande */
+        font-size: 1em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; /* Asegura que no se desborde si el nombre es muy largo */
     }
 
     /* El contador de boletos ahora ocupa todo el ancho en su propia línea */
     .ticket-count {
-        width: 100%;
-        text-align: right; /* Lo alineamos a la derecha */
-        margin-top: 5px;
-        font-size: 1.2em; /* Lo hacemos más prominente */
-        padding-right: 5px;
+        width: auto;
+        text-align: right;
+        margin-top: 0;
+        font-size: 1.1em;
+        padding-right: 0;
     }
 }
