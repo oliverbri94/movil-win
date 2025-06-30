@@ -551,11 +551,16 @@ function initializeRafflePage() {
     // --- 4. FUNCIONES PRINCIPALES Y DE LÓGICA ---
 
     async function moveToSlide(index) {
-        if (prizeNavContainer) {
-            prizeNavContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+ 
         sorteoFinalizado = false;
         if (!prizeCarouselTrack || index < 0 || index >= sorteosDisponibles.length) return;
+        if (sorteoActual && sorteoActual.status_sorteo === 'programado') {
+            const carouselSection = document.getElementById('main-carousel-section');
+            if (carouselSection) {
+                // Y apunta a toda la sección del carrusel, no solo a la navegación
+                carouselSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
         premioActualIndex = index;
         prizeCarouselTrack.style.transform = `translateX(${-index * 100}%)`;
         const sorteoActual = sorteosDisponibles[premioActualIndex];
@@ -860,7 +865,23 @@ function initializeRafflePage() {
                                 <div class="progress-bar-wrapper ${urgenciaClass}"><div class="progress-bar-fill" style="width: ${percentageRemaining.toFixed(2)}%;"><span class="progress-bar-percentage-text">${percentageRemaining.toFixed(1)}% Disponible</span></div></div>
                                 <p class="motivational-text-integrated">${motivationalMessage}</p>
                             </div>
-                            <div class="top-participants-wrapper"></div>
+                        <div class="top-participants-wrapper">
+                            <div class="top-list-header">
+                                <i class="fas fa-crown"></i>
+                                <span>Top 5 Participantes</span>
+                            </div>
+                            <div class="loader-container oculto"></div>
+                            <ol class="top-participants-list"></ol>
+                        </div>
+                        <div class="winner-card-container oculto">
+                             <div class="winner-card">
+                                 <h3>¡Tenemos un Ganador!</h3>
+                                 <p class="winner-prize"></p>
+                                 <p class="winner-name"></p>
+                                 <p class="winner-id"></p>
+                                 <p class="winner-contact-note">¡Nos pondremos en contacto contigo pronto!</p>
+                             </div>
+                         </div>
                         </div>
                     </div>
                     <div class="contenedor-sorteo content-section">
