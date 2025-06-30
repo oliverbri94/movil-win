@@ -551,6 +551,9 @@ function initializeRafflePage() {
     // --- 4. FUNCIONES PRINCIPALES Y DE LÓGICA ---
 
     async function moveToSlide(index) {
+        if (prizeCarouselContainer) {
+            prizeCarouselContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
         sorteoFinalizado = false;
         if (!prizeCarouselTrack || index < 0 || index >= sorteosDisponibles.length) return;
         premioActualIndex = index;
@@ -861,7 +864,7 @@ function initializeRafflePage() {
                         </div>
                     </div>
                     <div class="contenedor-sorteo content-section">
-                        <h2 class="titulo-dorado" data-text="¡A GIRAR!">¡A GIRAR!</h2><p class="rueda-subtitulo">¡Mucha Suerte a Todos los Participantes!</p><div class="price-is-right-wheel-frame"><div class="wheel-price-is-right-container"><canvas class="price-wheel-canvas"></canvas></div><div class="clacker-container"><div class="clacker-border"></div><div class="clacker-top"></div></div></div>
+                        <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2><p class="rueda-subtitulo">¡El sorteo empieza al llegar a la meta de boletos!</p><div class="price-is-right-wheel-frame"><div class="wheel-price-is-right-container"><canvas class="price-wheel-canvas"></canvas></div><div class="clacker-container"><div class="clacker-border"></div><div class="clacker-top"></div></div></div>
                     </div>
                 `;
             }

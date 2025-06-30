@@ -1009,7 +1009,7 @@ body.dark-theme .admin-section h2::after { display: none; }
 /* --- Estilos para los Paneles de Navegación del Carrusel --- */
 .prize-nav-container {
     display: flex;
-    justify-content: center; 
+    justify-content: flex-start; 
     gap: 15px; /* Espacio entre las pestañas */
     padding: 0 15px; /* Padding a los lados del contenedor */
     margin-bottom: 10px; /* Espacio entre las pestañas y el carrusel */
@@ -1053,6 +1053,13 @@ body.dark-theme .admin-section h2::after { display: none; }
     color: var(--clr-primary);
     font-weight: 700;
     border-bottom-color: var(--clr-primary); /* La línea indicadora de la pestaña activa */
+}
+
+@media (min-width: 992px) {
+    .prize-nav-container {
+        /* EN ESCRITORIO: centrado */
+        justify-content: center;
+    }
 }
 
 nav.bg-custom-dark-bg-frame {
@@ -2762,4 +2769,12 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 .proximo-banner-grande span i {
     margin-right: 8px;
     animation: pulse-icon 2s infinite ease-in-out;
+}
+
+/* Limita el tamaño de la imagen del premio en pantallas grandes */
+@media (min-width: 992px) {
+    .prize-image-container img {
+        max-width: 450px; /* Ajusta este valor si quieres la imagen más grande o más pequeña */
+        margin: 0 auto; /* Centra la imagen dentro de su columna */
+    }
 }
