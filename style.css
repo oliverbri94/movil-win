@@ -3021,7 +3021,7 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 /* Contenedor del contenido plegable */
 .collapsible-list-content {
-    padding: 0 10px 10px 10px;
+    padding: 0 5px 5px 5px;
     max-height: 58px; /* Altura para mostrar solo el primer elemento (ajusta si es necesario) */
     overflow: hidden;
     transition: max-height 0.5s ease-in-out;
@@ -3051,4 +3051,38 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 /* Ocultamos la sección completa si el sorteo es próximo */
 .slide-proximo .top-participants-wrapper {
     display: none;
+}
+
+/* ======================================================== */
+/* --- CORRECCIÓN RESPONSIVA PARA LISTA TOP PARTICIPANTES --- */
+/* ======================================================== */
+
+@media (max-width: 480px) {
+    .top-list-item {
+        /* Cambiamos de grid a flexbox en móviles para más control */
+        display: flex;
+        flex-wrap: wrap; /* ¡La clave! Permite que los elementos salten a la siguiente línea */
+        align-items: center;
+        gap: 5px 15px; /* Menos espacio entre elementos */
+        padding: 12px;
+    }
+
+    /* El contenedor del nombre ahora ocupa todo el espacio sobrante en la primera línea */
+    .participant-details {
+        flex-grow: 1;
+        min-width: 100px; /* Le damos un ancho mínimo para que no se encoja demasiado */
+    }
+
+    .participant-name {
+        font-size: 1.1em; /* Hacemos el nombre un poco más grande */
+    }
+
+    /* El contador de boletos ahora ocupa todo el ancho en su propia línea */
+    .ticket-count {
+        width: 100%;
+        text-align: right; /* Lo alineamos a la derecha */
+        margin-top: 5px;
+        font-size: 1.2em; /* Lo hacemos más prominente */
+        padding-right: 5px;
+    }
 }

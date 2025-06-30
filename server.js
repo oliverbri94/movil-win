@@ -258,8 +258,6 @@ app.get('/api/sorteos-visibles', async (req, res) => {
         res.status(500).json({ success: false, error: "Error interno del servidor." });
     }
 });
-// CÓDIGO CORREGIDO
-
 
 app.get('/api/public-list/:sorteo_id', async (req, res) => {
     const { sorteo_id } = req.params;
@@ -270,29 +268,25 @@ app.get('/api/public-list/:sorteo_id', async (req, res) => {
         }
         const client = await dbClient.connect();
         try {
-            // Consulta para obtener los boletos de un sorteo específico
             const sql = `
-                SELECT 
-                    numero_boleto_sorteo, 
-                    nombre, 
-                    id_documento 
-                FROM 
-                    participaciones 
-                WHERE 
-                    id_sorteo_config_fk = $1 
-                ORDER BY 
-                    numero_boleto_sorteo ASC;
+                SELECT numero_boleto_sorteo, nombre, id_documento 
+                FROM participaciones 
+                WHERE id_sorteo_config_fk = $1 
+                ORDER BY numero_boleto_sorteo ASC;
             `;
             const result = await client.query(sql, [sorteo_id]);
 
-            // Formateamos los datos para que sean anónimos
+            // Esta es la parte clave: se crean las propiedades correctas que el frontend espera
             const publicList = result.rows.map(p => ({
                 boleto: p.numero_boleto_sorteo,
-                nombre: p.nombre ? `${p.nombre.trim().split(' ')[0]} ${p.nombre.trim().split(' ').pop().charAt(0)}.` : 'Participante',
-                cedula: (p.id_documento && p.id_documento.length === 10) ? `${p.id_documento.substring(0, 2)}...${p.id_documento.substring(8)}` : 'ID Oculto'
+                // Datos para MOSTRAR (formateados y anónimos)
+                nombre_display: p.nombre ? `${p.nombre.trim().split(' ')[0]} ${p.nombre.trim().split(' ').pop().charAt(0)}.` : 'Participante',
+                cedula_display: (p.id_documento && p.id_documento.length === 10) ? `${p.id_documento.substring(0, 2)}...${p.id_documento.substring(8)}` : 'ID Oculto',
+                // Datos COMPLETOS para la búsqueda interna
+                nombre_raw: p.nombre,
+                cedula_raw: p.id_documento
             }));
             
-            // Obtenemos el nombre del sorteo para el título de la página
             const sorteoInfoSql = "SELECT nombre_premio_display FROM sorteos_config WHERE id_sorteo = $1";
             const sorteoInfoResult = await client.query(sorteoInfoSql, [sorteo_id]);
             const sorteoNombre = sorteoInfoResult.rows.length > 0 ? sorteoInfoResult.rows[0].nombre_premio_display : "Sorteo";
@@ -307,6 +301,7 @@ app.get('/api/public-list/:sorteo_id', async (req, res) => {
         res.status(500).json({ success: false, error: 'Error interno del servidor.' });
     }
 });
+
 app.get('/api/participantes', (req, res) => {
     const sorteoIdQuery = req.query.sorteoId;
     if (!sorteoIdQuery) {
