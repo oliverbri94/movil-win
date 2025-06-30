@@ -2778,3 +2778,140 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
         margin: 0 auto; /* Centra la imagen dentro de su columna */
     }
 }
+
+/* ================================================= */
+/* --- ESTILOS PARA PÁGINA DE LISTADO PÚBLICO --- */
+/* ================================================= */
+
+.public-list-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    background-color: var(--clr-dark-bg);
+    color: var(--clr-dark-text);
+    font-family: var(--font-main);
+}
+
+.list-container {
+    width: 100%;
+    max-width: 800px;
+    background-color: var(--clr-dark-bg-alt);
+    padding: 30px 40px;
+    border-radius: var(--border-radius-large);
+    border: 1px solid var(--clr-dark-border);
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+.list-logo {
+    max-width: 150px;
+    margin-bottom: 20px;
+}
+
+.list-container h1 {
+    font-size: clamp(1.8em, 4vw, 2.5em);
+    font-weight: 700;
+    color: var(--clr-primary);
+    line-height: 1.2;
+}
+
+.list-subtitulo {
+    font-size: 1.1em;
+    color: var(--clr-dark-text-alt);
+    margin-top: 10px;
+    margin-bottom: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.search-bar {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.search-bar .fa-search {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--clr-dark-text-alt);
+}
+
+.search-bar input[type="search"] {
+    width: 100%;
+    padding: 12px 15px 12px 45px; /* Espacio para el ícono */
+    background-color: var(--clr-dark-bg);
+    border: 1px solid var(--clr-dark-border);
+    border-radius: 8px;
+    color: var(--clr-dark-text);
+    font-size: 1em;
+}
+
+.table-wrapper {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid var(--clr-dark-border);
+    border-radius: 8px;
+}
+
+.public-list-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.public-list-table th, .public-list-table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.public-list-table thead {
+    background-color: var(--clr-dark-bg-frame);
+    position: sticky;
+    top: 0;
+}
+
+.public-list-table tbody tr:nth-child(even) {
+    background-color: var(--clr-dark-bg);
+}
+
+#total-boletos {
+    margin-top: 20px;
+    font-weight: 600;
+    color: var(--clr-dark-text-alt);
+}
+
+/* Hacemos la tabla responsiva en móviles */
+@media (max-width: 600px) {
+    .public-list-table thead {
+        display: none;
+    }
+    .public-list-table, .public-list-table tbody, .public-list-table tr, .public-list-table td {
+        display: block;
+        width: 100%;
+    }
+    .public-list-table tr {
+        margin-bottom: 15px;
+        border: 1px solid var(--clr-dark-border);
+        border-radius: 8px;
+    }
+    .public-list-table td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+        border-bottom: 1px solid var(--clr-dark-border);
+    }
+    .public-list-table td:last-child {
+        border-bottom: none;
+    }
+    .public-list-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 15px;
+        width: calc(50% - 30px);
+        text-align: left;
+        font-weight: 600;
+        color: var(--clr-dark-text);
+    }
+}
