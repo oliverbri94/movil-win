@@ -2915,3 +2915,41 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
         color: var(--clr-dark-text);
     }
 }
+/* En style.css */
+.selection-title {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--clr-dark-text);
+}
+.selection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.sorteo-selection-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: var(--clr-dark-bg);
+    border: 1px solid var(--clr-dark-border);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--clr-dark-text);
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.sorteo-selection-item:hover {
+    transform: translateY(-2px);
+    border-color: var(--clr-primary);
+}
+.status-tag {
+    font-size: 0.8em;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-weight: 600;
+}
+.status-tag.status-activo { background-color: rgba(var(--clr-primary-rgb), 0.2); color: var(--clr-primary); }
+.status-tag.status-finalizado, .status-tag.status-completado { background-color: rgba(var(--clr-accent-rgb), 0.2); color: var(--clr-accent); }
+.back-link-small { color: var(--clr-primary); text-decoration: none; font-size: 0.9em; }

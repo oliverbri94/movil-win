@@ -2,38 +2,94 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listado Oficial de Participantes - Movil Win</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tailwind-config.js"></script>
 </head>
-<body class="public-list-body">
-    <div class="list-container">
-        <img src="images/logo.png" alt="Logo Movil Win" class="list-logo">
-        <h1 id="listado-titulo">Cargando listado del sorteo...</h1>
-        <p class="list-subtitulo">Verifica aquí que tu boleto esté registrado antes del sorteo en vivo. ¡Tu confianza es nuestra prioridad!</p>
+<body class="dark-theme">
 
-        <div class="form-group search-bar">
-            <i class="fas fa-search"></i>
-            <input type="search" id="searchInput" placeholder="Busca por tu nombre o cédula...">
+    <nav class="bg-custom-dark-bg-frame shadow-lg fixed w-full top-0 z-50">
+        <div class="main-nav-grid">
+            <div class="nav-left">
+                <button id="mobileMenuButton" class="nav-icon-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="nav-center">
+                <a href="index.html">
+                    <img src="images/logo.png" alt="Logo Movil Win" class="nav-logo">
+                </a>
+            </div>
+            <div class="nav-right"></div>
         </div>
+        <div id="fullScreenMenu" class="hidden fixed inset-0 bg-custom-dark-bg bg-opacity-95 backdrop-blur-sm z-40 flex flex-col items-center justify-center p-6 transition-opacity duration-300 ease-in-out">
+            <button id="closeMenuButton" class="absolute top-6 right-6 text-custom-text-alt hover:text-custom-primary text-4xl leading-none">&times;</button>
+            <img src="images/logo.png" alt="Logo Movil Win" class="h-20 w-auto mb-8">
+            <ul class="flex flex-col items-center space-y-6">
+                <li><a href="index.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Inicio</a></li>
+                <li><a href="listado.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Lista Pública</a></li>                
+                <li><a href="faq.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Preguntas Frecuentes</a></li>
+                <li><a href="bases.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Bases y Condiciones</a></li>
+                <li><a href="ganadores.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Historial de Ganadores</a></li>
+                <li><a href="club-afiliados.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Cub de Afiliados</a></li>            
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="site-main">
+        <div class="page-text-container"> <h1 id="listado-titulo" class="text-center">Cargando listado...</h1>
+            <p id="listado-subtitulo" class="text-center text-custom-text-alt max-w-2xl mx-auto mb-8">
+                Verifica aquí que tu boleto esté registrado. ¡Tu confianza es nuestra prioridad!
+            </p>
 
-        <div class="table-wrapper">
-            <table class="public-list-table">
-                <thead>
-                    <tr>
-                        <th># Boleto</th>
-                        <th>Participante</th>
-                        <th>Cédula (Parcial)</th>
-                    </tr>
-                </thead>
-                <tbody id="listado-tbody">
-                    </tbody>
-            </table>
+            <div id="seleccion-sorteo-container">
+                <h2 class="selection-title">Por favor, elige un sorteo para ver la lista de participantes:</h2>
+                <div id="lista-de-sorteos" class="selection-list">
+                    </div>
+            </div>
+
+            <div id="listado-participantes-container" class="oculto">
+                <div class="form-group affiliate-search-bar"> <label for="searchInput">Buscar en la lista:</label>
+                    <input type="search" id="searchInput" placeholder="Escribe un nombre o cédula para filtrar...">
+                </div>
+                <div class="table-wrapper">
+                    <table class="tabla-sorteos public-list-table">
+                        <thead>
+                            <tr>
+                                <th># Boleto</th>
+                                <th>Participante</th>
+                                <th>Cédula (Parcial)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listado-tbody"></tbody>
+                    </table>
+                </div>
+                <p id="total-boletos" class="text-center mt-4 font-semibold"></p>
+            </div>
+
+            <div id="loader" class="loader-container mt-8"><div class="loader"></div></div>
         </div>
-        <div id="loader" class="loader-container"><div class="loader"></div></div>
-        <p id="total-boletos"></p>
-    </div>
-    <script src="listado.js"></script>
-</body>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2025 Movil Win | Todos los derechos reservados.</p>
+        <div class="social-links-footer">
+            <a href="https://wa.me/593963135510" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script> <script src="listado.js"></script> </body>
 </html>

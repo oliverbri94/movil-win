@@ -405,6 +405,27 @@ app.get('/api/ganadores', (req, res) => {
     });
 });
 
+app.get('/api/listable-raffles', async (req, res) => {
+    try {
+        const client = await dbClient.connect();
+        try {
+            // Obtenemos todos los sorteos que no estén en estado 'programado'
+            const sql = `
+                SELECT id_sorteo, nombre_premio_display, status_sorteo 
+                FROM sorteos_config 
+                WHERE status_sorteo != 'programado'
+                ORDER BY id_sorteo DESC;
+            `;
+            const result = await client.query(sql);
+            res.json({ success: true, sorteos: result.rows });
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error("Error al obtener sorteos listables:", error);
+        res.status(500).json({ success: false, error: 'Error interno del servidor.' });
+    }
+});
 app.get('/api/ultimos-ganadores', (req, res) => {
     const sql = "SELECT nombre, ciudad, imagenUrl, premio, fecha FROM ganadores ORDER BY id DESC LIMIT 3";
     db.all(sql, [], (err, rows) => {
