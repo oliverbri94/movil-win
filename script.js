@@ -551,9 +551,11 @@ function initializeRafflePage() {
     // --- 4. FUNCIONES PRINCIPALES Y DE LÓGICA ---
 
     async function moveToSlide(index) {
- 
-        sorteoFinalizado = false;
+
         if (!prizeCarouselTrack || index < 0 || index >= sorteosDisponibles.length) return;
+        premioActualIndex = index;
+        const sorteoActual = sorteosDisponibles[premioActualIndex];
+        
         if (sorteoActual && sorteoActual.status_sorteo === 'programado') {
             const carouselSection = document.getElementById('main-carousel-section');
             if (carouselSection) {
@@ -561,9 +563,8 @@ function initializeRafflePage() {
                 carouselSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
-        premioActualIndex = index;
+        sorteoFinalizado = false;
         prizeCarouselTrack.style.transform = `translateX(${-index * 100}%)`;
-        const sorteoActual = sorteosDisponibles[premioActualIndex];
         const activeSlide = prizeCarouselTrack.children[index];
         if (!activeSlide) return;
         document.querySelectorAll('.prize-nav-panel').forEach((p, i) => p.classList.toggle('active', i === index));
