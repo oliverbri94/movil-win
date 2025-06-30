@@ -551,8 +551,8 @@ function initializeRafflePage() {
     // --- 4. FUNCIONES PRINCIPALES Y DE LÓGICA ---
 
     async function moveToSlide(index) {
-        if (prizeCarouselContainer) {
-            prizeCarouselContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (prizeNavContainer) {
+            prizeNavContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         sorteoFinalizado = false;
         if (!prizeCarouselTrack || index < 0 || index >= sorteosDisponibles.length) return;
@@ -1068,7 +1068,16 @@ function initializeRafflePage() {
     }
     const navContainer = document.getElementById('prizeNavContainer');
     if (navContainer) { navContainer.addEventListener('click', (e) => { if (e.target && e.target.classList.contains('prize-nav-panel')) { const slideIndex = parseInt(e.target.dataset.slideTo, 10); if (!isNaN(slideIndex)) moveToSlide(slideIndex); } }); }
-    if (prizeCarouselTrack) { prizeCarouselTrack.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }); prizeCarouselTrack.addEventListener('touchend', (e) => { const deltaX = e.changedTouches[0].clientX - touchStartX; if (deltaX < -50) moveToSlide(premioActualIndex + 1); else if (deltaX > 50) moveToSlide(premioActualIndex - 1); }); }
+    if (prizeCarouselTrack) { prizeCarouselTrack.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }); 
+    prizeCarouselTrack.addEventListener('touchend', (e) => { 
+        const deltaX = e.changedTouches[0].clientX - touchStartX;
+        const swipeThreshold = 80;
+        if (deltaX < -swipeThreshold) { 
+            moveToSlide(premioActualIndex + 1);
+        } else if (deltaX > swipeThreshold) { 
+            moveToSlide(premioActualIndex - 1);
+        }
+    }); }
     window.addEventListener('storage', (e) => { if (e.key === 'sorteoIniciado') { checkMainPageCountdownStatus(); } });
 
     // Animación de aparición al hacer scroll
