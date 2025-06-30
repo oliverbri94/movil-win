@@ -2970,3 +2970,85 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 .btn-share-ticket:hover {
     transform: scale(1.1);
 }
+
+/* ================================================= */
+/* --- ESTILOS PARA LISTA PLEGABLE DE TOP 5 --- */
+/* ================================================= */
+
+/* Contenedor principal de la sección */
+.top-participants-wrapper {
+    background-color: var(--clr-dark-bg);
+    border-radius: var(--border-radius-medium);
+    border: 1px solid var(--clr-dark-border);
+    overflow: hidden; /* Clave para el efecto */
+}
+
+/* Encabezado que ahora es un botón */
+.top-list-header.collapsible-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 15px 20px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--clr-dark-text);
+}
+
+.top-list-header .header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+.top-list-header .header-title .fa-crown {
+    color: var(--clr-gold);
+}
+
+.top-list-header .header-action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--clr-dark-text-alt);
+}
+.top-list-header .header-action i {
+    transition: transform 0.3s ease;
+}
+
+/* Contenedor del contenido plegable */
+.collapsible-list-content {
+    padding: 0 10px 10px 10px;
+    max-height: 58px; /* Altura para mostrar solo el primer elemento (ajusta si es necesario) */
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+}
+.top-participants-list li {
+    background: none;
+    border: none;
+}
+
+/* --- LÓGICA DE EXPANSIÓN --- */
+
+/* Cuando está expandido, el contenido crece */
+.top-participants-wrapper.is-expanded .collapsible-list-content {
+    max-height: 500px; /* Un valor alto para permitir que todos los items se vean */
+}
+
+/* Rotamos la flecha */
+.top-participants-wrapper.is-expanded .header-action i {
+    transform: rotate(180deg);
+}
+
+/* Cambiamos el texto del botón */
+.top-participants-wrapper .text-ver-menos { display: none; }
+.top-participants-wrapper.is-expanded .text-ver-mas { display: none; }
+.top-participants-wrapper.is-expanded .text-ver-menos { display: inline; }
+
+/* Ocultamos la sección completa si el sorteo es próximo */
+.slide-proximo .top-participants-wrapper {
+    display: none;
+}

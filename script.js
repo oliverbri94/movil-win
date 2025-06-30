@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error al inicializar las pestañas de afiliados:", error);
         }
     }
+
 });
 
 function inicializarComponentesGlobales() {
@@ -114,6 +115,26 @@ function initializeRafflePage() {
     // Todas las funciones que ayudan a formatear datos, dibujar, etc.
 // En script.js, añade esta nueva función de ayuda
 
+
+    // --- Lógica para el acordeón de Top Participantes ---
+    prizeCarouselTrack?.addEventListener('click', (e) => {
+        const toggleButton = e.target.closest('.collapsible-toggle');
+        if (!toggleButton) return;
+
+        const wrapper = toggleButton.closest('.top-participants-wrapper');
+        const content = wrapper.querySelector('.collapsible-list-content');
+
+        wrapper.classList.toggle('is-expanded');
+
+        if (wrapper.classList.contains('is-expanded')) {
+            // Al abrir, calculamos la altura necesaria para mostrar todo el contenido
+            content.style.maxHeight = content.scrollHeight + "px";
+        } else {
+            // Al cerrar, volvemos a la altura para mostrar solo un elemento
+            const firstItemHeight = content.querySelector('li')?.offsetHeight || 58;
+            content.style.maxHeight = firstItemHeight + "px";
+        }
+    });
     /**
      * Anonimiza un número de cédula, mostrando solo los primeros y últimos dos dígitos.
      * @param {string} id_documento - El número de cédula de 10 dígitos.
@@ -867,12 +888,21 @@ function initializeRafflePage() {
                                 <p class="motivational-text-integrated">${motivationalMessage}</p>
                             </div>
                         <div class="top-participants-wrapper">
-                            <div class="top-list-header">
-                                <i class="fas fa-crown"></i>
-                                <span>Top 5 Participantes</span>
+                            <button type="button" class="top-list-header collapsible-toggle">
+                                <div class="header-title">
+                                    <i class="fas fa-crown"></i>
+                                    <span>Top 5 Participantes</span>
+                                </div>
+                                <div class="header-action">
+                                    <span class="text-ver-mas">Ver más</span>
+                                    <span class="text-ver-menos">Ver menos</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </button>
+                            <div class="collapsible-list-content">
+                                <div class="loader-container oculto"></div>
+                                <ol class="top-participants-list"></ol>
                             </div>
-                            <div class="loader-container oculto"></div>
-                            <ol class="top-participants-list"></ol>
                         </div>
                         <div class="winner-card-container oculto">
                              <div class="winner-card">
