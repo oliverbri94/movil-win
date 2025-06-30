@@ -1012,8 +1012,8 @@ body.dark-theme .admin-section h2::after { display: none; }
     justify-content: flex-start; 
     gap: 15px; /* Espacio entre las pestañas */
     padding: 0 15px; /* Padding a los lados del contenedor */
-    margin-bottom: 25px; /* Espacio entre las pestañas y el carrusel */
-    border-bottom: 1px solid var(--clr-dark-border); /* Línea divisoria */
+    margin-bottom: 10px; /* Espacio entre las pestañas y el carrusel */
+    border-bottom: 2px solid var(--clr-dark-border); /* Línea divisoria */
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Oculta la barra de scroll en Firefox */
@@ -1033,7 +1033,7 @@ body.dark-theme .admin-section h2::after { display: none; }
 .prize-nav-panel {
     position: relative;
     flex-shrink: 0;
-    padding: 12px 5px; /* Padding vertical y un poco horizontal */
+    padding: 5px 5px; /* Padding vertical y un poco horizontal */
     border: none;
     border-bottom: 3px solid transparent; /* Borde inferior que se activará */
     background-color: transparent;

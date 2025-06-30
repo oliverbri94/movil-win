@@ -811,10 +811,53 @@ function initializeRafflePage() {
             
             const esProximo = sorteo.status_sorteo === 'programado';
             
-            const mediaParaRenderizar = {
-                ...sorteo, // Copiamos todos los datos originales del sorteo
-                esProximo: esProximo
-            };
+            if (esProximo) {
+                // Si el sorteo es "programado", usamos una estructura HTML de una sola columna
+                slideWrapper.innerHTML = `
+                    <div class="prize-carousel-slide slide-proximo" data-sorteo-id="${sorteo.id_sorteo}">
+                        <div class="prize-image-container">
+                            <img src="${sorteo.imagen_url || 'images/proximo_sorteo.png'}" alt="${sorteo.nombre_premio_display}" class="grayscale">
+                            <div class="proximo-banner-grande">
+                                <h2>${sorteo.nombre_premio_display}</h2>
+                                <span><i class="fas fa-hourglass-half"></i> ¡PRÓXIMAMENTE!</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Si el sorteo está "activo", usamos la estructura de dos columnas que ya funciona
+                let percentageSold = 0, motivationalMessage = "¡El sorteo ha comenzado!", boletosRestantes = 0, urgenciaClass = '';
+                const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
+                const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
+                percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
+                boletosRestantes = goal - currentCount;
+                if (percentageSold >= 90) { urgenciaClass = 'critico'; motivationalMessage = "¡QUEDAN LOS ÚLTIMOS!"; } 
+                else if (percentageSold >= 70) { urgenciaClass = 'urgente'; motivationalMessage = "¡Se acaban rápido!"; } 
+                else { motivationalMessage = "Cada boleto es una nueva oportunidad de ganar."; }
+                const percentageRemaining = 100 - percentageSold;
+                const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json);
+
+                slideWrapper.innerHTML = `
+                    <div class="prize-carousel-slide" data-sorteo-id="${sorteo.id_sorteo}">
+                        <div class="prize-image-container">
+                            ${renderMedia(sorteo)}
+                        </div>
+                        <div class="prize-info-container">
+                            <h2 class="prize-title">${sorteo.nombre_premio_display}</h2>
+                            <div class="mini-package-selector">${miniPaquetesHTML}</div>
+                            <div class="progress-info-wrapper">
+                                <div class="boletos-restantes-container"><span class="boletos-restantes-numero">${boletosRestantes}</span><span class="boletos-restantes-texto">Boletos Disponibles</span></div>
+                                <div class="progress-bar-wrapper ${urgenciaClass}"><div class="progress-bar-fill" style="width: ${percentageRemaining.toFixed(2)}%;"><span class="progress-bar-percentage-text">${percentageRemaining.toFixed(1)}% Disponible</span></div></div>
+                                <p class="motivational-text-integrated">${motivationalMessage}</p>
+                            </div>
+                            <div class="top-participants-wrapper"></div>
+                        </div>
+                    </div>
+                    <div class="contenedor-sorteo content-section">
+                        <h2 class="titulo-dorado" data-text="¡A GIRAR!">¡A GIRAR!</h2><p class="rueda-subtitulo">¡Mucha Suerte a Todos los Participantes!</p><div class="price-is-right-wheel-frame"><div class="wheel-price-is-right-container"><canvas class="price-wheel-canvas"></canvas></div><div class="clacker-container"><div class="clacker-border"></div><div class="clacker-top"></div></div></div>
+                    </div>
+                `;
+            }
 
             // 3. El título siempre será el nombre real del premio.
             const tituloMostrado = sorteo.nombre_premio_display;
