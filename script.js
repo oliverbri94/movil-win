@@ -810,9 +810,9 @@ function initializeRafflePage() {
             slideWrapper.style.cssText = 'width: 100%; flex-shrink: 0;';
             
             const esProximo = sorteo.status_sorteo === 'programado';
-            
+
             if (esProximo) {
-                // Si el sorteo es "programado", usamos una estructura HTML de una sola columna
+                // Estructura HTML de una sola columna para sorteos "programados"
                 slideWrapper.innerHTML = `
                     <div class="prize-carousel-slide slide-proximo" data-sorteo-id="${sorteo.id_sorteo}">
                         <div class="prize-image-container">
@@ -825,7 +825,14 @@ function initializeRafflePage() {
                     </div>
                 `;
             } else {
-                // Si el sorteo está "activo", usamos la estructura de dos columnas que ya funciona
+                // Estructura de dos columnas para sorteos "activos"
+                
+                // --- INICIO DE LA CORRECCIÓN ---
+                // Definimos la variable que faltaba para el sorteo activo
+                const mediaParaRenderizar = sorteo;
+                const tituloMostrado = sorteo.nombre_premio_display;
+                // --- FIN DE LA CORRECCIÓN ---
+
                 let percentageSold = 0, motivationalMessage = "¡El sorteo ha comenzado!", boletosRestantes = 0, urgenciaClass = '';
                 const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
                 const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
@@ -840,10 +847,10 @@ function initializeRafflePage() {
                 slideWrapper.innerHTML = `
                     <div class="prize-carousel-slide" data-sorteo-id="${sorteo.id_sorteo}">
                         <div class="prize-image-container">
-                            ${renderMedia(sorteo)}
+                            ${renderMedia(mediaParaRenderizar)}
                         </div>
                         <div class="prize-info-container">
-                            <h2 class="prize-title">${sorteo.nombre_premio_display}</h2>
+                            <h2 class="prize-title">${tituloMostrado}</h2>
                             <div class="mini-package-selector">${miniPaquetesHTML}</div>
                             <div class="progress-info-wrapper">
                                 <div class="boletos-restantes-container"><span class="boletos-restantes-numero">${boletosRestantes}</span><span class="boletos-restantes-texto">Boletos Disponibles</span></div>
@@ -858,96 +865,11 @@ function initializeRafflePage() {
                     </div>
                 `;
             }
-
-            // 3. El título siempre será el nombre real del premio.
-            const tituloMostrado = sorteo.nombre_premio_display;
-            let percentage = 0;
-            let motivationalMessage = "¡El sorteo ha comenzado!";   
-            let boletosRestantes = 0;
-            let urgenciaClass = ''; // Clase para cambiar el color de la barra
-            if (!esProximo) {
-                const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
-                const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
-                percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
-                boletosRestantes = goal - currentCount;
-
-                // Asignamos una clase de 'urgencia' según qué tan lleno esté
-                if (percentage >= 90) {
-                    urgenciaClass = 'critico'; // Rojo
-                    motivationalMessage = "¡QUEDAN LOS ÚLTIMOS! No te quedes fuera.";
-                } else if (percentage >= 70) {
-                    urgenciaClass = 'urgente'; // Naranja
-                    motivationalMessage = "¡Se acaban rápido! Asegura tu oportunidad ahora.";
-                } else {
-                    motivationalMessage = "Cada boleto es una nueva oportunidad de ganar.";
-                }
-            }
-            const percentageRemaining = 100 - percentageSold;
-            const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json);
-            const bannerProximoHTML = esProximo
-                ? `<div class="proximo-banner"><i class="fas fa-hourglass-start"></i> PRÓXIMAMENTE</div>`
-                : '';
-            slideWrapper.innerHTML = `
-                <div class="prize-carousel-slide" data-sorteo-id="${sorteo.id_sorteo || 'proximo'}">
-                    <div class="prize-image-container">
-                        ${renderMedia(mediaParaRenderizar)}
-                        <h2 class="prize-title">${tituloMostrado}</h2>
-                    </div>
-                    <div class="prize-info-container">
-                        <div class="mini-package-selector" style="${esProximo ? 'display: none;' : ''}">${miniPaquetesHTML}</div>
-
-                        <div class="progress-info-wrapper" style="${esProximo ? 'display: none;' : ''}">
-                            <div class="boletos-restantes-container">
-                                <span class="boletos-restantes-numero">${boletosRestantes}</span>
-                                <span class="boletos-restantes-texto">Boletos Disponibles</span>
-                            </div>
-                            <div class="progress-bar-wrapper ${urgenciaClass}">
-                                <div class="progress-bar-fill" style="width: ${percentageRemaining.toFixed(2)}%;">
-                                    <span class="progress-bar-percentage-text">${percentageRemaining.toFixed(1)}% Disponible</span>
-                                </div>
-                            </div>
-                            <p class="motivational-text-integrated">${motivationalMessage}</p>
-                        </div>
-                        <div class="top-participants-wrapper" style="${esProximo ? 'display: none;' : ''}">
-                            <div class="top-list-header">
-                                <i class="fas fa-crown"></i>
-                                <span>Top 5 Participantes</span>
-                            </div>
-                            <div class="loader-container oculto"></div>
-                            <ol class="top-participants-list"></ol>
-                        </div>
-
-                        <div class="winner-card-container oculto">
-                            <div class="winner-card">
-                                <h3>¡Tenemos un Ganador!</h3>
-                                <p class="winner-prize"></p>
-                                <p class="winner-name"></p>
-                                <p class="winner-id"></p>
-                                <p class="winner-contact-note">¡Nos pondremos en contacto contigo pronto!</p>
-                            </div>
-                        </div>
-                        </div>
-                </div>
-                
-                ${!esProximo ? `
-                <div class="contenedor-sorteo content-section">
-                    <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
-                    <p class="rueda-subtitulo">¡El sorteo comienza al llegar a la meta de boletos!</p>
-                    <div class="price-is-right-wheel-frame">
-                        <div class="wheel-price-is-right-container">
-                            <canvas class="price-wheel-canvas"></canvas>
-                        </div>
-                        <div class="clacker-container">
-                            <div class="clacker-border"></div>
-                            <div class="clacker-top"></div>
-                        </div>
-                    </div>
-                </div>` : ''}
-            `;
             
             prizeCarouselTrack.appendChild(slideWrapper);
         }
-
+        
+        // El resto de la función para añadir el botón de admin no cambia
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('admin')) {
             document.querySelectorAll('.contenedor-sorteo').forEach(cont => {
@@ -1191,5 +1113,3 @@ function initializeRafflePage() {
     chequearEstadoGlobal(); 
     cargarEstadisticasGlobales(); 
 }
-
-
