@@ -20,7 +20,30 @@ document.addEventListener('DOMContentLoaded', () => {
         seleccionContainer.classList.remove('oculto');
         cargarListaDeSorteos();
     }
+// En listado.js, AÑADE este bloque de código al final
 
+document.getElementById('listado-tbody').addEventListener('click', (e) => {
+    const shareButton = e.target.closest('.btn-share-ticket');
+    if (!shareButton) return;
+
+    const boleto = shareButton.dataset.boleto;
+    const sorteoNombre = shareButton.dataset.sorteoNombre;
+    const shareText = `¡Ya estoy participando para ganar un ${sorteoNombre} con Movil Win! Mi boleto de la suerte es el #${boleto}.`;
+    const shareUrl = 'https://movilwin.com'; // Enlace a tu página principal
+
+    if (navigator.share) {
+        // Usa la API nativa de compartir si está disponible (ideal en móviles)
+        navigator.share({
+            title: 'Sorteo Movil Win',
+            text: shareText,
+            url: shareUrl,
+        }).catch(console.error);
+    } else {
+        // Si no, copia el texto al portapapeles y avisa al usuario (para escritorio)
+        navigator.clipboard.writeText(`${shareText} ¡Tú también puedes participar aquí! ${shareUrl}`);
+        alert('¡Texto para compartir copiado al portapapeles!');
+    }
+});
     async function cargarListaDeSorteos() {
         const listaSorteosDiv = document.getElementById('lista-de-sorteos');
         try {
@@ -63,7 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
             let filasHTML = '';
             data.listado.forEach(p => {
                 const searchData = `${p.nombre_raw || ''} ${p.cedula_raw || ''}`.toLowerCase();
-                filasHTML += `<tr data-search="${searchData}"><td data-label="# Boleto">${p.boleto}</td><td data-label="Participante">${p.nombre_display}</td><td data-label="Cédula">${p.cedula_display}</td></tr>`;
+                filasHTML += `<tr data-search="${searchData}">
+                                <td data-label="# Boleto">${p.boleto}</td>
+                                <td data-label="Participante">${p.nombre_display}</td>
+                                <td data-label="Cédula">${p.cedula_display}</td>
+                                <td data-label="Compartir">
+                                    <button class="btn-share-ticket" data-boleto="${p.boleto}" data-sorteo-nombre="${data.nombreSorteo}" title="Compartir mi boleto">
+                                        <i class="fas fa-share-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>`;
             });
             tbody.innerHTML = filasHTML;
 
