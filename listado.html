@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado Oficial de Participantes - Movil Win</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="public-list-body">
+    <div class="list-container">
+        <img src="images/logo.png" alt="Logo Movil Win" class="list-logo">
+        <h1 id="listado-titulo">Cargando listado del sorteo...</h1>
+        <p class="list-subtitulo">Verifica aquí que tu boleto esté registrado antes del sorteo en vivo. ¡Tu confianza es nuestra prioridad!</p>
+
+        <div class="form-group search-bar">
+            <i class="fas fa-search"></i>
+            <input type="search" id="searchInput" placeholder="Busca por tu nombre o cédula...">
+        </div>
+
+        <div class="table-wrapper">
+            <table class="public-list-table">
+                <thead>
+                    <tr>
+                        <th># Boleto</th>
+                        <th>Participante</th>
+                        <th>Cédula (Parcial)</th>
+                    </tr>
+                </thead>
+                <tbody id="listado-tbody">
+                    </tbody>
+            </table>
+        </div>
+        <div id="loader" class="loader-container"><div class="loader"></div></div>
+        <p id="total-boletos"></p>
+    </div>
+    <script src="listado.js"></script>
+</body>
+</html>

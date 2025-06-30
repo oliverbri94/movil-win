@@ -1073,6 +1073,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <i class="fas fa-history"></i>
                             </button>
                         </td>
+                        </td>
+                        <td data-label="Acciones Públicas">
+                            <button class="accion-btn btn-copiar-listado" data-id="${sorteo.id_sorteo}" title="Copiar Link del Listado Público">
+                                <i class="fas fa-list-ol"></i>
+                            </button>
+                        </td>
                     `;
                     tbodyListaSorteos.appendChild(tr);
                 });
@@ -1703,6 +1709,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert("Eliminación cancelada. La palabra no coincidió.");
             }
         }
+    if (boton.classList.contains('btn-copiar-listado')) {
+        const sorteoId = boton.dataset.id;
+        const publicURL = `https://movilwin.com/listado.html?sorteo=${sorteoId}`;
+
+        navigator.clipboard.writeText(publicURL).then(() => {
+            showGenericStatusMessage(statusSorteoMessage, '¡Enlace del listado copiado al portapapeles!', false);
+        }).catch(err => {
+            showGenericStatusMessage(statusSorteoMessage, 'Error al copiar el enlace.', true);
+        });
+    }
         // --- FIN DE LA LÓGICA DE ELIMINAR ---
     });
 
