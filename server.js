@@ -1025,7 +1025,7 @@ app.post('/api/admin/participantes', requireAdminLogin, async (req, res) => {
                 numeroFormateado = `593${numeroFormateado.substring(1)}`;
             }
             const boletosTexto = `Tus números de boleto son: ${nuevosBoletosNumeros.join(', ')}.`;
-            const mensajeWhatsApp = `¡Hola, ${nombre}! Gracias por tu compra para el sorteo del ${sorteoInfo.nombre_premio_display}.Ya puedes ver tus boletos en nuestra web: https://movilwin.com ${boletosTexto} ¡No olvides seguirnos en nuestras redes sociales para enterarte de nuestros próximos premios, mucha suerte!`;
+            const mensajeWhatsApp = `¡Hola, ${nombre}! Gracias por tu compra para el sorteo del ${sorteoInfo.nombre_premio_display}. Ya puedes ver tus boletos en la lista pública de nuestra web: https://movilwin.com ${boletosTexto} ¡No olvides seguirnos en nuestras redes sociales para enterarte de nuestros próximos premios, mucha suerte!`;
             linkWhatsApp = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensajeWhatsApp)}`;
         }
         // 1. Envío de Correo Electrónico (si aplica)
