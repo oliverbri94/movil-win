@@ -222,6 +222,55 @@ app.get('/debug-cors', (req, res) => {
     });
 });
 
+
+app.post('/api/crear-pedido', async (req, res) => {
+    const { sorteoId, paquete, nombre, cedula, celular, email } = req.body;
+
+    if (!sorteoId || !paquete || !nombre || !cedula) {
+        return res.status(400).json({ error: 'Faltan datos para procesar el pedido.' });
+    }
+
+    const sql = `
+        INSERT INTO pedidos (id_sorteo_fk, nombre_cliente, cedula_cliente, celular_cliente, email_cliente, paquete_elegido)
+        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id_pedido;
+    `;
+    const params = [sorteoId, paquete, nombre, cedula, celular, email];
+
+    try {
+        const result = await new Promise((resolve, reject) => {
+            db.get(sql, params, function(err, row) {
+                if (err) return reject(err);
+                resolve(row);
+            });
+        });
+
+        // Si el pedido se guarda, te enviamos un email de notificación A TI
+        if (transporter && process.env.EMAIL_USER) {
+            const mailOptions = {
+                from: `"Sistema Movil Win" <${process.env.EMAIL_USER}>`,
+                to: process.env.EMAIL_USER, // Se envía a tu propio correo
+                subject: `🔔 ¡Nuevo Pedido Pendiente de Pago! - Pedido #${result.id_pedido}`,
+                html: `
+                    <h2>Tienes un nuevo pedido pendiente de pago.</h2>
+                    <p><strong>Cliente:</strong> ${nombre}</p>
+                    <p><strong>Cédula:</strong> ${cedula}</p>
+                    <p><strong>Celular:</strong> ${celular || 'No proporcionado'}</p>
+                    <p><strong>Email:</strong> ${email || 'No proporcionado'}</p>
+                    <p><strong>Paquete:</strong> ${paquete}</p>
+                    <p>Por favor, verifica tu cuenta bancaria para confirmar el pago y luego registra los boletos en el panel de administración.</p>
+                `
+            };
+            transporter.sendMail(mailOptions).catch(err => console.error("Error enviando email de notificación al admin:", err));
+        }
+
+        res.status(201).json({ success: true, message: 'Pedido recibido. Pendiente de pago.' });
+
+    } catch (error) {
+        console.error("Error al crear pedido:", error);
+        res.status(500).json({ success: false, error: 'No se pudo registrar el pedido.' });
+    }
+});
+
 app.get('/api/sorteos-visibles', async (req, res) => {
     try {
         const sql = `

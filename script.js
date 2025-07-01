@@ -307,75 +307,62 @@ function initializeRafflePage() {
     }
 
 
-
-    function renderizarPaquetesPublicos(paquetes, contenedor) {
+    function renderizarPaquetesPublicos(paquetes, contenedor, sorteoId) {
         if (!contenedor) return;
         contenedor.innerHTML = '';
 
         if (!paquetes || paquetes.length === 0) {
-            contenedor.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">No hay paquetes de boletos disponibles para este sorteo.</p>';
+            contenedor.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">No hay paquetes de boletos disponibles para este sorteo en este momento.</p>';
             return;
         }
 
         const paqueteIndividual = paquetes.find(p => p.boletos === 1);
         const precioIndividual = paqueteIndividual ? paqueteIndividual.precio : null;
-
         const paquetesMultiples = paquetes.filter(p => p.boletos > 1);
-        const paquetePopular = paquetesMultiples.length > 0
-            ? paquetesMultiples.reduce((max, p) => (p.boletos > max.boletos ? p : max), paquetesMultiples[0])
-            : null;
+        const paquetePopular = paquetesMultiples.length > 0 ? paquetesMultiples.reduce((max, p) => (p.boletos > max.boletos ? p : max), paquetesMultiples[0]) : null;
 
         paquetes.forEach(paquete => {
             const esPopular = (paquete === paquetePopular);
-            let valorRealHTML = '';
-            let boletosGratisHTML = '';
-
+            let valorRealHTML = '', boletosGratisHTML = '';
             if (precioIndividual && paquete.boletos > 1) {
                 const valorReal = precioIndividual * paquete.boletos;
                 const ahorro = valorReal - paquete.precio;
                 if (ahorro > 0) {
                     valorRealHTML = `<span class="precio-original-tachado">$${valorReal.toFixed(0)}</span>`;
                     const boletosGratis = Math.floor(ahorro / precioIndividual);
-                    if (boletosGratis > 0) {
-                        boletosGratisHTML = `<div class="etiqueta-ahorro">+${boletosGratis} Boleto(s) GRATIS</div>`;
-                    }
+                    if (boletosGratis > 0) boletosGratisHTML = `<div class="etiqueta-ahorro">+${boletosGratis} Boleto(s) GRATIS</div>`;
                 }
             }
-            
             let descripcion = "Una excelente opción para aumentar tus probabilidades de ganar.";
-            if (paquete.boletos === 1) {
-                descripcion = "La forma perfecta de entrar en el sorteo y probar tu suerte.";
-            } else if (esPopular) {
-                descripcion = "¡La mejor relación precio-oportunidad! El paquete preferido por nuestros participantes.";
-            }
+            if (paquete.boletos === 1) descripcion = "La forma perfecta de entrar en el sorteo y probar tu suerte.";
+            else if (esPopular) descripcion = "¡La mejor relación precio-oportunidad! El paquete preferido por nuestros participantes.";
             
-            // --- INICIO DE LA MODIFICACIÓN ---
-            // 1. Lógica para elegir un ícono dinámico basado en el paquete
-            let iconoHTML = '<i class="fas fa-layer-group"></i>'; // Icono por defecto para paquetes intermedios
+            let iconoHTML = '<i class="fas fa-layer-group"></i>';
+            if (paquete.boletos === 1) iconoHTML = '<i class="fas fa-ticket-alt"></i>';
+            else if (esPopular) iconoHTML = '<i class="fas fa-rocket"></i>';
+            else if (paquete.boletos > 15) iconoHTML = '<i class="fas fa-gem"></i>';
 
-            if (paquete.boletos === 1) {
-                iconoHTML = '<i class="fas fa-ticket-alt"></i>'; // Icono para boleto individual
-            } else if (esPopular) {
-                iconoHTML = '<i class="fas fa-rocket"></i>'; // Icono para el paquete más popular/grande
-            } else if (paquete.boletos > 15) { // Un umbral para paquetes "premium"
-                iconoHTML = '<i class="fas fa-gem"></i>'; // Icono de gema para paquetes de alto valor
-            }
+            // --- INICIO DE LA MODIFICACIÓN ---
+            // Creamos los parámetros para la URL de compra
+            const params = new URLSearchParams({
+                sorteoId: sorteoId,
+                paqueteNombre: paquete.nombre,
+                paquetePrecio: paquete.precio,
+                paqueteBoletos: paquete.boletos
+            });
+            const enlaceCompra = `comprar.html?${params.toString()}`;
             // --- FIN DE LA MODIFICACIÓN ---
 
-            const mensajeWhatsApp = `Hola, quiero el paquete "${paquete.nombre}" de ${paquete.boletos} boletos por $${paquete.precio} para el sorteo MOVIL WIN!`;
-            
             const paqueteHTML = `
                 <div class="paquete-item ${esPopular ? 'popular' : ''}">
                     ${esPopular ? '<span class="etiqueta-popular">Más Popular</span>' : ''}
-
                     <div class="paquete-icono">${iconoHTML}</div>
-                    
                     <h4>${paquete.nombre}</h4>
                     <div class="paquete-precio">$${paquete.precio} ${valorRealHTML}</div>
                     <div class="paquete-cantidad">${paquete.boletos} Boleto(s) Digital(es)</div>
                     ${boletosGratisHTML}
                     <p class="paquete-descripcion">${descripcion}</p>
-                    <a href="https://wa.me/593963135510?text=${encodeURIComponent(mensajeWhatsApp)}" target="_blank" class="boton-paquete">Elegir Paquete</a>
+                    <a href="${enlaceCompra}" class="boton-paquete">Elegir Paquete</a>
                 </div>
             `;
             contenedor.innerHTML += paqueteHTML;
@@ -386,56 +373,30 @@ function initializeRafflePage() {
      * @param {Array<object>} paquetes - El array de paquetes de un sorteo.
      * @returns {string} El string de HTML con los botones de los paquetes.
      */
-    function generarHTMLMiniPaquetes(paquetes) {
-        if (!paquetes || paquetes.length === 0) {
-            return ''; // Si no hay paquetes, no devuelve nada.
-        }
-
-        // Buscamos el paquete individual (el que tiene 1 boleto)
+    function generarHTMLMiniPaquetes(paquetes, sorteoId) {
+        if (!paquetes || paquetes.length === 0) return '';
+        
         const paqueteIndividual = paquetes.find(p => p.boletos === 1);
-
-        // Buscamos el paquete de "mejor valor" (el que más boletos tiene)
         const paquetesMultiples = paquetes.filter(p => p.boletos > 1);
-        const paqueteMejorValor = paquetesMultiples.length > 0
-            ? paquetesMultiples.reduce((max, p) => (p.boletos > max.boletos ? p : max), paquetesMultiples[0])
-            : null;
-
+        const paqueteMejorValor = paquetesMultiples.length > 0 ? paquetesMultiples.reduce((max, p) => (p.boletos > max.boletos ? p : max), paquetesMultiples[0]) : null;
+        
         let html = '';
 
-        // Creamos el botón para el paquete individual, si existe
         if (paqueteIndividual) {
-            const mensaje = `Hola, quiero el paquete "${paqueteIndividual.nombre}" de ${paqueteIndividual.boletos} boleto(s) por $${paqueteIndividual.precio} para el sorteo MOVIL WIN!`;
-            html += `
-                <a href="https://wa.me/593963135510?text=${encodeURIComponent(mensaje)}" target="_blank" class="mini-package-btn">
-                    <strong>${paqueteIndividual.boletos} Boleto</strong>
-                    <span>por $${paqueteIndividual.precio}</span>
-                </a>
-            `;
+            const params = new URLSearchParams({sorteoId, paqueteNombre: paqueteIndividual.nombre, paquetePrecio: paqueteIndividual.precio, paqueteBoletos: paqueteIndividual.boletos});
+            const enlaceCompra = `comprar.html?${params.toString()}`;
+            html += `<a href="${enlaceCompra}" class="mini-package-btn"><strong>${paqueteIndividual.boletos} Boleto</strong><span>por $${paqueteIndividual.precio}</span></a>`;
         }
 
-        // Creamos el botón para el paquete de mejor valor, si existe
         if (paqueteMejorValor) {
-            const mensaje = `Hola, quiero el paquete "${paqueteMejorValor.nombre}" de ${paqueteMejorValor.boletos} boletos por $${paqueteMejorValor.precio} para el sorteo MOVIL WIN!`;
-            html += `
-                <a href="https://wa.me/593963135510?text=${encodeURIComponent(mensaje)}" target="_blank" class="mini-package-btn popular">
-                    <strong>${paqueteMejorValor.boletos} Boletos</strong>
-                    <span>por $${paqueteMejorValor.precio}</span>
-                    <span class="popular-tag">¡Recomendado!</span>
-                </a>
-            `;
+            const params = new URLSearchParams({sorteoId, paqueteNombre: paqueteMejorValor.nombre, paquetePrecio: paqueteMejorValor.precio, paqueteBoletos: paqueteMejorValor.boletos});
+            const enlaceCompra = `comprar.html?${params.toString()}`;
+            html += `<a href="${enlaceCompra}" class="mini-package-btn popular"><strong>${paqueteMejorValor.boletos} Boletos</strong><span>por $${paqueteMejorValor.precio}</span><span class="popular-tag">¡Recomendado!</span></a>`;
         }
-
-        // Siempre añadimos el botón "Ver Todos"
-        html += `
-            <a href="#paquetes-section" class="mini-package-btn all-packages">
-                <strong>Ver Todos</strong>
-                <span><i class="fas fa-arrow-down"></i></span>
-            </a>
-        `;
-
+        
+        html += `<a href="#paquetes-section" class="mini-package-btn all-packages"><strong>Ver Todos</strong><span><i class="fas fa-arrow-down"></i></span></a>`;
         return html;
     }
-    // --- 3. FUNCIONES DE DIBUJO DE LA RULETA ---
 
 
 
@@ -595,7 +556,8 @@ function initializeRafflePage() {
             if (sorteoActual.status_sorteo === 'programado') {
                 paqueteContainer.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">Los paquetes de participación se anunciarán pronto. ¡Mantente atento!</p>';
             } else {
-                renderizarPaquetesPublicos(sorteoActual.paquetes_json, paqueteContainer);
+                renderizarPaquetesPublicos(sorteoActual.paquetes_json, paqueteContainer, sorteoActual.id_sorteo);
+
             }
         }
         const currentWheelCanvas = activeSlide.querySelector('.price-wheel-canvas');
@@ -872,7 +834,8 @@ function initializeRafflePage() {
                 else if (percentageSold >= 70) { urgenciaClass = 'urgente'; motivationalMessage = "¡Se acaban rápido!"; } 
                 else { motivationalMessage = "Cada boleto es una nueva oportunidad de ganar."; }
                 const percentageRemaining = 100 - percentageSold;
-                const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json);
+                const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo);
+
 
                 slideWrapper.innerHTML = `
                     <div class="prize-carousel-slide" data-sorteo-id="${sorteo.id_sorteo}">

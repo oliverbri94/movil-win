@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Completar Pedido - Movil Win</title>
+</head>
+<body class="dark-theme">
+    <main class="site-main">
+        <section class="content-section page-text-container">
+            <h1>Completar tu Pedido</h1>
+            <div id="resumen-pedido" class="resumen-pedido">Cargando detalles del paquete...</div>
+            
+            <form id="form-pedido" class="admin-form" style="max-width: 600px; margin: 20px auto;">
+                <p>Por favor, completa tus datos para generar tu pedido.</p>
+                <div class="form-group">
+                    <label for="nombre">Nombre Completo:</label>
+                    <input type="text" id="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="cedula">Cédula:</label>
+                    <input type="text" id="cedula" required maxlength="10">
+                </div>
+                 <div class="form-group">
+                    <label for="celular">Celular (para contacto):</label>
+                    <input type="text" id="celular" required maxlength="10">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email (opcional, para recibir confirmación):</label>
+                    <input type="email" id="email">
+                </div>
+                <button type="submit" class="admin-button">Generar Pedido y Ver Datos de Pago</button>
+            </form>
+            <div id="pedido-status" class="status-container oculto"></div>
+        </section>
+    </main>
+    
+    <script src="script.js"></script>
+    <script src="comprar.js"></script>
+</body>
+</html>
