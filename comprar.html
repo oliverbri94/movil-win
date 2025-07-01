@@ -1,9 +1,43 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Completar Pedido - Movil Win</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tailwind-config.js"></script>
 </head>
 <body class="dark-theme">
+
+    <nav class="bg-custom-dark-bg-frame shadow-lg fixed w-full top-0 z-50">
+        <div class="main-nav-grid">
+            <div class="nav-left"><button id="mobileMenuButton" class="nav-icon-btn"><i class="fas fa-bars"></i></button></div>
+            <div class="nav-center"><a href="index.html"><img src="images/logo.png" alt="Logo Movil Win" class="nav-logo"></a></div>
+            <div class="nav-right"></div>
+        </div>
+        <div id="fullScreenMenu" class="hidden fixed inset-0 bg-custom-dark-bg bg-opacity-95 backdrop-blur-sm z-40 flex flex-col items-center justify-center p-6">
+            <button id="closeMenuButton" class="absolute top-6 right-6 text-custom-text-alt hover:text-custom-primary text-4xl leading-none">&times;</button>
+            <img src="images/logo.png" alt="Logo Movil Win" class="h-20 w-auto mb-8">
+            <ul class="flex flex-col items-center space-y-6">
+                <li><a href="index.html" class="text-2xl text-custom-text-light hover:text-custom-primary">Inicio</a></li>
+                <li><a href="faq.html" class="text-2xl text-custom-text-light hover:text-custom-primary">Preguntas Frecuentes</a></li>
+                <li><a href="bases.html" class="text-2xl text-custom-text-light hover:text-custom-primary">Bases y Condiciones</a></li>
+                <li><a href="ganadores.html" class="text-2xl text-custom-text-light hover:text-custom-primary">Ganadores</a></li>
+                <li><a href="club-afiliados.html" class="text-2xl text-custom-text-light hover:text-custom-primary">Club de Afiliados</a></li>
+            </ul>
+        </div>
+    </nav>
+    
     <main class="site-main">
         <section class="content-section page-text-container">
             <h1>Completar tu Pedido</h1>
@@ -32,6 +66,15 @@
             <div id="pedido-status" class="status-container oculto"></div>
         </section>
     </main>
+    
+    <footer class="site-footer">
+        <p>&copy; 2025 Movil Win | Todos los derechos reservados.</p>
+        <div class="social-links-footer">
+            <a href="https://wa.me/593959687438" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+        </div>
+    </footer>
     
     <script src="script.js"></script>
     <script src="comprar.js"></script>
