@@ -1120,98 +1120,91 @@ app.delete('/api/admin/participaciones/:orden_id', requireAdminLogin, async (req
 // Otras rutas de admin
 
 // REEMPLAZA TU RUTA EXISTENTE CON ESTA VERSIÓN FINAL Y COMPLETA
+// En server.js, reemplaza tu ruta GET /api/admin/dashboard-avanzado completa por esta:
+
 app.get('/api/admin/dashboard-avanzado', requireAdminLogin, async (req, res) => {
     try {
-        const stats = {};
+        const client = await dbClient.connect();
+        try {
+            const stats = {};
 
-        // --- CÁLCULO DE INGRESOS (LÓGICA MEJORADA) ---
-        const priceMap = {
-            'Individual ($2 c/u)': 2,
-            'Pack Básico (6 x $12)': 12,
-            'Combo Ganador (15 x $28)': 28,
-            'Fortuna MAX (30 x $55)': 55
-        };
-        const ticketsPerPackage = {
-            'Pack Básico (6 x $12)': 6,
-            'Combo Ganador (15 x $28)': 15,
-            'Fortuna MAX (30 x $55)': 30
-        };
+            // --- INICIO DE LA NUEVA LÓGICA DE CÁLCULO DE INGRESOS ---
 
-        // 1. Agrupamos los boletos para identificar compras de paquetes
-        const purchaseGroups = await new Promise((resolve, reject) => {
-            const sql = `
-                SELECT paquete_elegido, id_documento, id_sorteo_config_fk, COUNT(*) as num_tickets
+            // 1. Obtenemos todos los sorteos con sus configuraciones de paquetes
+            const sorteosResult = await client.query("SELECT id_sorteo, paquetes_json FROM sorteos_config");
+            const priceData = {}; // Aquí construiremos nuestro mapa de precios dinámico
+            
+            sorteosResult.rows.forEach(s => {
+                priceData[s.id_sorteo] = {};
+                try {
+                    const paquetes = JSON.parse(s.paquetes_json);
+                    if (paquetes && paquetes.length > 0) {
+                        paquetes.forEach(p => {
+                            // La "llave" es el texto descriptivo del paquete, ej: "Pack Básico (5 x $10)"
+                            const key = `${p.nombre} (${p.boletos} x $${p.precio})`;
+                            priceData[s.id_sorteo][key] = { price: p.precio, boletos: p.boletos };
+                        });
+                    }
+                } catch(e) { /* Ignora JSON inválido o nulo */ }
+            });
+            
+            // 2. Agrupamos las participaciones vendidas por sorteo y tipo de paquete
+            const purchaseGroupsSql = `
+                SELECT id_sorteo_config_fk, paquete_elegido, COUNT(*) as num_tickets
                 FROM participaciones
-                GROUP BY id_documento, id_sorteo_config_fk, paquete_elegido;
+                WHERE paquete_elegido IS NOT NULL AND paquete_elegido != ''
+                GROUP BY id_sorteo_config_fk, paquete_elegido;
             `;
-            db.all(sql, [], (err, rows) => err ? reject(err) : resolve(rows));
-        });
+            const purchaseGroupsResult = await client.query(purchaseGroupsSql);
+            const purchaseGroups = purchaseGroupsResult.rows;
 
-        // 2. Calculamos el ingreso total basado en los grupos
-        stats.totalRevenue = purchaseGroups.reduce((total, group) => {
-            const packagePrice = priceMap[group.paquete_elegido];
-            if (!packagePrice) return total; // Si el paquete no está en nuestro mapa, lo ignoramos
-
-            if (group.paquete_elegido === 'Individual ($2 c/u)') {
-                // Para boletos individuales, sumamos el precio por cada boleto
-                return total + (group.num_tickets * packagePrice);
-            } else {
-                // Para paquetes, calculamos cuántos paquetes completos se compraron
-                const numTicketsInPackage = ticketsPerPackage[group.paquete_elegido];
-                if (numTicketsInPackage > 0) {
-                    const numberOfPackages = Math.floor(group.num_tickets / numTicketsInPackage);
-                    return total + (numberOfPackages * packagePrice);
+            // 3. Calculamos los ingresos iterando sobre los grupos de compra
+            stats.totalRevenue = purchaseGroups.reduce((total, group) => {
+                const sorteoId = group.id_sorteo_config_fk;
+                const paqueteElegidoKey = group.paquete_elegido;
+                
+                // Buscamos el precio en nuestro mapa dinámico
+                if (priceData[sorteoId] && priceData[sorteoId][paqueteElegidoKey]) {
+                    const paqueteInfo = priceData[sorteoId][paqueteElegidoKey];
+                    const numTicketsInPackage = paqueteInfo.boletos;
+                    const packagePrice = paqueteInfo.price;
+                    
+                    if (numTicketsInPackage > 0) {
+                        const numberOfPackagesSold = Math.floor(group.num_tickets / numTicketsInPackage);
+                        return total + (numberOfPackagesSold * packagePrice);
+                    }
                 }
-            }
-            return total;
-        }, 0);
+                return total;
+            }, 0);
+            
+            // --- FIN DE LA NUEVA LÓGICA ---
 
-        // --- El resto de las estadísticas (ya estaban correctas) ---
-        const participaciones = await new Promise((resolve, reject) => {
-             db.all("SELECT paquete_elegido, fecha_creacion, nombre_afiliado FROM participaciones", [], (err, rows) => err ? reject(err) : resolve(rows));
-        });
-        
-        const sqlRendimiento = `
-            SELECT s.nombre_premio_display, COUNT(p.orden_id) as participantes_actuales
-            FROM sorteos_config s LEFT JOIN participaciones p ON s.id_sorteo = p.id_sorteo_config_fk
-            WHERE s.status_sorteo = 'activo' GROUP BY s.id_sorteo ORDER BY participantes_actuales DESC;
-        `;
-        stats.rendimientoSorteos = await new Promise((resolve, reject) => {
-            db.all(sqlRendimiento, [], (err, rows) => err ? reject(err) : resolve(rows));
-        });
 
-        const affiliateCounts = {};
-        participaciones.forEach(p => {
-            if (p.nombre_afiliado && p.nombre_afiliado.trim() !== '') {
-                affiliateCounts[p.nombre_afiliado] = (affiliateCounts[p.nombre_afiliado] || 0) + 1;
-            }
-        });
-        stats.topAfiliados = Object.entries(affiliateCounts).map(([name, count]) => ({ nombre_afiliado: name, total_boletos: count })).sort((a, b) => b.total_boletos - a.total_boletos).slice(0, 5);
+            // El resto de las estadísticas se calculan como antes
+            const [
+                rendimientoSorteosResult,
+                topAfiliadosResult,
+                paquetesPopularesResult,
+                participacionesDiariasResult
+            ] = await Promise.all([
+                client.query("SELECT s.nombre_premio_display, COUNT(p.orden_id) as participantes_actuales FROM sorteos_config s LEFT JOIN participaciones p ON s.id_sorteo = p.id_sorteo_config_fk WHERE s.status_sorteo = 'activo' GROUP BY s.id_sorteo ORDER BY participantes_actuales DESC"),
+                client.query("SELECT nombre_afiliado, COUNT(*) as total_boletos FROM participaciones WHERE nombre_afiliado IS NOT NULL AND nombre_afiliado != '' GROUP BY nombre_afiliado ORDER BY total_boletos DESC LIMIT 5"),
+                client.query("SELECT paquete_elegido, COUNT(*) as count FROM participaciones WHERE paquete_elegido IS NOT NULL AND paquete_elegido != '' GROUP BY paquete_elegido ORDER BY count DESC"),
+                client.query("SELECT TO_CHAR(fecha_creacion, 'YYYY-MM-DD') as dia, COUNT(*) as count FROM participaciones WHERE fecha_creacion >= NOW() - INTERVAL '7 days' GROUP BY dia ORDER BY dia ASC")
+            ]);
 
-        const packageCounts = {};
-        participaciones.forEach(p => {
-            if (p.paquete_elegido && p.paquete_elegido.trim() !== '') {
-                packageCounts[p.paquete_elegido] = (packageCounts[p.paquete_elegido] || 0) + 1;
-            }
-        });
-        stats.paquetesPopulares = Object.entries(packageCounts).map(([name, count]) => ({ paquete_elegido: name, count: count }));
+            stats.rendimientoSorteos = rendimientoSorteosResult.rows;
+            stats.topAfiliados = topAfiliadosResult.rows;
+            stats.paquetesPopulares = paquetesPopularesResult.rows;
+            stats.participacionesDiarias = participacionesDiariasResult.rows;
 
-        const dailyCounts = {};
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        participaciones.forEach(p => {
-            const participationDate = new Date(p.fecha_creacion);
-            if (participationDate >= sevenDaysAgo) {
-                const day = participationDate.toISOString().split('T')[0];
-                dailyCounts[day] = (dailyCounts[day] || 0) + 1;
-            }
-        });
-        stats.participacionesDiarias = Object.entries(dailyCounts).map(([day, count]) => ({ dia: day, count: count })).sort((a, b) => new Date(a.dia) - new Date(b.dia));
+            res.json({ success: true, stats: stats });
 
-        res.json({ success: true, stats });
-
+        } finally {
+            client.release();
+        }
     } catch (error) {
-        console.error("Error obteniendo estadísticas avanzadas del dashboard:", error.message);
+        console.error("Error obteniendo estadísticas avanzadas del dashboard:", error);
         res.status(500).json({ success: false, error: 'Error interno al obtener estadísticas.' });
     }
 });
