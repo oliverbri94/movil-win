@@ -223,48 +223,47 @@ app.get('/debug-cors', (req, res) => {
 });
 
 
+// En server.js, reemplaza esta ruta
 app.post('/api/crear-pedido', async (req, res) => {
-    const { sorteoId, paquete, nombre, cedula, celular, email } = req.body;
+    // Añadimos 'ciudad' a la lista de datos recibidos
+    const { sorteoId, paquete, nombre, cedula, celular, email, ciudad } = req.body;
 
     if (!sorteoId || !paquete || !nombre || !cedula) {
         return res.status(400).json({ error: 'Faltan datos para procesar el pedido.' });
     }
 
+    // Añadimos la nueva columna y el nuevo parámetro
     const sql = `
-        INSERT INTO pedidos (id_sorteo_fk, nombre_cliente, cedula_cliente, celular_cliente, email_cliente, paquete_elegido)
-        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id_pedido;
+        INSERT INTO pedidos (id_sorteo_fk, nombre_cliente, cedula_cliente, celular_cliente, email_cliente, paquete_elegido, ciudad_cliente)
+        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id_pedido;
     `;
-    const params = [sorteoId, paquete, nombre, cedula, celular, email];
+    const params = [sorteoId, paquete, nombre, cedula, celular, email, ciudad];
 
     try {
         const result = await new Promise((resolve, reject) => {
-            db.get(sql, params, function(err, row) {
-                if (err) return reject(err);
-                resolve(row);
-            });
+            db.get(sql, params, (err, row) => err ? reject(err) : resolve(row));
         });
 
-        // Si el pedido se guarda, te enviamos un email de notificación A TI
+        // Añadimos la ciudad al email de notificación para ti
         if (transporter && process.env.EMAIL_USER) {
             const mailOptions = {
-                from: `"Sistema Movil Win" <${process.env.EMAIL_USER}>`,
-                to: process.env.EMAIL_USER, // Se envía a tu propio correo
-                subject: `🔔 ¡Nuevo Pedido Pendiente de Pago! - Pedido #${result.id_pedido}`,
+                to: process.env.EMAIL_USER,
+                subject: `🔔 ¡Nuevo Pedido Pendiente! - Pedido #${result.id_pedido}`,
                 html: `
                     <h2>Tienes un nuevo pedido pendiente de pago.</h2>
                     <p><strong>Cliente:</strong> ${nombre}</p>
                     <p><strong>Cédula:</strong> ${cedula}</p>
+                    <p><strong>Ciudad:</strong> ${ciudad || 'No proporcionada'}</p>
                     <p><strong>Celular:</strong> ${celular || 'No proporcionado'}</p>
                     <p><strong>Email:</strong> ${email || 'No proporcionado'}</p>
                     <p><strong>Paquete:</strong> ${paquete}</p>
-                    <p>Por favor, verifica tu cuenta bancaria para confirmar el pago y luego registra los boletos en el panel de administración.</p>
+                    <p>Por favor, verifica tu cuenta bancaria para confirmar el pago.</p>
                 `
             };
-            transporter.sendMail(mailOptions).catch(err => console.error("Error enviando email de notificación al admin:", err));
+            transporter.sendMail(mailOptions).catch(err => console.error("Error enviando email al admin:", err));
         }
 
-        res.status(201).json({ success: true, message: 'Pedido recibido. Pendiente de pago.' });
-
+        res.status(201).json({ success: true, message: 'Pedido recibido. Pendiente de pago.', pedidoId: result.id_pedido });
     } catch (error) {
         console.error("Error al crear pedido:", error);
         res.status(500).json({ success: false, error: 'No se pudo registrar el pedido.' });
@@ -525,7 +524,81 @@ app.get('/api/admin/sorteos', requireAdminLogin, (req, res) => {
     });
 });
 // --- REEMPLAZA LA RUTA DE AÑADIR SORTEO CON ESTA VERSIÓN ---
+// En server.js, AÑADE estas dos nuevas rutas de admin
 
+// 1. RUTA PARA OBTENER TODOS LOS PEDIDOS PENDIENTES
+app.get('/api/admin/pedidos', requireAdminLogin, async (req, res) => {
+    try {
+        const client = await dbClient.connect();
+        try {
+            const sql = "SELECT * FROM pedidos WHERE estado_pedido = 'pendiente' ORDER BY fecha_pedido ASC";
+            const result = await client.query(sql);
+            res.json(result.rows);
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error("Error al obtener pedidos pendientes:", error);
+        res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+});
+
+
+// 2. RUTA PARA CONFIRMAR UN PAGO Y REGISTRAR LOS BOLETOS (EL "BOTÓN MÁGICO")
+app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
+    const { pedido_id } = req.body;
+    const client = await dbClient.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        // Obtenemos los datos del pedido y del sorteo asociado
+        const pedidoSql = "SELECT * FROM pedidos WHERE id_pedido = $1 AND estado_pedido = 'pendiente'";
+        const pedidoResult = await client.query(pedidoSql, [pedido_id]);
+        if (pedidoResult.rows.length === 0) throw new Error("Pedido no encontrado o ya procesado.");
+        const pedido = pedidoResult.rows[0];
+
+        const sorteoSql = "SELECT * FROM sorteos_config WHERE id_sorteo = $1";
+        const sorteoResult = await client.query(sorteoSql, [pedido.id_sorteo_fk]);
+        const sorteoInfo = sorteoResult.rows[0];
+        if (!sorteoInfo) throw new Error("El sorteo asociado a este pedido no existe.");
+
+        // Extraemos la cantidad de boletos del nombre del paquete
+        const matches = pedido.paquete_elegido.match(/\((\d+)\s*x/);
+        const cantidad_a_anadir = matches ? parseInt(matches[1], 10) : 1;
+
+        // Calculamos los nuevos números de boleto
+        const maxTicketSql = 'SELECT MAX(numero_boleto_sorteo) as max_num FROM participaciones WHERE id_sorteo_config_fk = $1';
+        const maxTicketRes = await client.query(maxTicketSql, [pedido.id_sorteo_fk]);
+        let nextTicketNumber = (maxTicketRes.rows[0].max_num || 0) + 1;
+
+        const sqlInsert = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk, numero_boleto_sorteo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING numero_boleto_sorteo;`;
+        const nuevosBoletosNumeros = [];
+        for (let i = 0; i < cantidad_a_anadir; i++) {
+            const params = [pedido.cedula_cliente, pedido.nombre_cliente, pedido.ciudad_cliente, pedido.celular_cliente, pedido.email_cliente, pedido.paquete_elegido, null, pedido.id_sorteo_fk, nextTicketNumber];
+            const result = await client.query(sqlInsert, params);
+            nuevosBoletosNumeros.push(result.rows[0].numero_boleto_sorteo);
+            nextTicketNumber++;
+        }
+
+        // Actualizamos el estado del pedido a 'completado'
+        const updatePedidoSql = "UPDATE pedidos SET estado_pedido = 'completado' WHERE id_pedido = $1";
+        await client.query(updatePedidoSql, [pedido_id]);
+
+        // (Opcional) Enviar email de confirmación al cliente con sus números
+        // ... (Aquí iría la lógica de Nodemailer si deseas automatizarlo) ...
+
+        await client.query('COMMIT');
+        res.json({ success: true, message: `Pedido #${pedido_id} confirmado. Se asignaron los boletos: ${nuevosBoletosNumeros.join(', ')}` });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error("Error al confirmar el pedido:", error);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+});
 
 app.post('/api/admin/start-countdown', requireAdminLogin, async (req, res) => {
     try {

@@ -189,6 +189,7 @@
                     <nav id="adminSidebarNav" class="admin-sidebar-nav">
                         <ul>
                             <li><a href="#" class="active" data-target="page-dashboard"><i class="fas fa-chart-line fa-fw"></i> Inicio</a></li>
+                            <li><a href="#" data-target="page-pedidos"><i class="fas fa-file-invoice-dollar fa-fw"></i> Pedidos</a></li>
                             <li><a href="#" data-target="page-participantes"><i class="fas fa-ticket-alt fa-fw"></i> Participantes</a></li>
                             <li><a href="#" data-target="page-sorteos"><i class="fas fa-gift fa-fw"></i> Sorteos</a></li>
                             <li><a href="#" data-target="page-ganadores"><i class="fas fa-trophy fa-fw"></i> Ganadores</a></li>
@@ -469,7 +470,30 @@
                             </div>
                         </section>
                     </div>
-
+                    <div id="page-pedidos" class="admin-page">
+                        <section class="admin-section">
+                            <h2><i class="fas fa-clock"></i> Pedidos Pendientes de Pago</h2>
+                            <p style="font-size: 0.9em; color: var(--clr-dark-text-alt); margin-bottom:20px;">
+                                Esta es la lista de pedidos generados desde la web. Cuando un cliente te envíe su comprobante, busca su pedido aquí y haz clic en "Confirmar Pago" para registrar sus boletos automáticamente.
+                            </p>
+                            <div id="statusPedidosMessage" class="status-container oculto"></div>
+                            <div class="loader-container oculto" id="loaderPedidos"><div class="loader"></div></div>
+                            <table class="tabla-sorteos">
+                                <thead>
+                                    <tr>
+                                        <th>Pedido #</th>
+                                        <th>Fecha</th>
+                                        <th>Cliente</th>
+                                        <th>Cédula</th>
+                                        <th>Paquete</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyPedidosPendientes">
+                                    </tbody>
+                            </table>
+                        </section>
+                    </div>
                 </main>
             </div>
         </div>

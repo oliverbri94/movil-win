@@ -79,7 +79,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const closeAffiliateModalBtn = document.getElementById('closeAffiliateModal');
     const quickAffiliateForm = document.getElementById('quickAffiliateForm');
 
-
+    const tbodyPedidos = document.getElementById('tbodyPedidosPendientes');
+    tbodyPedidos?.addEventListener('click', e => {
+        const boton = e.target.closest('.btn-confirmar-pago');
+        if (boton) {
+            const pedidoId = boton.dataset.id;
+            handleConfirmarPedido(pedidoId);
+        }
+    });
     const btnGenerarReporte = document.getElementById('btnGenerarReporte');
     btnGenerarReporte?.addEventListener('click', async () => {
         const sorteoId = document.getElementById('reporteSorteoSelect').value;
@@ -719,7 +726,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             cargarDashboardStats(),
             fetchAndDisplayAffiliates(), 
             populateAffiliatesDropdown(),
-            fetchAndDisplayWinnersForAdmin() 
+            fetchAndDisplayWinnersForAdmin(), 
+            cargarPedidosPendientes() 
 
         ]);
     }
@@ -1456,7 +1464,71 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    async function cargarPedidosPendientes() {
+        const tbody = document.getElementById('tbodyPedidosPendientes');
+        const loader = document.getElementById('loaderPedidos');
+        if (!tbody || !loader) return;
 
+        loader.classList.remove('oculto');
+        tbody.innerHTML = '';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/pedidos`, { credentials: 'include' });
+            const pedidos = await response.json();
+
+            if (pedidos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">¡Excelente! No hay pedidos pendientes.</td></tr>';
+            } else {
+                pedidos.forEach(pedido => {
+                    const tr = document.createElement('tr');
+                    const fecha = new Date(pedido.fecha_pedido).toLocaleString('es-EC');
+                    tr.innerHTML = `
+                        <td data-label="Pedido #">${pedido.id_pedido}</td>
+                        <td data-label="Fecha">${fecha}</td>
+                        <td data-label="Cliente">${pedido.nombre_cliente}</td>
+                        <td data-label="Cédula">${pedido.cedula_cliente}</td>
+                        <td data-label="Paquete">${pedido.paquete_elegido}</td>
+                        <td data-label="Acción">
+                            <button class="accion-btn btn-confirmar-pago" data-id="${pedido.id_pedido}" title="Confirmar Pago y Registrar Boletos">
+                                <i class="fas fa-check-circle"></i> Confirmar Pago
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        } catch (error) {
+            tbody.innerHTML = `<tr><td colspan="6" class="error-message">Error al cargar pedidos: ${error.message}</td></tr>`;
+        } finally {
+            loader.classList.add('oculto');
+        }
+    }
+
+    async function handleConfirmarPedido(pedidoId) {
+        const statusDiv = document.getElementById('statusPedidosMessage');
+        if (!confirm(`¿Estás seguro de que quieres confirmar el pago para el Pedido #${pedidoId}? Esta acción registrará los boletos y no se puede deshacer.`)) {
+            return;
+        }
+
+        showGenericStatusMessage(statusDiv, `Procesando Pedido #${pedidoId}...`, false);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/confirmar-pedido`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'credentials': 'include' },
+                body: JSON.stringify({ pedido_id: pedidoId })
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || result.error);
+
+            showGenericStatusMessage(statusDiv, result.message, false);
+            cargarPedidosPendientes(); // Recarga la lista para que el pedido confirmado desaparezca
+            fetchAndDisplayParticipants(); // Opcional: recarga la lista de participantes para ver los nuevos boletos
+
+        } catch (error) {
+            showGenericStatusMessage(statusDiv, `Error: ${error.message}`, true);
+        }
+    }
 
     /**
      * Carga la información de los sorteos activos en los selectores.

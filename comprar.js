@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             paquete: `${paqueteNombre} (${paqueteBoletos} x $${paquetePrecio})`,
             nombre: document.getElementById('nombre').value,
             cedula: document.getElementById('cedula').value,
+            ciudad: document.getElementById('ciudad').value, 
             celular: document.getElementById('celular').value,
             email: document.getElementById('email').value,
         };
@@ -42,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error(result.error || 'Error en el servidor.');
             
             // Si todo sale bien, redirige a la página de gracias
-            window.location.href = 'gracias.html';
+            window.location.href = `gracias.html?pedidoId=${result.pedidoId}`;
 
         } catch (error) {
             statusDiv.textContent = `Error: ${error.message}`;

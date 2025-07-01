@@ -3202,3 +3202,54 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     text-align: center;
     margin-top: 30px;
 }
+
+.boton-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #25D366; /* Verde oficial de WhatsApp */
+    color: white !important;
+    padding: 12px 28px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1em;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+}
+.boton-whatsapp:hover {
+    transform: translateY(-3px);
+    background-color: #1DAE54;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+}
+
+
+/* Estilos para los nuevos botones de COPIAR */
+.datos-pago ul li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.btn-copy {
+    background-color: var(--clr-dark-bg-frame);
+    color: var(--clr-dark-text-alt);
+    border: 1px solid var(--clr-dark-border);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-copy:hover {
+    background-color: var(--clr-secondary);
+    color: white;
+}
+.btn-copy.copied {
+    background-color: var(--clr-primary);
+    color: white;
+}
+.btn-copy i {
+    margin-right: 5px;
+}
+
+.btn-confirmar-pago { background-color: var(--clr-primary); }
