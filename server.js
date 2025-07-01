@@ -585,9 +585,63 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
         const updatePedidoSql = "UPDATE pedidos SET estado_pedido = 'completado' WHERE id_pedido = $1";
         await client.query(updatePedidoSql, [pedido_id]);
 
-        // (Opcional) Enviar email de confirmación al cliente con sus números
-        // ... (Aquí iría la lógica de Nodemailer si deseas automatizarlo) ...
+        const boletosTexto = `Tus números de boleto son: ${nuevosBoletosNumeros.join(', ')}.`;
+        
+        // 1. Envío de Correo Electrónico automático al cliente
+        if (pedido.email_cliente && transporter) {
+            const boletosTextoEmail = `<p>Para tu referencia, tus números de boleto asignados son:</p><ul style="padding-left: 20px;">${nuevosBoletosNumeros.map(id => `<li style="margin-bottom: 5px;">Boleto #${id}</li>`).join('')}</ul>`;
+            const mailOptions = {
+                from: `"Movil Win" <${process.env.EMAIL_USER}>`,
+                to: pedido.email_cliente,
+                subject: `✅ ¡Confirmación de tus Boletos para el Sorteo ${sorteoInfo.nombre_premio_display}!`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <img src="cid:logo_movilwin" alt="MOVIL WIN Logo" style="max-width: 150px; height: auto;">
+                        </div>
+                        <h2 style="color: #7f5af0; text-align: center;">¡Hola, ${nombre}!</h2>
+                        <p>¡Gracias por adquirir tu Mini-Guía y obtener <strong>${quantity} boleto(s) digital(es)</strong>.</p>${boletosTextoEmail} para el sorteo del <strong>${sorteoInfo.nombre_premio_display}</strong> en MOVIL WIN!</p>
+                        <p>Estamos emocionados de tenerte a bordo. Tu Mini-Guía "${nombreArchivoGuia}" está adjunta a este correo.</p>
+                        <p>Recuerda seguirnos en nuestras redes para estar al tanto de todas las novedades y próximos sorteos:</p>
+                        <p style="text-align: center; margin: 20px 0;">
+                            <a href="https://www.facebook.com/profile.php?id=61576682273505" style="color: #ffffff; background-color: #1877F2; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-right: 10px;">Facebook</a>
+                            <a href="https://www.instagram.com/movilwin" style="color: #ffffff; background-color: #E4405F; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Instagram</a>
+                        </p>
+                        <p style="text-align: center; margin-top: 20px;">¡Mucha suerte en el sorteo!</p>
+                        <p style="text-align: center; font-size: 0.9em; color: #777;">Atentamente,<br>El equipo de MOVIL WIN</p>
+                        <p style="text-align: center; font-size: 0.9em; color: #777;">
+                            Recuerda revisar nuestras 
+                            <a href="https://movilwin.com/bases.html" style="color: #7f5af0; text-decoration: underline;" target="_blank">
+                                Bases y Condiciones
+                            </a>
+                        </p>
+                    </div>
+                `,
+                attachments: [{ filename: 'logo.png', path: path.join(__dirname, 'images', 'logo.png'), cid: 'logo_movilwin' }]
+            };
+            if (fs.existsSync(rutaGuia)) mailOptions.attachments.push({ filename: nombreArchivoGuia, path: rutaGuia });
+            transporter.sendMail(mailOptions).catch(emailError => console.error("⚠️ ERROR EN TAREA DE EMAIL:", emailError));
+        }
 
+        // 2. Preparación del enlace de WhatsApp para el administrador
+        let linkWhatsApp = null;
+        if (pedido.celular_cliente) {
+            let numeroFormateado = String(pedido.celular_cliente).trim().replace(/\D/g, '');
+            if (numeroFormateado.length === 10 && numeroFormateado.startsWith('0')) {
+                numeroFormateado = `593${numeroFormateado.substring(1)}`;
+            }
+            const mensajeWhatsApp = `¡Hola, ${pedido.nombre_cliente}! Tu pago ha sido confirmado. ${boletosTexto} ¡Mucha suerte de parte del equipo de Movil Win!`;
+            linkWhatsApp = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensajeWhatsApp)}`;
+        }
+
+        await client.query('COMMIT');
+        
+        res.json({
+            success: true,
+            message: `Pedido #${pedido_id} confirmado. Boletos asignados: ${nuevosBoletosNumeros.join(', ')}`,
+            whatsappLink: linkWhatsApp // Se envía el link al frontend
+        });
+        
         await client.query('COMMIT');
         res.json({ success: true, message: `Pedido #${pedido_id} confirmado. Se asignaron los boletos: ${nuevosBoletosNumeros.join(', ')}` });
 

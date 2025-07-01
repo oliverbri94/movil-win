@@ -1520,8 +1520,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.message || result.error);
+            let successMessageContent = `<p>${result.message}</p>`;
+            if (result.whatsappLink) {
+                successMessageContent += `<a href="${result.whatsappLink}" target="_blank" class="whatsapp-action-link" style="margin-top: 15px;"><i class="fab fa-whatsapp"></i> Enviar Confirmación por WhatsApp al Cliente</a>`;
+            }            
 
-            showGenericStatusMessage(statusDiv, result.message, false);
+            showGenericStatusMessage(statusDiv, successMessageContent, false, 30000); // Más tiempo para dar clic
             cargarPedidosPendientes(); // Recarga la lista para que el pedido confirmado desaparezca
             fetchAndDisplayParticipants(); // Opcional: recarga la lista de participantes para ver los nuevos boletos
 
