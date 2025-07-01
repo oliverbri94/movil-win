@@ -544,50 +544,58 @@ app.get('/api/admin/pedidos', requireAdminLogin, async (req, res) => {
 });
 
 
-// 2. RUTA PARA CONFIRMAR UN PAGO Y REGISTRAR LOS BOLETOS (EL "BOTÓN MÁGICO")
+
+
 app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
     const { pedido_id } = req.body;
-    const client = await dbClient.connect();
+    if (!pedido_id) {
+        return res.status(400).json({ error: "Falta el ID del pedido." });
+    }
 
+    const client = await dbClient.connect();
     try {
         await client.query('BEGIN');
 
-        // Obtenemos los datos del pedido y del sorteo asociado
+        // 1. Obtenemos los datos del pedido y del sorteo asociado
         const pedidoSql = "SELECT * FROM pedidos WHERE id_pedido = $1 AND estado_pedido = 'pendiente'";
         const pedidoResult = await client.query(pedidoSql, [pedido_id]);
         if (pedidoResult.rows.length === 0) throw new Error("Pedido no encontrado o ya procesado.");
+        
         const pedido = pedidoResult.rows[0];
-
         const sorteoSql = "SELECT * FROM sorteos_config WHERE id_sorteo = $1";
         const sorteoResult = await client.query(sorteoSql, [pedido.id_sorteo_fk]);
         const sorteoInfo = sorteoResult.rows[0];
         if (!sorteoInfo) throw new Error("El sorteo asociado a este pedido no existe.");
 
-        // Extraemos la cantidad de boletos del nombre del paquete
+        // 2. Extraemos la cantidad de boletos y los creamos
         const matches = pedido.paquete_elegido.match(/\((\d+)\s*x/);
         const cantidad_a_anadir = matches ? parseInt(matches[1], 10) : 1;
-
-        // Calculamos los nuevos números de boleto
         const maxTicketSql = 'SELECT MAX(numero_boleto_sorteo) as max_num FROM participaciones WHERE id_sorteo_config_fk = $1';
         const maxTicketRes = await client.query(maxTicketSql, [pedido.id_sorteo_fk]);
         let nextTicketNumber = (maxTicketRes.rows[0].max_num || 0) + 1;
-
-        const sqlInsert = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk, numero_boleto_sorteo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING numero_boleto_sorteo;`;
+        const sqlInsert = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, id_sorteo_config_fk, numero_boleto_sorteo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING numero_boleto_sorteo;`;
+        
         const nuevosBoletosNumeros = [];
         for (let i = 0; i < cantidad_a_anadir; i++) {
-            const params = [pedido.cedula_cliente, pedido.nombre_cliente, pedido.ciudad_cliente, pedido.celular_cliente, pedido.email_cliente, pedido.paquete_elegido, null, pedido.id_sorteo_fk, nextTicketNumber];
+            const params = [pedido.cedula_cliente, pedido.nombre_cliente, pedido.ciudad_cliente, pedido.celular_cliente, pedido.email_cliente, pedido.paquete_elegido, pedido.id_sorteo_fk, nextTicketNumber];
             const result = await client.query(sqlInsert, params);
             nuevosBoletosNumeros.push(result.rows[0].numero_boleto_sorteo);
             nextTicketNumber++;
         }
 
-        // Actualizamos el estado del pedido a 'completado'
+        // 3. Actualizamos el estado del pedido a 'completado'
         const updatePedidoSql = "UPDATE pedidos SET estado_pedido = 'completado' WHERE id_pedido = $1";
         await client.query(updatePedidoSql, [pedido_id]);
 
-        const boletosTexto = `Tus números de boleto son: ${nuevosBoletosNumeros.join(', ')}.`;
+        // 4. Preparamos las notificaciones (Email y WhatsApp)
+        let linkWhatsApp = null;
+        if (pedido.celular_cliente) {
+            let numeroFormateado = String(pedido.celular_cliente).trim().replace(/\D/g, '');
+            if (numeroFormateado.length === 10 && numeroFormateado.startsWith('0')) numeroFormateado = `593${numeroFormateado.substring(1)}`;
+            const mensajeWhatsApp = `¡Hola, ${pedido.nombre_cliente}! Tu pago ha sido confirmado para el sorteo del ${sorteoInfo.nombre_premio_display}. Tus números de boleto son: ${nuevosBoletosNumeros.join(', ')}. ¡Mucha suerte de parte del equipo de Movil Win!`;
+            linkWhatsApp = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensajeWhatsApp)}`;
+        }
         
-        // 1. Envío de Correo Electrónico automático al cliente
         if (pedido.email_cliente && transporter) {
             const nombreArchivoGuia = `MiniGuia_${sorteoInfo.nombre_base_archivo_guia.replace(/\s+/g, '_')}.pdf`;
             const rutaGuia = path.join(__dirname, 'guias', nombreArchivoGuia);
@@ -597,55 +605,32 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
                 to: pedido.email_cliente,
                 subject: `✅ ¡Confirmación de tus Boletos para el Sorteo ${sorteoInfo.nombre_premio_display}!`,
                 html: `
-                    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; padding: 20px;">
                         <div style="text-align: center; margin-bottom: 20px;">
                             <img src="cid:logo_movilwin" alt="MOVIL WIN Logo" style="max-width: 150px; height: auto;">
                         </div>
                         <h2 style="color: #7f5af0; text-align: center;">¡Hola, ${pedido.nombre_cliente}!</h2>
-                        <p>¡Gracias por adquirir tu Mini-Guía!.</p>${boletosTextoEmail} para el sorteo del <strong>${sorteoInfo.nombre_premio_display}</strong> en MOVIL WIN!</p>
-                        <p>Estamos emocionados de tenerte a bordo. Tu Mini-Guía "${nombreArchivoGuia}" está adjunta a este correo.</p>
-                        <p>Recuerda seguirnos en nuestras redes para estar al tanto de todas las novedades y próximos sorteos:</p>
-                        <p style="text-align: center; margin: 20px 0;">
-                            <a href="https://www.facebook.com/profile.php?id=61576682273505" style="color: #ffffff; background-color: #1877F2; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-right: 10px;">Facebook</a>
-                            <a href="https://www.instagram.com/movilwin" style="color: #ffffff; background-color: #E4405F; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Instagram</a>
-                        </p>
-                        <p style="text-align: center; margin-top: 20px;">¡Mucha suerte en el sorteo!</p>
-                        <p style="text-align: center; font-size: 0.9em; color: #777;">Atentamente,<br>El equipo de MOVIL WIN</p>
-                        <p style="text-align: center; font-size: 0.9em; color: #777;">
-                            Recuerda revisar nuestras 
-                            <a href="https://movilwin.com/bases.html" style="color: #7f5af0; text-decoration: underline;" target="_blank">
-                                Bases y Condiciones
-                            </a>
-                        </p>
-                    </div>
-                `,
+                        <p>Tu pago ha sido confirmado y tus boletos para el sorteo del <strong>${sorteoInfo.nombre_premio_display}</strong> ya están registrados.</p>
+                        ${boletosTextoEmail}
+                        <p>Te deseamos muchísima suerte. Recuerda seguirnos en nuestras redes para estar al tanto de todo.</p>
+                        <p style="text-align: center; font-size: 0.9em; color: #777; margin-top: 30px;">Atentamente,<br>El equipo de MOVIL WIN</p>
+                    </div>`,
                 attachments: [{ filename: 'logo.png', path: path.join(__dirname, 'images', 'logo.png'), cid: 'logo_movilwin' }]
             };
-            if (fs.existsSync(rutaGuia)) mailOptions.attachments.push({ filename: nombreArchivoGuia, path: rutaGuia });
+            if (fs.existsSync(rutaGuia)) {
+                mailOptions.attachments.push({ filename: nombreArchivoGuia, path: rutaGuia });
+            }
             transporter.sendMail(mailOptions).catch(emailError => console.error("⚠️ ERROR EN TAREA DE EMAIL:", emailError));
         }
 
-        // 2. Preparación del enlace de WhatsApp para el administrador
-        let linkWhatsApp = null;
-        if (pedido.celular_cliente) {
-            let numeroFormateado = String(pedido.celular_cliente).trim().replace(/\D/g, '');
-            if (numeroFormateado.length === 10 && numeroFormateado.startsWith('0')) {
-                numeroFormateado = `593${numeroFormateado.substring(1)}`;
-            }
-            const mensajeWhatsApp = `¡Hola, ${pedido.nombre_cliente}! Tu pago ha sido confirmado. ${boletosTexto} ¡Mucha suerte de parte del equipo de Movil Win!`;
-            linkWhatsApp = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensajeWhatsApp)}`;
-        }
-
+        // 5. Confirmamos la transacción y enviamos la respuesta final
         await client.query('COMMIT');
         
         res.json({
             success: true,
             message: `Pedido #${pedido_id} confirmado. Boletos asignados: ${nuevosBoletosNumeros.join(', ')}`,
-            whatsappLink: linkWhatsApp // Se envía el link al frontend
+            whatsappLink: linkWhatsApp
         });
-        
-        await client.query('COMMIT');
-        res.json({ success: true, message: `Pedido #${pedido_id} confirmado. Se asignaron los boletos: ${nuevosBoletosNumeros.join(', ')}` });
 
     } catch (error) {
         await client.query('ROLLBACK');
