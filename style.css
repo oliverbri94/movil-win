@@ -3103,3 +3103,102 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
         font-size: 1.1em;
     }
 }
+
+
+/* ================================================= */
+/* --- ESTILOS PARA PÁGINAS DE COMPRA Y GRACIAS --- */
+/* ================================================= */
+
+/* Estilos para el resumen del pedido en comprar.html */
+.resumen-pedido {
+    background-color: var(--clr-dark-bg);
+    border: 1px solid var(--clr-dark-border);
+    border-left: 5px solid var(--clr-primary);
+    border-radius: var(--border-radius-medium);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+.resumen-pedido p {
+    margin: 0;
+    font-size: 1.1em;
+    color: var(--clr-dark-text-alt);
+}
+.resumen-pedido p strong {
+    color: var(--clr-dark-text);
+}
+.resumen-pedido p:last-child {
+    margin-top: 10px;
+    font-size: 1.3em;
+    font-weight: 700;
+    color: var(--clr-primary);
+}
+
+/* Estilos para el formulario en comprar.html */
+.site-form p {
+    margin-bottom: 20px;
+    text-align: center;
+}
+.site-form .form-group label {
+    color: var(--clr-dark-text-alt);
+    font-size: 0.9em;
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+.site-form .form-group input {
+    background-color: #3a3a3c;
+    border-color: var(--clr-dark-border);
+    color: var(--clr-dark-text);
+    padding: 12px 15px;
+    font-size: 1em;
+    border-radius: 8px;
+    width: 100%;
+    border-width: 1px;
+    border-style: solid;
+}
+
+/* Estilos para la página de gracias.html */
+.page-text-container.text-center {
+    text-align: center;
+}
+.page-text-container .fa-check-circle {
+    font-size: 3em;
+    margin-bottom: 15px;
+}
+
+/* Estilos para la caja de datos de pago */
+.datos-pago {
+    background-color: var(--clr-dark-bg);
+    border: 1px solid var(--clr-dark-border);
+    border-radius: var(--border-radius-medium);
+    padding: 30px;
+    margin-top: 30px;
+    text-align: left;
+}
+.datos-pago h3 {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: var(--clr-dark-text);
+    text-align: center;
+    margin-bottom: 20px;
+}
+.datos-pago ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+.datos-pago ul li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--clr-dark-border);
+}
+.datos-pago ul li:last-child {
+    border-bottom: none;
+}
+.datos-pago ul li strong {
+    color: var(--clr-primary);
+}
+.datos-pago a.boton-cta {
+    display: block;
+    text-align: center;
+    margin-top: 30px;
+}
