@@ -3253,3 +3253,22 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 }
 
 .btn-confirmar-pago { background-color: var(--clr-primary); }
+
+/* --- MEJORAS DE DISEÑO PARA PÁGINA DE GRACIAS EN MÓVILES --- */
+
+@media (max-width: 600px) {
+    .datos-pago ul li {
+        /* En móviles, apilamos el contenido para más claridad */
+        flex-direction: column;
+        align-items: flex-start; /* Alineamos todo a la izquierda */
+        gap: 10px; /* Espacio entre el texto y el botón */
+    }
+
+    .btn-copy {
+        width: 100%; /* El botón de copiar ocupa todo el ancho */
+    }
+
+    .page-text-container {
+        padding: 10px;
+    }
+}

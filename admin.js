@@ -1515,8 +1515,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/confirmar-pedido`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'credentials': 'include' },
-                body: JSON.stringify({ pedido_id: pedidoId })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pedido_id: pedidoId }),
+                credentials: 'include' 
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.message || result.error);
