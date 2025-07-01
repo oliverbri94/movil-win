@@ -2028,21 +2028,8 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 /* --- 2. CORRECCIÓN PARA EL DESBORDAMIENTO DEL DASHBOARD EN MÓVILES --- */
 
-/* Estilo base del grid del dashboard */
-.dashboard-grid {
-    display: grid;
-    /* En pantallas grandes, intenta poner tantos elementos de 320px como quepan */
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 30px;
-}
 
-/* Media Query específica para celulares */
-@media (max-width: 420px) {
-    .dashboard-grid {
-        /* En pantallas muy pequeñas, forzamos a que sea siempre una sola columna */
-        grid-template-columns: 1fr;
-    }
-}
+
 
 .paquetes-editor-container {
     display: flex;
