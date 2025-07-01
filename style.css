@@ -3094,3 +3094,25 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
         padding-right: 0;
     }
 }
+
+/* ======================================================== */
+/* --- CORRECCIÓN RESPONSIVA PARA EL DASHBOARD DE ADMIN --- */
+/* ======================================================== */
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        /* En móviles, cambiamos a una sola columna */
+        grid-template-columns: 1fr;
+        gap: 20px; /* Reducimos el espacio entre tarjetas */
+    }
+
+    /* Ajustamos el padding de las tarjetas para que no se sientan tan apretadas */
+    .dashboard-card {
+        padding: 20px;
+    }
+
+    /* Hacemos el título de las tarjetas un poco más pequeño */
+    .dashboard-card h3 {
+        font-size: 1.1em;
+    }
+}
