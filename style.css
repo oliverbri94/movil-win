@@ -3244,8 +3244,7 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     padding: 4px 4px 4px 12px;
     border-radius: 8px;
     border: 1px solid var(--clr-dark-border);
-    flex-grow: 1; /* Ocupa el espacio restante */
-    min-width: 220px; /* Ancho mínimo para evitar que se rompa */
+    min-width: 180px; /* Ancho mínimo para evitar que se rompa */
 }
 
 .datos-pago ul li > strong {
@@ -3258,15 +3257,18 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     background-color: var(--clr-dark-bg-frame);
     color: var(--clr-dark-text-alt);
     border: 1px solid var(--clr-dark-border);
-    padding: 5px 10px;
+    padding: 5px 5px;
     border-radius: 6px;
+    display: flex;
     font-size: 0.9em;
     cursor: pointer;
     transition: all 0.2s ease;
     display: inline-flex;
+    min-width: 36px;
     align-items: center;
+    height: 36px;
     gap: 6px;
-    margin-left: 10px;
+    margin-left: 5px;
 }
 .btn-copy:hover {
     background-color: var(--clr-secondary);
