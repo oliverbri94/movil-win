@@ -3230,28 +3230,53 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     justify-content: space-between;
     align-items: center;
 }
-.btn-copy {
-    background-color: var(--clr-dark-bg-frame);
-    color: var(--clr-dark-text-alt);
+.copy-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--clr-dark-bg);
+    padding: 8px 12px;
+    border-radius: 8px;
     border: 1px solid var(--clr-dark-border);
-    padding: 4px 10px;
+}
+
+.datos-pago ul li > strong {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.btn-copy {
+    background-color: transparent;
+    color: var(--clr-dark-text-alt);
+    border: 1px solid transparent;
+    padding: 5px 10px;
     border-radius: 6px;
-    font-size: 0.8em;
+    font-size: 0.9em;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 .btn-copy:hover {
     background-color: var(--clr-secondary);
     color: white;
 }
 .btn-copy.copied {
-    background-color: var(--clr-primary);
-    color: white;
-}
-.btn-copy i {
-    margin-right: 5px;
+    background-color: var(--clr-primary) !important;
+    color: white !important;
 }
 
+/* En móviles, ocultamos el texto "Copiar" para que solo quede el ícono */
+@media (max-width: 600px) {
+    .btn-copy .copy-text {
+        display: none;
+    }
+    .btn-copy {
+        padding: 8px;
+    }
+}
 .btn-confirmar-pago { background-color: var(--clr-primary); }
 
 /* --- MEJORAS DE DISEÑO PARA PÁGINA DE GRACIAS EN MÓVILES --- */
