@@ -523,9 +523,31 @@ app.get('/api/admin/sorteos', requireAdminLogin, (req, res) => {
         res.json(sorteosProcesados);
     });
 });
-// --- REEMPLAZA LA RUTA DE AÑADIR SORTEO CON ESTA VERSIÓN ---
-// En server.js, AÑADE estas dos nuevas rutas de admin
+// En server.js, AÑADE esta nueva ruta
 
+// RUTA PARA ELIMINAR UN PEDIDO PENDIENTE
+app.delete('/api/admin/pedidos/:pedido_id', requireAdminLogin, async (req, res) => {
+    try {
+        const { pedido_id } = req.params;
+        const sql = "DELETE FROM pedidos WHERE id_pedido = $1 AND estado_pedido = 'pendiente'";
+        
+        const result = await new Promise((resolve, reject) => {
+            db.run(sql, [pedido_id], function(err) {
+                if (err) return reject(err);
+                resolve(this);
+            });
+        });
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: "Pedido no encontrado o ya estaba completado." });
+        }
+        res.json({ success: true, message: `Pedido #${pedido_id} eliminado exitosamente.` });
+
+    } catch (error) {
+        console.error("Error al eliminar pedido:", error);
+        res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+});
 // 1. RUTA PARA OBTENER TODOS LOS PEDIDOS PENDIENTES
 app.get('/api/admin/pedidos', requireAdminLogin, async (req, res) => {
     try {

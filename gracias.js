@@ -22,22 +22,40 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => {
             const targetId = button.dataset.copyTarget;
             const targetElement = document.getElementById(targetId);
-            
+
             if (targetElement) {
-                const textToCopy = targetElement.innerText;
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    const originalText = button.innerHTML;
-                    button.innerHTML = '<i class="fas fa-check"></i> Copiado';
-                    button.classList.add('copied');
-                    setTimeout(() => {
-                        button.innerHTML = originalText;
-                        button.classList.remove('copied');
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Error al copiar:', err);
-                    alert('No se pudo copiar el texto.');
-                });
+                const textToCopy = targetElement.innerText || targetElement.value || '';
+                if (!navigator.clipboard) {
+                    // Fallback para navegadores antiguos
+                    const textarea = document.createElement('textarea');
+                    textarea.value = textToCopy;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        document.execCommand('copy');
+                        showCopiedFeedback(button);
+                    } catch (err) {
+                        alert('No se pudo copiar el texto.');
+                    }
+                    document.body.removeChild(textarea);
+                } else {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        showCopiedFeedback(button);
+                    }).catch(err => {
+                        alert('No se pudo copiar el texto.');
+                    });
+                }
             }
         });
     });
+
+    function showCopiedFeedback(button) {
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i> Copiado';
+        button.classList.add('copied');
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('copied');
+        }, 2000);
+    }
 });

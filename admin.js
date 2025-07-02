@@ -81,10 +81,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const tbodyPedidos = document.getElementById('tbodyPedidosPendientes');
     tbodyPedidos?.addEventListener('click', e => {
-        const boton = e.target.closest('.btn-confirmar-pago');
-        if (boton) {
-            const pedidoId = boton.dataset.id;
+        const botonConfirmar = e.target.closest('.btn-confirmar-pago');
+        const botonEliminar = e.target.closest('.btn-eliminar-pedido');
+
+        if (botonConfirmar) {
+            const pedidoId = botonConfirmar.dataset.id;
             handleConfirmarPedido(pedidoId);
+        } else if (botonEliminar) {
+            const pedidoId = botonEliminar.dataset.id;
+            handleEliminarPedido(pedidoId);
         }
     });
     const btnGenerarReporte = document.getElementById('btnGenerarReporte');
@@ -1491,6 +1496,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 pedidos.forEach(pedido => {
                     const tr = document.createElement('tr');
                     const fecha = new Date(pedido.fecha_pedido).toLocaleString('es-EC');
+                    
+                    // Se añade un segundo botón dentro de la celda de Acción
                     tr.innerHTML = `
                         <td data-label="Pedido #">${pedido.id_pedido}</td>
                         <td data-label="Fecha">${fecha}</td>
@@ -1499,7 +1506,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <td data-label="Paquete">${pedido.paquete_elegido}</td>
                         <td data-label="Acción">
                             <button class="accion-btn btn-confirmar-pago" data-id="${pedido.id_pedido}" title="Confirmar Pago y Registrar Boletos">
-                                <i class="fas fa-check-circle"></i> Confirmar Pago
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="accion-btn btn-eliminar-pedido" data-id="${pedido.id_pedido}" title="Eliminar Pedido" style="background-color:var(--clr-red);">
+                                <i class="fas fa-trash-alt"></i>
                             </button>
                         </td>
                     `;
@@ -1510,6 +1520,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             tbody.innerHTML = `<tr><td colspan="6" class="error-message">Error al cargar pedidos: ${error.message}</td></tr>`;
         } finally {
             loader.classList.add('oculto');
+        }
+    }
+
+
+    async function handleEliminarPedido(pedidoId) {
+        const statusDiv = document.getElementById('statusPedidosMessage');
+        if (!confirm(`¿Seguro que quieres eliminar el Pedido #${pedidoId}? Esta acción es irreversible.`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/pedidos/${pedidoId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || result.error);
+
+            showGenericStatusMessage(statusDiv, result.message, false);
+            cargarPedidosPendientes(); // Recarga la lista para que el pedido eliminado desaparezca
+        } catch (error) {
+            showGenericStatusMessage(statusDiv, `Error: ${error.message}`, true);
         }
     }
 
