@@ -3272,3 +3272,44 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
         padding: 10px;
     }
 }
+
+/* --- ESTILOS MEJORADOS PARA LA LISTA DE PARTICIPANTES (ADMIN) --- */
+
+#participantList li {
+    /* Usamos flexbox para alinear el contenido y el botón de eliminar */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+}
+
+.participant-info {
+    display: flex;
+    flex-direction: column; /* Apilamos la información verticalmente */
+    text-align: left;
+    flex-grow: 1; /* Ocupa el espacio disponible */
+}
+
+.participant-name {
+    font-weight: 600;
+    color: var(--clr-dark-text);
+    font-size: 1.05em;
+}
+
+.participant-details {
+    font-size: 0.9em;
+    color: var(--clr-dark-text-alt);
+}
+
+.participant-package {
+    font-size: 0.85em;
+    font-style: italic;
+    color: var(--clr-primary);
+    margin-top: 4px;
+}
+
+.participant-actions .delete-btn {
+    font-size: 1.2em; /* Botón de eliminar un poco más grande */
+    padding: 5px 12px;
+}

@@ -1110,11 +1110,17 @@ app.post('/api/admin/afiliados', requireAdminLogin, async (req, res) => {
 // CRUD de Participantes
 app.get('/api/admin/participantes-activos', requireAdminLogin, (req, res) => {
     const sql = `
-        SELECT p.orden_id, p.id_documento, p.nombre, p.ciudad, p.id_sorteo_config_fk as sorteo_id FROM participaciones p
-        JOIN sorteos_config s ON p.id_sorteo_config_fk = s.id_sorteo WHERE s.status_sorteo = 'activo' ORDER BY p.orden_id DESC
+        SELECT p.orden_id, p.id_documento, p.nombre, p.ciudad, p.paquete_elegido, p.id_sorteo_config_fk as sorteo_id 
+        FROM participaciones p
+        JOIN sorteos_config s ON p.id_sorteo_config_fk = s.id_sorteo 
+        WHERE s.status_sorteo = 'activo' 
+        ORDER BY p.orden_id DESC
     `;
     db.all(sql, [], (err, rows) => {
-        if (err) return res.status(500).json({ error: 'Error interno.' });
+        if (err) {
+            console.error("Error fetching active participants:", err.message);
+            return res.status(500).json({ error: 'Error interno.' });
+        }
         res.json(rows);
     });
 });

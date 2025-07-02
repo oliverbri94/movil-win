@@ -862,8 +862,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 participants.forEach(p => {
                     const li = document.createElement('li');
-                    let details = `ID: ${p.id_documento || 'N/A'} | Ciudad: ${p.ciudad || 'N/A'}`;
-                    li.innerHTML = `<span>${p.nombre || 'Sin Nombre'} (Sorteo #${p.sorteo_id})</span> <span class="participant-details">${details}</span> <button class="delete-btn" data-ordenid="${p.orden_id}" title="Eliminar">X</button>`;
+                    const ciudad = p.ciudad ? ` | Ciudad: ${p.ciudad}` : '';
+                    const paquete = p.paquete_elegido ? `<span class="participant-package">${p.paquete_elegido}</span>` : '';
+
+                    li.innerHTML = `
+                        <div class="participant-info">
+                            <span class="participant-name">${p.nombre || 'Sin Nombre'} (Sorteo #${p.sorteo_id})</span>
+                            <span class="participant-details">ID: ${p.id_documento || 'N/A'}${ciudad}</span>
+                            ${paquete}
+                        </div>
+                        <div class="participant-actions">
+                            <button class="delete-btn" data-ordenid="${p.orden_id}" title="Eliminar">×</button>
+                        </div>
+                    `;
                     participantListUl.appendChild(li);
                 });
             }
