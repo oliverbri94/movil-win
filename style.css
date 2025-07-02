@@ -3237,8 +3237,9 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 .copy-container {
     display: flex;
-    justify-content: space-between;
+    flex-direction: row; /* Asegura fila en todos los tamaños */
     align-items: center;
+    gap: 10px; /* Espacio entre texto y botón */
     background-color: var(--clr-dark-bg);
     padding: 4px 4px 4px 12px;
     border-radius: 8px;
@@ -3286,7 +3287,17 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     }
 }
 .btn-confirmar-pago { background-color: var(--clr-primary); }
-
+/* Elimina el ancho completo del botón en móviles */
+@media (max-width: 600px) {
+    .copy-container {
+        flex-direction: row; /* Fuerza fila en móviles también */
+        gap: 10px;
+    }
+    .btn-copy {
+        width: auto; /* Quita el width: 100% */
+        min-width: 44px; /* Opcional: tamaño mínimo para el botón */
+    }
+}
 /* --- MEJORAS DE DISEÑO PARA PÁGINA DE GRACIAS EN MÓVILES --- */
 
 @media (max-width: 600px) {
