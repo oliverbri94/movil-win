@@ -618,7 +618,30 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
         }
 
         if (pedido.email_cliente && transporter) {
-            // Lógica para enviar email al cliente... (la dejamos como estaba)
+            const nombreArchivoGuia = `MiniGuia_${sorteoInfo.nombre_base_archivo_guia.replace(/\s+/g, '_')}.pdf`;
+            const rutaGuia = path.join(__dirname, 'guias', nombreArchivoGuia);
+            const boletosTextoEmail = `<p>Para tu referencia, tus números de boleto asignados son:</p><ul style="padding-left: 20px;">${nuevosBoletosNumeros.map(id => `<li style="margin-bottom: 5px;">Boleto #${id}</li>`).join('')}</ul>`;
+            const mailOptions = {
+                from: `"Movil Win" <${process.env.EMAIL_USER}>`,
+                to: pedido.email_cliente,
+                subject: `✅ ¡Confirmación de tus Boletos para el Sorteo ${sorteoInfo.nombre_premio_display}!`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; padding: 20px;">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <img src="cid:logo_movilwin" alt="MOVIL WIN Logo" style="max-width: 150px; height: auto;">
+                        </div>
+                        <h2 style="color: #7f5af0; text-align: center;">¡Hola, ${pedido.nombre_cliente}!</h2>
+                        <p>Tu pago ha sido confirmado y tus boletos para el sorteo del <strong>${sorteoInfo.nombre_premio_display}</strong> ya están registrados.</p>
+                        ${boletosTextoEmail}
+                        <p>Te deseamos muchísima suerte. Recuerda seguirnos en nuestras redes para estar al tanto de todo.</p>
+                        <p style="text-align: center; font-size: 0.9em; color: #777; margin-top: 30px;">Atentamente,<br>El equipo de MOVIL WIN</p>
+                    </div>`,
+                attachments: [{ filename: 'logo.png', path: path.join(__dirname, 'images', 'logo.png'), cid: 'logo_movilwin' }]
+            };
+            if (fs.existsSync(rutaGuia)) {
+                mailOptions.attachments.push({ filename: nombreArchivoGuia, path: rutaGuia });
+            }
+            transporter.sendMail(mailOptions).catch(emailError => console.error("⚠️ ERROR EN TAREA DE EMAIL:", emailError));
         }
         
         await client.query('COMMIT');
