@@ -320,9 +320,10 @@ function initializeRafflePage() {
     }
 
 
-    function renderizarPaquetesPublicos(paquetes, contenedor, sorteoId) {
+    function renderizarPaquetesPublicos(paquetes, contenedor, sorteoId, sorteoNombre) {
         if (!contenedor) return;
         contenedor.innerHTML = '';
+
 
         if (!paquetes || paquetes.length === 0) {
             contenedor.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">No hay paquetes de boletos disponibles para este sorteo en este momento.</p>';
@@ -357,12 +358,8 @@ function initializeRafflePage() {
 
             // --- INICIO DE LA MODIFICACIÓN ---
             // Creamos los parámetros para la URL de compra
-            const params = new URLSearchParams({
-                sorteoId: sorteoId,
-                paqueteNombre: paquete.nombre,
-                paquetePrecio: paquete.precio,
-                paqueteBoletos: paquete.boletos
-            });
+            const params = new URLSearchParams({ sorteoId, sorteoNombre, paqueteNombre: paquete.nombre, paquetePrecio: paquete.precio, paqueteBoletos: paquete.boletos });
+
             const enlaceCompra = `comprar.html?${params.toString()}`;
             // --- FIN DE LA MODIFICACIÓN ---
 
@@ -386,7 +383,7 @@ function initializeRafflePage() {
      * @param {Array<object>} paquetes - El array de paquetes de un sorteo.
      * @returns {string} El string de HTML con los botones de los paquetes.
      */
-    function generarHTMLMiniPaquetes(paquetes, sorteoId) {
+    function generarHTMLMiniPaquetes(paquetes, sorteoId, sorteoNombre) {
         if (!paquetes || paquetes.length === 0) return '';
         
         const paqueteIndividual = paquetes.find(p => p.boletos === 1);
@@ -396,15 +393,16 @@ function initializeRafflePage() {
         let html = '';
 
         if (paqueteIndividual) {
-            const params = new URLSearchParams({sorteoId, paqueteNombre: paqueteIndividual.nombre, paquetePrecio: paqueteIndividual.precio, paqueteBoletos: paqueteIndividual.boletos});
+            // Se añade 'sorteoNombre' a los parámetros del enlace
+            const params = new URLSearchParams({sorteoId, sorteoNombre, paqueteNombre: paqueteIndividual.nombre, paquetePrecio: paqueteIndividual.precio, paqueteBoletos: paqueteIndividual.boletos});
             const enlaceCompra = `comprar.html?${params.toString()}`;
-            html += `<a href="${enlaceCompra}" class="mini-package-btn"><strong>${paqueteIndividual.boletos} Boleto</strong><span>por $${paqueteIndividual.precio}</span></a>`;
+            html += `<a href="${enlaceCompra}" ...>...</a>`;
         }
-
         if (paqueteMejorValor) {
-            const params = new URLSearchParams({sorteoId, paqueteNombre: paqueteMejorValor.nombre, paquetePrecio: paqueteMejorValor.precio, paqueteBoletos: paqueteMejorValor.boletos});
+            // Se añade 'sorteoNombre' a los parámetros del enlace
+            const params = new URLSearchParams({sorteoId, sorteoNombre, paqueteNombre: paqueteMejorValor.nombre, paquetePrecio: paqueteMejorValor.precio, paqueteBoletos: paqueteMejorValor.boletos});
             const enlaceCompra = `comprar.html?${params.toString()}`;
-            html += `<a href="${enlaceCompra}" class="mini-package-btn popular"><strong>${paqueteMejorValor.boletos} Boletos</strong><span>por $${paqueteMejorValor.precio}</span><span class="popular-tag">¡Recomendado!</span></a>`;
+            html += `<a href="${enlaceCompra}" ...>...</a>`;
         }
         
         html += `<a href="#paquetes-section" class="mini-package-btn all-packages"><strong>Ver Todos</strong><span><i class="fas fa-arrow-down"></i></span></a>`;
@@ -569,7 +567,7 @@ function initializeRafflePage() {
             if (sorteoActual.status_sorteo === 'programado') {
                 paqueteContainer.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">Los paquetes de participación se anunciarán pronto. ¡Mantente atento!</p>';
             } else {
-                renderizarPaquetesPublicos(sorteoActual.paquetes_json, paqueteContainer, sorteoActual.id_sorteo);
+                renderizarPaquetesPublicos(sorteoActual.paquetes_json, paqueteContainer, sorteoActual.id_sorteo, sorteoActual.nombre_premio_display);
 
             }
         }
@@ -847,7 +845,7 @@ function initializeRafflePage() {
                 else if (percentageSold >= 70) { urgenciaClass = 'urgente'; motivationalMessage = "¡Se acaban rápido!"; } 
                 else { motivationalMessage = "Cada boleto es una nueva oportunidad de ganar."; }
                 const percentageRemaining = 100 - percentageSold;
-                const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo);
+                const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
 
 
                 slideWrapper.innerHTML = `

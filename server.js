@@ -248,9 +248,9 @@ app.post('/api/crear-pedido', async (req, res) => {
         if (transporter && process.env.EMAIL_USER) {
             const mailOptions = {
                 to: process.env.EMAIL_USER,
-                subject: `🔔 ¡Nuevo Pedido Pendiente! - Pedido #${result.id_pedido}`,
+                subject: `🔔 Pedido #${result.id_pedido} para el sorteo: ${sorteoNombre}`,
                 html: `
-                    <h2>Tienes un nuevo pedido pendiente de pago.</h2>
+                    <h2>Nuevo pedido pendiente para: ${sorteoNombre}</h2>
                     <p><strong>Cliente:</strong> ${nombre}</p>
                     <p><strong>Cédula:</strong> ${cedula}</p>
                     <p><strong>Ciudad:</strong> ${ciudad || 'No proporcionada'}</p>

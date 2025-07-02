@@ -2,7 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = 'https://movil-win-production.up.railway.app';
     const params = new URLSearchParams(window.location.search);
     
+    // Obtenemos todos los datos de la URL
     const sorteoId = params.get('sorteoId');
+    const sorteoNombre = params.get('sorteoNombre');
     const paqueteNombre = params.get('paqueteNombre');
     const paquetePrecio = params.get('paquetePrecio');
     const paqueteBoletos = params.get('paqueteBoletos');
@@ -11,10 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('form-pedido');
     const statusDiv = document.getElementById('pedido-status');
 
-    if (resumenDiv && paqueteNombre) {
+    // Mostramos el resumen completo del pedido
+    if (resumenDiv && paqueteNombre && sorteoNombre) {
         resumenDiv.innerHTML = `
+            <p><strong>Sorteo:</strong> ${sorteoNombre}</p>
             <p><strong>Estás comprando:</strong> ${paqueteNombre}</p>
-            <p><strong>Recibirás:</strong> ${paqueteBoletos} boletos</p>
+            <p><strong>Recibirás:</strong> ${paqueteBoletos} boleto(s)</p>
             <p><strong>Total a Pagar:</strong> $${paquetePrecio}</p>
         `;
     }
@@ -24,14 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const payload = {
             sorteoId: sorteoId,
+            sorteoNombre: sorteoNombre, // Lo añadimos al payload
             paquete: `${paqueteNombre} (${paqueteBoletos} x $${paquetePrecio})`,
             nombre: document.getElementById('nombre').value,
             cedula: document.getElementById('cedula').value,
-            ciudad: document.getElementById('ciudad').value, 
+            ciudad: document.getElementById('ciudad').value,
             celular: document.getElementById('celular').value,
             email: document.getElementById('email').value,
             affiliateId: sessionStorage.getItem('affiliateRef') || null
-
         };
 
         try {
