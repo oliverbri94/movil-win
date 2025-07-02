@@ -406,7 +406,13 @@ function initializeRafflePage() {
             // Se añade 'sorteoNombre' a los parámetros del enlace
             const params = new URLSearchParams({sorteoId, sorteoNombre, paqueteNombre: paqueteMejorValor.nombre, paquetePrecio: paqueteMejorValor.precio, paqueteBoletos: paqueteMejorValor.boletos});
             const enlaceCompra = `comprar.html?${params.toString()}`;
-            html += `<a href="${enlaceCompra}" ...>...</a>`;
+            html += `
+                <a href="${enlaceCompra}" class="mini-package-btn popular">
+                    <strong>${paqueteMejorValor.boletos} Boletos</strong>
+                    <span>por $${paqueteMejorValor.precio}</span>
+                    <span class="popular-tag">¡Recomendado!</span>
+                </a>
+            `;
         }
         
         html += `<a href="#paquetes-section" class="mini-package-btn all-packages"><strong>Ver Todos</strong><span><i class="fas fa-arrow-down"></i></span></a>`;
