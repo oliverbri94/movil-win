@@ -3428,3 +3428,12 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     color: var(--clr-dark-text-alt);
     cursor: pointer;
 }
+
+/* Estilo para el nuevo botón de WhatsApp en el panel de admin */
+.btn-whatsapp {
+    background-color: #25D366; /* Verde de WhatsApp */
+    color: white !important; /* Asegura que el ícono sea blanco */
+}
+.btn-whatsapp:hover {
+    background-color: #1DAE54; /* Un verde más oscuro al pasar el cursor */
+}

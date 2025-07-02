@@ -1497,17 +1497,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const tr = document.createElement('tr');
                     const fecha = new Date(pedido.fecha_pedido).toLocaleString('es-EC');
                     
-                    // Se añade un segundo botón dentro de la celda de Acción
+                    let whatsappLink = '';
+                    if (pedido.celular_cliente) {
+                        let numeroFormateado = String(pedido.celular_cliente).trim().replace(/\D/g, '').replace(/^0+/, '');
+                        if(numeroFormateado.length === 9) numeroFormateado = `593${numeroFormateado}`;
+                        
+                        const mensaje = `Hola ${pedido.nombre_cliente}, te escribo de Movil Win sobre tu Pedido #${pedido.id_pedido}. Para confirmar tu participación, solo falta que nos envíes el comprobante de pago. ¡Gracias!`;
+                        whatsappLink = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensaje)}`;
+                    }
+
+                    // Actualizamos el HTML para mostrar el celular y el nuevo botón
                     tr.innerHTML = `
                         <td data-label="Pedido #">${pedido.id_pedido}</td>
                         <td data-label="Fecha">${fecha}</td>
                         <td data-label="Cliente">${pedido.nombre_cliente}</td>
-                        <td data-label="Cédula">${pedido.cedula_cliente}</td>
+                        <td data-label="Celular">${pedido.celular_cliente || 'N/A'}</td>
                         <td data-label="Paquete">${pedido.paquete_elegido}</td>
                         <td data-label="Acción">
                             <button class="accion-btn btn-confirmar-pago" data-id="${pedido.id_pedido}" title="Confirmar Pago y Registrar Boletos">
                                 <i class="fas fa-check"></i>
                             </button>
+                            ${whatsappLink ? `
+                            <a href="${whatsappLink}" target="_blank" class="accion-btn btn-whatsapp" title="Contactar por WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            ` : ''}
                             <button class="accion-btn btn-eliminar-pedido" data-id="${pedido.id_pedido}" title="Eliminar Pedido" style="background-color:var(--clr-red);">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
