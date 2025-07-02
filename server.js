@@ -604,7 +604,23 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
 
         const updatePedidoSql = "UPDATE pedidos SET estado_pedido = 'completado' WHERE id_pedido = $1";
         await client.query(updatePedidoSql, [pedido_id]);
+        // 4. Preparamos las notificaciones para el cliente
+        const boletosTexto = `Tus números de boleto son: ${nuevosBoletosNumeros.join(', ')}.`;
+        let linkWhatsApp = null;
 
+        if (pedido.celular_cliente) {
+            let numeroFormateado = String(pedido.celular_cliente).trim().replace(/\D/g, '');
+            if (numeroFormateado.length === 10 && numeroFormateado.startsWith('0')) {
+                numeroFormateado = `593${numeroFormateado.substring(1)}`;
+            }
+            const mensajeWhatsApp = `¡Hola, ${pedido.nombre_cliente}! Tu pago ha sido confirmado para el sorteo del ${sorteoInfo.nombre_premio_display}. ${boletosTexto} ¡Mucha suerte de parte del equipo de Movil Win!`;
+            linkWhatsApp = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensajeWhatsApp)}`;
+        }
+
+        if (pedido.email_cliente && transporter) {
+            // Lógica para enviar email al cliente... (la dejamos como estaba)
+        }
+        
         await client.query('COMMIT');
         
         res.json({
