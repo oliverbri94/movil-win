@@ -1502,7 +1502,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         let numeroFormateado = String(pedido.celular_cliente).trim().replace(/\D/g, '').replace(/^0+/, '');
                         if(numeroFormateado.length === 9) numeroFormateado = `593${numeroFormateado}`;
                         
-                        const mensaje = `Hola ${pedido.nombre_cliente}, te escribo de Movil Win sobre tu Pedido #${pedido.id_pedido}. Para confirmar tu participación, solo falta que nos envíes el comprobante de pago. ¡Gracias!`;
+                        const mensaje = `Hola ${pedido.nombre_cliente}, te escribo de Movil Win sobre tu Pedido #${pedido.id_pedido}. ¿Tal vez necesitas ayuda o más información?`;
                         whatsappLink = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensaje)}`;
                     }
 
