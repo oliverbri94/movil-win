@@ -396,8 +396,12 @@ function initializeRafflePage() {
             // Se añade 'sorteoNombre' a los parámetros del enlace
             const params = new URLSearchParams({sorteoId, sorteoNombre, paqueteNombre: paqueteIndividual.nombre, paquetePrecio: paqueteIndividual.precio, paqueteBoletos: paqueteIndividual.boletos});
             const enlaceCompra = `comprar.html?${params.toString()}`;
-            html += `<a href="${enlaceCompra}" ...>...</a>`;
-        }
+            html += `
+                <a href="${enlaceCompra}" class="mini-package-btn">
+                    <strong>${paqueteIndividual.boletos} Boleto</strong>
+                    <span>por $${paqueteIndividual.precio}</span>
+                </a>
+            `;        }
         if (paqueteMejorValor) {
             // Se añade 'sorteoNombre' a los parámetros del enlace
             const params = new URLSearchParams({sorteoId, sorteoNombre, paqueteNombre: paqueteMejorValor.nombre, paquetePrecio: paqueteMejorValor.precio, paqueteBoletos: paqueteMejorValor.boletos});
