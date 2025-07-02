@@ -1781,6 +1781,13 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 }
 
 .mini-package-btn {
+
+    display: flex; /* Usamos flexbox para controlar el contenido interno */
+    flex-direction: column; /* Apilamos el título y el subtítulo */
+    justify-content: center; /* Centramos verticalmente */
+    align-items: center; /* Centramos horizontalmente */
+    min-height: 80px; /* Le damos una altura mínima para que no colapse */
+    text-decoration: none; /* Nos aseguramos de que no haya subrayado */
     flex: 1; /* Ocupan el mismo espacio */
     padding: 12px 5px;
     border-radius: var(--border-radius-medium);
@@ -1803,6 +1810,8 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     display: block;
     font-size: 1.1em;
     font-weight: 700;
+    color: var(--clr-white); /* Forzamos un color visible y de alto contraste */
+
 }
 
 .mini-package-btn span {
@@ -1830,6 +1839,16 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 }
 
 .all-packages strong {
+    color: var(--clr-accent);
+}
+
+/* Estilo específico para el botón de "Ver Todos" y su ícono */
+.mini-package-btn.all-packages strong {
+    color: var(--clr-accent);
+}
+.mini-package-btn.all-packages i {
+    font-size: 1.5em;
+    margin-top: 4px;
     color: var(--clr-accent);
 }
 
