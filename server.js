@@ -236,7 +236,7 @@ app.post('/api/crear-pedido', async (req, res) => {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_pedido;
     `;    
 
-    const params = [sorteoId, paquete, nombre, cedula, celular, email, ciudad];
+    const params = [sorteoId, paquete, nombre, cedula, celular, email, ciudad, affiliateId];
 
     try {
         const result = await new Promise((resolve, reject) => {
