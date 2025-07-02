@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ciudad: document.getElementById('ciudad').value, 
             celular: document.getElementById('celular').value,
             email: document.getElementById('email').value,
+            affiliateId: sessionStorage.getItem('affiliateRef') || null
+
         };
 
         try {

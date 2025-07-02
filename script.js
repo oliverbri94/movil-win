@@ -14,6 +14,19 @@ console.log("VERSIÓN DEL SCRIPT: 27 DE JUNIO - ACTUALIZADA");
 document.addEventListener('DOMContentLoaded', () => {
     inicializarComponentesGlobales();
 
+
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const refId = urlParams.get('ref');
+        if (refId) {
+            // Guardamos el ID del afiliado en la memoria de la sesión del navegador
+            sessionStorage.setItem('affiliateRef', refId);
+            console.log(`Referido detectado y guardado: ${refId}`);
+        }
+    } catch (error) {
+        console.error("Error capturando referido:", error);
+    }    
+
     // --- CÓDIGO SOLO PARA PÁGINA PRINCIPAL (index.html) ---
     if (document.getElementById('prizeCarouselContainer')) {
         try {

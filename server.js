@@ -231,12 +231,11 @@ app.post('/api/crear-pedido', async (req, res) => {
     if (!sorteoId || !paquete || !nombre || !cedula) {
         return res.status(400).json({ error: 'Faltan datos para procesar el pedido.' });
     }
-
-    // Añadimos la nueva columna y el nuevo parámetro
     const sql = `
-        INSERT INTO pedidos (id_sorteo_fk, nombre_cliente, cedula_cliente, celular_cliente, email_cliente, paquete_elegido, ciudad_cliente)
-        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id_pedido;
-    `;
+        INSERT INTO pedidos (id_sorteo_fk, nombre_cliente, cedula_cliente, celular_cliente, email_cliente, paquete_elegido, ciudad_cliente, id_afiliado_fk)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_pedido;
+    `;    
+
     const params = [sorteoId, paquete, nombre, cedula, celular, email, ciudad];
 
     try {
@@ -554,8 +553,9 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
 
     const client = await dbClient.connect();
     try {
-        await client.query('BEGIN');
+        await client.query('BEGIN'); // Inicia transacción
 
+        // 1. Obtiene los datos del pedido y del sorteo
         const pedidoSql = "SELECT * FROM pedidos WHERE id_pedido = $1 AND estado_pedido = 'pendiente'";
         const pedidoResult = await client.query(pedidoSql, [pedido_id]);
         if (pedidoResult.rows.length === 0) throw new Error("Pedido no encontrado o ya procesado.");
@@ -566,57 +566,44 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
         const sorteoInfo = sorteoResult.rows[0];
         if (!sorteoInfo) throw new Error("El sorteo asociado a este pedido no existe.");
 
+        // 2. Busca el nombre del afiliado si existe
+        let nombreAfiliado = null;
+        if (pedido.id_afiliado_fk) {
+            const afiliadoSql = "SELECT nombre_completo FROM afiliados WHERE id_afiliado = $1";
+            const afiliadoResult = await client.query(afiliadoSql, [pedido.id_afiliado_fk]);
+            if (afiliadoResult.rows.length > 0) {
+                nombreAfiliado = afiliadoResult.rows[0].nombre_completo;
+            }
+        }
+        
+        // 3. Calcula y crea los nuevos boletos
         const matches = pedido.paquete_elegido.match(/\((\d+)\s*x/);
         const cantidad_a_anadir = matches ? parseInt(matches[1], 10) : 1;
-
         const maxTicketSql = 'SELECT MAX(numero_boleto_sorteo) as max_num FROM participaciones WHERE id_sorteo_config_fk = $1';
         const maxTicketRes = await client.query(maxTicketSql, [pedido.id_sorteo_fk]);
         let nextTicketNumber = (maxTicketRes.rows[0].max_num || 0) + 1;
 
-        // La consulta SQL con todas las columnas en el orden correcto
-        const sqlInsert = `
-            INSERT INTO participaciones 
-            (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk, numero_boleto_sorteo) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-            RETURNING numero_boleto_sorteo;
-        `;
-        
+        const sqlInsert = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk, numero_boleto_sorteo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING numero_boleto_sorteo;`;
         const nuevosBoletosNumeros = [];
         for (let i = 0; i < cantidad_a_anadir; i++) {
-            // --- INICIO DE LA CORRECCIÓN ---
-            // El array de parámetros ahora está en el orden correcto y asigna NULL a 'nombre_afiliado'
-            const params = [
-                pedido.cedula_cliente,      // $1: id_documento
-                pedido.nombre_cliente,      // $2: nombre
-                pedido.ciudad_cliente,      // $3: ciudad
-                pedido.celular_cliente,     // $4: celular
-                pedido.email_cliente,       // $5: email
-                pedido.paquete_elegido,     // $6: paquete_elegido
-                null,                       // $7: nombre_afiliado (los pedidos web no tienen afiliado)
-                pedido.id_sorteo_fk,        // $8: id_sorteo_config_fk
-                nextTicketNumber            // $9: numero_boleto_sorteo
-            ];
-            // --- FIN DE LA CORRECCIÓN ---
+            const params = [pedido.cedula_cliente, pedido.nombre_cliente, pedido.ciudad_cliente, pedido.celular_cliente, pedido.email_cliente, pedido.paquete_elegido, nombreAfiliado, pedido.id_sorteo_fk, nextTicketNumber];
             const result = await client.query(sqlInsert, params);
             nuevosBoletosNumeros.push(result.rows[0].numero_boleto_sorteo);
             nextTicketNumber++;
         }
 
-        const updatePedidoSql = "UPDATE pedidos SET estado_pedido = 'completado' WHERE id_pedido = $1";
-        await client.query(updatePedidoSql, [pedido_id]);
-        // 4. Preparamos las notificaciones para el cliente
+        // 4. Marca el pedido como completado
+        await client.query("UPDATE pedidos SET estado_pedido = 'completado' WHERE id_pedido = $1", [pedido_id]);
+
+        // 5. Prepara las notificaciones
         const boletosTexto = `Tus números de boleto son: ${nuevosBoletosNumeros.join(', ')}.`;
         let linkWhatsApp = null;
-
         if (pedido.celular_cliente) {
-            let numeroFormateado = String(pedido.celular_cliente).trim().replace(/\D/g, '');
-            if (numeroFormateado.length === 10 && numeroFormateado.startsWith('0')) {
-                numeroFormateado = `593${numeroFormateado.substring(1)}`;
-            }
+            let numeroFormateado = String(pedido.celular_cliente).trim().replace(/\D/g, '').replace(/^0+/, '');
+            if(numeroFormateado.length === 9) numeroFormateado = `593${numeroFormateado}`;
             const mensajeWhatsApp = `¡Hola, ${pedido.nombre_cliente}! Tu pago ha sido confirmado para el sorteo del ${sorteoInfo.nombre_premio_display}. ${boletosTexto} ¡Mucha suerte de parte del equipo de Movil Win!`;
             linkWhatsApp = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensajeWhatsApp)}`;
         }
-
         if (pedido.email_cliente && transporter) {
             const nombreArchivoGuia = `MiniGuia_${sorteoInfo.nombre_base_archivo_guia.replace(/\s+/g, '_')}.pdf`;
             const rutaGuia = path.join(__dirname, 'guias', nombreArchivoGuia);
@@ -645,7 +632,6 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
         }
         
         await client.query('COMMIT');
-        
         res.json({
             success: true,
             message: `Pedido #${pedido_id} confirmado. Boletos asignados: ${nuevosBoletosNumeros.join(', ')}`,
@@ -660,7 +646,6 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
         client.release();
     }
 });
-
 app.post('/api/admin/start-countdown', requireAdminLogin, async (req, res) => {
     try {
         const { sorteo_id } = req.body;

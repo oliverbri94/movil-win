@@ -310,12 +310,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // --- Lógica para COPIAR LINK ---
         if (boton.classList.contains('btn-copiar-link')) {
-            const nombreAfiliado = boton.dataset.nombre;
-            const tuNumeroWhatsApp = '593963135510'; // Asegúrate que este sea tu número de contacto
-            const mensaje = `Hola MOVIL WIN, quiero participar en el sorteo. Mi afiliado es ${nombreAfiliado}.`;
-            const enlaceAfiliado = `https://wa.me/${tuNumeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+            const afiliadoId = boton.closest('tr').querySelector('.btn-editar-afiliado').dataset.id; // Obtenemos el ID del afiliado
+            const enlaceReferido = `https://movilwin.com/?ref=${afiliadoId}`; // Creamos el nuevo enlace
 
-            navigator.clipboard.writeText(enlaceAfiliado).then(() => {
+            navigator.clipboard.writeText(enlaceReferido).then(() => {
                 const originalIcon = boton.innerHTML;
                 boton.innerHTML = '<i class="fas fa-check"></i>';
                 boton.style.backgroundColor = 'var(--clr-primary)';
