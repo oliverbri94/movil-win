@@ -31,6 +31,62 @@ document.getElementById('listado-tbody').addEventListener('click', (e) => {
     const shareText = `¡Ya estoy participando para ganar un ${sorteoNombre} con Movil Win! Mi boleto de la suerte es el #${boleto}.`;
     const shareUrl = 'https://movilwin.com'; // Enlace a tu página principal
 
+        // 1. Crear el modal dinámicamente
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'share-modal-overlay';
+        modalOverlay.innerHTML = `
+            <div class="share-modal-content">
+                <h3>¿Cómo quieres compartir?</h3>
+                <div class="share-options">
+                    <button class="share-option-btn whatsapp" id="share-whatsapp">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </button>
+                    <button class="share-option-btn other-apps" id="share-others">
+                        <i class="fas fa-share-square"></i> Otras Apps
+                    </button>
+                </div>
+                <button class="share-modal-close" id="share-close">Cancelar</button>
+            </div>
+        `;
+        document.body.appendChild(modalOverlay);
+
+        // Pequeña animación de entrada
+        setTimeout(() => modalOverlay.classList.add('visible'), 10);
+
+        // 2. Función para cerrar el modal
+        const closeModal = () => {
+            modalOverlay.classList.remove('visible');
+            setTimeout(() => modalOverlay.remove(), 300);
+        };
+
+        // 3. Añadir listeners a los nuevos botones
+        document.getElementById('share-whatsapp').addEventListener('click', () => {
+            const tuNumero = '593963135510'; // Tu número de WhatsApp
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+            window.open(whatsappUrl, '_blank');
+            closeModal();
+        });
+
+        document.getElementById('share-others').addEventListener('click', () => {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Sorteo Movil Win',
+                    text: shareText,
+                    url: shareUrl,
+                }).catch(console.error);
+            } else {
+                navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+                alert('¡Enlace y texto para compartir copiados al portapapeles!');
+            }
+            closeModal();
+        });
+        
+        document.getElementById('share-close').addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (event) => {
+            if (event.target === modalOverlay) closeModal();
+        });
+        // --- FIN DE LA NUEVA LÓGICA ---
+
     if (navigator.share) {
         // Usa la API nativa de compartir si está disponible (ideal en móviles)
         navigator.share({

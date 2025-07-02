@@ -1492,7 +1492,7 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 .top-participants-list {
     list-style: none;
     padding: 0;
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
 .top-list-item {
@@ -1501,10 +1501,10 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
      * AHORA: La última columna es 'auto', para que se ajuste sola al tamaño del texto.
     */
     grid-template-columns: 30px 45px 1fr auto;
-    gap: 15px;
+    gap: 10px;
     align-items: center;
-    padding: 10px;
-    margin-bottom: 8px;
+    padding: 5px;
+    margin-bottom: 5px;
     background-color: var(--clr-dark-bg);
     border-radius: var(--border-radius-medium);
     border: 1px solid var(--clr-dark-border);
@@ -3188,11 +3188,20 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     margin: 20px 0;
 }
 .datos-pago ul li {
-    padding: 10px 0;
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos se ajusten en móviles */
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
     border-bottom: 1px solid var(--clr-dark-border);
 }
 .datos-pago ul li:last-child {
     border-bottom: none;
+}
+
+.copy-label {
+    font-weight: 500;
+    margin-right: 15px; /* Espacio entre la etiqueta y el contenedor de copia */
 }
 .datos-pago ul li strong {
     color: var(--clr-primary);
@@ -3225,19 +3234,17 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 
 
 /* Estilos para los nuevos botones de COPIAR */
-.datos-pago ul li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+
 .copy-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background-color: var(--clr-dark-bg);
-    padding: 8px 12px;
+    padding: 4px 4px 4px 12px;
     border-radius: 8px;
     border: 1px solid var(--clr-dark-border);
+    flex-grow: 1; /* Ocupa el espacio restante */
+    min-width: 220px; /* Ancho mínimo para evitar que se rompa */
 }
 
 .datos-pago ul li > strong {
@@ -3247,9 +3254,9 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 }
 
 .btn-copy {
-    background-color: transparent;
+    background-color: var(--clr-dark-bg-frame);
     color: var(--clr-dark-text-alt);
-    border: 1px solid transparent;
+    border: 1px solid var(--clr-dark-border);
     padding: 5px 10px;
     border-radius: 6px;
     font-size: 0.9em;
@@ -3258,6 +3265,7 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    margin-left: 10px;
 }
 .btn-copy:hover {
     background-color: var(--clr-secondary);
@@ -3269,9 +3277,9 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 }
 
 /* En móviles, ocultamos el texto "Copiar" para que solo quede el ícono */
-@media (max-width: 600px) {
+@media (max-width: 480px) {
     .btn-copy .copy-text {
-        display: none;
+        display: none; /* Oculta el texto "Copiar" en móviles */
     }
     .btn-copy {
         padding: 8px;
@@ -3337,4 +3345,73 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 .participant-actions .delete-btn {
     font-size: 1.2em; /* Botón de eliminar un poco más grande */
     padding: 5px 12px;
+}
+
+/* --- ESTILOS PARA MODAL DE COMPARTIR --- */
+.share-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+}
+.share-modal-overlay.visible {
+    opacity: 1;
+}
+.share-modal-content {
+    background-color: var(--clr-dark-bg-alt);
+    padding: 30px;
+    border-radius: var(--border-radius-large);
+    border: 1px solid var(--clr-dark-border);
+    text-align: center;
+    width: 100%;
+    max-width: 350px;
+}
+.share-modal-content h3 {
+    font-size: 1.4em;
+    font-weight: 600;
+    margin-bottom: 25px;
+}
+.share-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.share-option-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+.share-option-btn:hover {
+    transform: scale(1.03);
+}
+.share-option-btn.whatsapp {
+    background-color: #25D366;
+    color: white;
+}
+.share-option-btn.other-apps {
+    background-color: var(--clr-secondary);
+    color: white;
+}
+.share-modal-close {
+    margin-top: 20px;
+    background: none;
+    border: none;
+    color: var(--clr-dark-text-alt);
+    cursor: pointer;
 }

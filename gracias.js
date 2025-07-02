@@ -1,25 +1,22 @@
-// En gracias.js, reemplaza todo el contenido
-
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const pedidoId = urlParams.get('pedidoId');
 
-    // --- LÓGICA PARA MOSTRAR EL ID DEL PEDIDO ---
+    // Muestra el ID del pedido en el título
     const pedidoIdSpan = document.getElementById('pedidoId');
     if (pedidoIdSpan && pedidoId) {
         pedidoIdSpan.textContent = pedidoId;
     }
 
-    // --- INICIO DE LA NUEVA LÓGICA PARA EL BOTÓN ---
+    // Actualiza el enlace de WhatsApp con el ID del pedido
     const whatsappBtn = document.getElementById('whatsapp-btn');
     if (whatsappBtn && pedidoId) {
         const baseWhatsAppUrl = 'https://wa.me/593959687438';
         const mensaje = `Hola, quiero enviar mi comprobante de pago para el Pedido #${pedidoId}.`;
         whatsappBtn.href = `${baseWhatsAppUrl}?text=${encodeURIComponent(mensaje)}`;
     }
-    // --- FIN DE LA NUEVA LÓGICA ---
 
-    // Lógica para los botones de "Copiar" (sin cambios)
+    // Lógica para todos los botones de "Copiar"
     const copyButtons = document.querySelectorAll('.btn-copy');
     copyButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -27,7 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetElement = document.getElementById(targetId);
             
             if (targetElement) {
-                navigator.clipboard.writeText(targetElement.innerText).then(() => {
+                const textToCopy = targetElement.innerText;
+                navigator.clipboard.writeText(textToCopy).then(() => {
                     const originalText = button.innerHTML;
                     button.innerHTML = '<i class="fas fa-check"></i> Copiado';
                     button.classList.add('copied');
@@ -37,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 2000);
                 }).catch(err => {
                     console.error('Error al copiar:', err);
+                    alert('No se pudo copiar el texto.');
                 });
             }
         });
