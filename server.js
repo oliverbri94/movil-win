@@ -226,7 +226,7 @@ app.get('/debug-cors', (req, res) => {
 // En server.js, reemplaza esta ruta
 app.post('/api/crear-pedido', async (req, res) => {
     // Añadimos 'ciudad' a la lista de datos recibidos
-    const { sorteoId, paquete, nombre, cedula, celular, email, ciudad, affiliateId } = req.body;
+    const { sorteoId, sorteoNombre, paquete, nombre, cedula, celular, email, ciudad, affiliateId } = req.body;
 
     if (!sorteoId || !paquete || !nombre || !cedula) {
         return res.status(400).json({ error: 'Faltan datos para procesar el pedido.' });
