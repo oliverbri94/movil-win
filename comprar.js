@@ -47,7 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || 'Error en el servidor.');
-            
+            // Verificamos que la función del Pixel exista y le informamos del nuevo "Lead"
+            if (typeof fbq === 'function') {
+                fbq('track', 'Lead');
+                console.log('Evento de Pixel "Lead" enviado a Meta.');
+            }
             // Si todo sale bien, redirige a la página de gracias
             window.location.href = `gracias.html?pedidoId=${result.pedidoId}`;
 
