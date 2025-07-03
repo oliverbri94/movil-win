@@ -61,6 +61,19 @@ function inicializarComponentesGlobales() {
     } catch (error) {
         console.error("Error al inicializar el menú de navegación:", error);
     }
+    const whatsappButton = document.querySelector('.whatsapp-flotante');
+
+    if (whatsappButton) {
+        window.addEventListener('scroll', () => {
+            // Muestra el botón si el usuario ha bajado más de 200px
+            if (window.scrollY > 200) {
+                whatsappButton.classList.add('visible');
+            } else {
+                // Oculta el botón si el usuario vuelve a la parte superior
+                whatsappButton.classList.remove('visible');
+            }
+        });
+    }   
 }
 function initializeAffiliateTabs() {
     const tabsContainer = document.querySelector(".instructivo-tabs");

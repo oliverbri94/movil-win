@@ -3437,3 +3437,38 @@ body.dark-theme #participantList li span:last-child { color: var(--clr-dark-text
 .btn-whatsapp:hover {
     background-color: #1DAE54; /* Un verde más oscuro al pasar el cursor */
 }
+
+/* ================================================= */
+/* --- ESTILOS PARA BOTÓN FLOTANTE DE WHATSAPP --- */
+/* ================================================= */
+
+.whatsapp-flotante {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    background-color: #25D366; /* Verde oficial de WhatsApp */
+    color: #FFF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em; /* Tamaño del ícono */
+    text-decoration: none;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    
+    /* Animación de entrada y salida */
+    transform: scale(0);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.whatsapp-flotante:hover {
+    transform: scale(1.1); /* Efecto al pasar el cursor */
+}
+
+/* Clase que usará JavaScript para mostrar el botón */
+.whatsapp-flotante.visible {
+    transform: scale(1);
+}
