@@ -1048,7 +1048,7 @@ body {
     margin-bottom: -1px; /* Pequeño truco para que la pestaña se "siente" sobre la línea */
 }
 .prize-nav-panel:hover {
-    color: var(--clr-white);
+    color: var(--clr-primary);
 }
 
 .prize-nav-panel.active {
@@ -1069,6 +1069,13 @@ nav.bg-custom-dark-bg-frame {
     background-color: var(--clr-light-bg-alt); /* Fondo blanco */
     border-bottom: 1px solid var(--clr-light-border); /* Borde inferior sutil */
     box-shadow: var(--clr-light-shadow); /* Sombra suave */
+}
+nav.bg-custom-dark-bg-frame a {
+    color: var(--clr-light-text-alt); /* Puedes cambiar este código HEX al color que prefieras */
+}
+
+nav.bg-custom-dark-bg-frame a:hover {
+    color: var(--clr-primary); /* Color al pasar el mouse, si deseas */
 }
 /* --- Secciones Próximo Premio, Ganadores, FAQ, Footer, Modales --- */
 .seccion-faq { text-align: left; }
@@ -1823,7 +1830,7 @@ nav.bg-custom-dark-bg-frame {
 
 .mini-package-btn span {
     font-size: 0.9em;
-    color: white;
+    color: var(--clr-light-text-alt);
 }
 
 .mini-package-btn.popular {
@@ -2373,7 +2380,7 @@ nav.bg-custom-dark-bg-frame {
     font-size: 1.1em;
     font-weight: 700;
     background-color: var(--clr-primary);
-    color: var(--clr-white);
+    color: var(--clr-light-text-alt);
     box-shadow: 0 5px 20px rgba(var(--clr-primary-rgb), 0.3);
 }
 
