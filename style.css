@@ -69,8 +69,15 @@ body {
 /* Cuando el JavaScript añade la clase 'is-open', el menú se hace visible con una animación suave. */
 
 /* El resto de los estilos del menú no necesitan cambios */
+
+#fullScreenMenu {
+    background-color: rgba(248, 249, 250, 0.95); /* Usamos el color de fondo claro con transparencia */
+    backdrop-filter: blur(10px); /* Mantenemos el efecto "cristal" que se ve bien */
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--clr-light-text); /* Aseguramos que el texto dentro sea oscuro */
+}
 #fullScreenMenu ul a { 
-border-bottom: 1px solid var(--clr-light-border); 
+    border-bottom: 1px solid var(--clr-light-border); 
     padding: 1rem 0; 
     display: block; 
     width: 100%; 
@@ -1058,7 +1065,10 @@ border-bottom: 1px solid var(--clr-light-border);
 }
 
 nav.bg-custom-dark-bg-frame {
-    height: 4rem; /* 64px - La misma altura que la barra interior */
+    height: 4rem; /* Mantenemos la altura */
+    background-color: var(--clr-light-bg-alt); /* Fondo blanco */
+    border-bottom: 1px solid var(--clr-light-border); /* Borde inferior sutil */
+    box-shadow: var(--clr-light-shadow); /* Sombra suave */
 }
 /* --- Secciones Próximo Premio, Ganadores, FAQ, Footer, Modales --- */
 .seccion-faq { text-align: left; }
