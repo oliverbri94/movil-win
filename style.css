@@ -3169,7 +3169,7 @@ nav.bg-custom-dark-bg-frame a:hover {
     font-weight: 600;
 }
 .site-form .form-group input {
-    background-color: #3a3a3c;
+    background-color: #dfdfdf;
     border-color: var(--clr-light-border);
     color: var(--clr-light-text);
     padding: 12px 15px;
@@ -3498,104 +3498,111 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 
 /* ============================================= */
-/* == ESTILOS PARA EL SELECTOR DE NÚMEROS TÓMBOLA == */
+/* == ESTILOS PARA EL SELECTOR DE NÚMEROS TÓMBOLA (DISEÑO DE BOLAS) == */
 /* ============================================= */
 
-/* El contenedor principal de todos los rodillos */
 .selector-wrapper {
     display: flex;
     justify-content: center;
-    gap: 15px; /* Espacio entre los rodillos */
+    gap: 15px;
     margin: 20px 0;
-    padding: 10px;
-    background-color: var(--clr-dark-bg);
+    padding: 20px;
+    background-color: var(--clr-dark-bg-alt); /* Un fondo más oscuro para resaltar las bolas */
     border-radius: var(--border-radius-medium);
 }
 
-/* La "ventana" por la que se ve un solo número */
 .number-picker {
-    height: 150px; /* Altura de la ventana (muestra aprox. 3 números) */
-    width: 100px; /* Ancho de cada rodillo */
-    overflow-y: scroll; /* ¡La clave para que sea deslizable! */
-    border: 2px solid var(--clr-dark-border);
-    border-radius: var(--border-radius-small);
-    background-color: var(--clr-dark-bg-frame);
-    position: relative; /* Necesario para la línea de selección */
-    
-    /* La "magia" para que el scroll siempre se centre en un número */
+    height: 100px; /* Ajustamos la altura para mostrar una bola centrada */
+    width: 100px; /* Damos un ancho fijo para que parezca una bola */
+    overflow-y: scroll;
+    border-radius: 50%; /* ¡Esto lo hace circular! */
+    border: 4px solid var(--clr-dark-border); /* Borde para definir la bola */
+    background-color: #f0f0f0; /* Color de fondo similar a la madera clara */
+    position: relative;
     scroll-snap-type: y mandatory;
-
-    /* Ocultar la barra de scroll visual */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    text-align: center; /* Centramos el número */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
-.number-picker::-webkit-scrollbar { 
-    display: none; /* Safari y Chrome */
-}
-
-/* Línea de selección en el centro (efecto visual) */
-.number-picker::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    transform: translateY(-50%);
-    height: 50px; /* Altura de un item */
-    background-color: rgba(127, 90, 240, 0.15); /* Color primario semi-transparente */
-    border-top: 2px solid var(--clr-primary);
-    border-bottom: 2px solid var(--clr-primary);
-    pointer-events: none; /* Para que no interfiera con el scroll */
-    z-index: 0;
+.number-picker::-webkit-scrollbar {
+    display: none;
 }
 
-
-/* El contenedor de la lista completa de números que se desliza */
 .picker-wheel {
-    padding: 50px 0; /* Espacio arriba y abajo para poder centrar el primer y último número */
+    padding: 50px 0; /* Espacio para centrar el primer y último número */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* Cada número individual en la lista */
 .picker-item {
-    height: 50px; /* Debe coincidir con la altura de la línea de selección */
+    height: 100px; /* Debe coincidir con la altura del picker */
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2em;
-    font-weight: 600;
+    font-size: 2.5em;
+    font-weight: bold;
     color: var(--clr-dark-text);
-    
-    /* La otra parte de la "magia" del centrado */
     scroll-snap-align: center;
+    width: 100%; /* Ocupar todo el ancho del picker */
 }
 
-/* Estilos para la lista de números que el usuario va eligiendo */
+/* Efecto de sombra suave para dar profundidad a la bola */
+.number-picker {
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Un pequeño brillo interior (opcional) */
+.number-picker::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    right: 10%;
+    bottom: 10%;
+    background: radial-gradient(circle at 50% 30%, #fff 20%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Estilos para la lista de números elegidos (manteniendo el diseño de bolas pequeñas) */
 #lista-numeros-elegidos {
     list-style: none;
     padding: 0;
+    display: flex; /* Para que las bolas se muestren en línea */
+    gap: 10px;
+    flex-wrap: wrap; /* Si no caben, pasan a la siguiente línea */
 }
 
 .numero-elegido-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 10px;
-    background-color: var(--clr-dark-bg);
-    border-radius: var(--border-radius-small);
-    margin-bottom: 8px;
+    background: none;
+    border-radius: 0;
+    margin-bottom: 0;
+    padding: 0;
 }
 
 .bola-small {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 35px;
-    height: 35px;
-    background-color: var(--clr-primary);
+    width: 45px;
+    height: 45px;
+    background-color: #f0f0f0; /* Color de fondo similar a la madera clara */
     border-radius: 50%;
     font-weight: bold;
-    color: white;
-    margin: 0 4px;
+    color: var(--clr-dark-text);
+    margin: 0;
+    border: 2px solid var(--clr-dark-border);
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    font-size: 1.2em;
+}
+
+.numero-elegido-item .bola-small + .bola-small {
+    margin-left: 5px;
 }
 
 .btn-eliminar-numero {
@@ -3606,6 +3613,15 @@ nav.bg-custom-dark-bg-frame a:hover {
     width: 25px;
     height: 25px;
     cursor: pointer;
-    font-size: 1.2em;
+    font-size: 0.8em; /* Reducimos un poco el tamaño del aspa */
     line-height: 1;
+    margin-left: 10px;
+}
+
+/* Centrar el selector en pantallas pequeñas */
+@media (max-width: 600px) {
+    .selector-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
 }

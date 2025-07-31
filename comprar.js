@@ -133,12 +133,31 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
     function getSeleccionActual() {
         const seleccion = [];
+        // Mensaje para saber que la función se está ejecutando
+        console.log("--- Calculando Selección Actual ---");
+
         document.querySelectorAll('.picker-wheel').forEach((wheel, index) => {
             const scrollTop = wheel.scrollTop;
-            const itemHeight = wheel.querySelector('.picker-item').offsetHeight;
-            const selectedIndex = Math.round(scrollTop / itemHeight);
-            seleccion.push(selectedIndex);
+            // Usamos 'optional chaining' (?.) para evitar errores si no encuentra el item
+            const itemHeight = wheel.querySelector('.picker-item')?.offsetHeight;
+
+            // Mensajes de depuración para ver los valores internos
+            console.log(`Rueda #${index + 1}:`);
+            console.log(`  -> Posición del Scroll (scrollTop): ${scrollTop}`);
+            console.log(`  -> Altura del Item (itemHeight): ${itemHeight}`);
+
+            // Solo hacemos el cálculo si tenemos una altura válida
+            if (itemHeight && itemHeight > 0) {
+                const selectedIndex = Math.round(scrollTop / itemHeight);
+                console.log(`  -> Índice Calculado: ${selectedIndex}`);
+                seleccion.push(selectedIndex);
+            } else {
+                console.error(`  -> ERROR: No se pudo determinar la altura del item para la rueda #${index + 1}. Se usará 0.`);
+                seleccion.push(0); // Si hay un error, devolvemos 0 para evitar que la app se rompa
+            }
         });
+
+        console.log("-> Selección Final que se va a añadir: ", seleccion);
         return seleccion;
     }
 
