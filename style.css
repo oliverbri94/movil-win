@@ -3747,13 +3747,18 @@ nav.bg-custom-dark-bg-frame a:hover {
 /* Botón secundario para "Anterior" */
 .admin-button-secondary {
     background-color: transparent;
-    border: 2px solid var(--clr-primary); /* Borde con el color principal */
-    color: var(--clr-primary); /* Texto con el color principal */
+    border: 2px solid var(--clr-primary);
+    color: var(--clr-primary);
     font-weight: 600;
+    padding: 10px 20px;
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .admin-button-secondary:hover {
     background-color: var(--clr-primary);
-    color: white; /* El color del texto cambia a blanco al pasar el mouse */
+    color: white;
 }
 
 /* --- Feedback de Validación --- */

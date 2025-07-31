@@ -681,12 +681,21 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
         const maxTicketRes = await client.query(maxTicketSql, [pedido.id_sorteo_fk]);
         let nextTicketNumber = (maxTicketRes.rows[0].max_num || 0) + 1;
 
+        
         const sqlInsert = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk, numero_boleto_sorteo, numeros_elegidos) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING numero_boleto_sorteo;`;
+        
+        const nuevosBoletosNumeros = []; // <--- 1. CREAMOS LA LISTA VACÍA
         
         for (let i = 0; i < cantidad_a_anadir; i++) {
             const numerosParaEsteBoleto = numerosElegidos ? JSON.stringify([numerosElegidos[i]]) : null;
             const params = [pedido.cedula_cliente, pedido.nombre_cliente, pedido.ciudad_cliente, pedido.celular_cliente, pedido.email_cliente, pedido.paquete_elegido, nombreAfiliado, pedido.id_sorteo_fk, nextTicketNumber, numerosParaEsteBoleto];
-            await client.query(sqlInsert, params);
+            
+            // 2. CAPTURAMOS EL RESULTADO DE LA BASE DE DATOS
+            const result = await client.query(sqlInsert, params);
+            
+            // 3. GUARDAMOS EL NÚMERO DEL BOLETO EN NUESTRA LISTA
+            nuevosBoletosNumeros.push(result.rows[0].numero_boleto_sorteo);
+            
             nextTicketNumber++;
         }
 
