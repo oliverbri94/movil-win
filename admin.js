@@ -400,7 +400,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
     function recogerDatosPaquetes() {
         const paquetes = [];
-        document.querySelectorAll('.paquete-editor-fila').forEach(fila => {
+        document.querySelectorAll('#paquetes-editor-container .paquete-editor-fila').forEach(fila => {
             const nombre = fila.querySelector('.paquete-nombre').value.trim();
             const precio = parseFloat(fila.querySelector('.paquete-precio').value);
             const boletos = parseInt(fila.querySelector('.paquete-boletos').value, 10);
