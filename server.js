@@ -225,44 +225,29 @@ app.get('/debug-cors', (req, res) => {
 
 // En server.js, reemplaza esta ruta
 app.post('/api/crear-pedido', async (req, res) => {
-    // Añadimos 'ciudad' a la lista de datos recibidos
-    const { sorteoId, sorteoNombre, paquete, nombre, cedula, celular, email, ciudad, affiliateId } = req.body;
+    const { sorteoId, sorteoNombre, paquete, nombre, cedula, celular, email, ciudad, affiliateId, numeros_elegidos } = req.body;
 
     if (!sorteoId || !paquete || !nombre || !cedula) {
         return res.status(400).json({ error: 'Faltan datos para procesar el pedido.' });
     }
+    
+    // Convertimos el array de números a un string JSON para guardarlo
+    const numerosElegidosString = numeros_elegidos ? JSON.stringify(numeros_elegidos) : null;
+
     const sql = `
-        INSERT INTO pedidos (id_sorteo_fk, nombre_cliente, cedula_cliente, celular_cliente, email_cliente, paquete_elegido, ciudad_cliente, id_afiliado_fk)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_pedido;
+        INSERT INTO pedidos (id_sorteo_fk, nombre_cliente, cedula_cliente, celular_cliente, email_cliente, paquete_elegido, ciudad_cliente, id_afiliado_fk, numeros_elegidos)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id_pedido;
     `;    
-
-    const params = [sorteoId, nombre, cedula, celular, email, paquete, ciudad, affiliateId];
-
+    const params = [sorteoId, nombre, cedula, celular, email, paquete, ciudad, affiliateId, numerosElegidosString];
 
     try {
         const result = await new Promise((resolve, reject) => {
             db.get(sql, params, (err, row) => err ? reject(err) : resolve(row));
         });
 
-        // Añadimos la ciudad al email de notificación para ti
         if (transporter && process.env.EMAIL_USER) {
-            const mailOptions = {
-                to: process.env.EMAIL_USER,
-                subject: `🔔 Pedido #${result.id_pedido} para el sorteo: ${sorteoNombre}`,
-                html: `
-                    <h2>Nuevo pedido pendiente para: ${sorteoNombre}</h2>
-                    <p><strong>Cliente:</strong> ${nombre}</p>
-                    <p><strong>Cédula:</strong> ${cedula}</p>
-                    <p><strong>Ciudad:</strong> ${ciudad || 'No proporcionada'}</p>
-                    <p><strong>Celular:</strong> ${celular || 'No proporcionado'}</p>
-                    <p><strong>Email:</strong> ${email || 'No proporcionado'}</p>
-                    <p><strong>Paquete:</strong> ${paquete}</p>
-                    <p>Por favor, verifica tu cuenta bancaria para confirmar el pago.</p>
-                `
-            };
-            transporter.sendMail(mailOptions).catch(err => console.error("Error enviando email al admin:", err));
+            // ... (el código de envío de email no cambia, se puede dejar como está)
         }
-
         res.status(201).json({ success: true, message: 'Pedido recibido. Pendiente de pago.', pedidoId: result.id_pedido });
     } catch (error) {
         console.error("Error al crear pedido:", error);
@@ -284,18 +269,23 @@ app.get('/api/sorteos-visibles', async (req, res) => {
             });
         });
 
-        // Convertimos el string JSON de paquetes de vuelta a un objeto para cada sorteo
         const sorteosProcesados = rows.map(sorteo => {
             try {
-                // Si paquetes_json existe y no está vacío, lo parseamos
                 if (sorteo.paquetes_json) {
                     sorteo.paquetes_json = JSON.parse(sorteo.paquetes_json);
                 } else {
-                    sorteo.paquetes_json = []; // Si es null o no existe, lo definimos como un array vacío
+                    sorteo.paquetes_json = [];
+                }
+                // ¡NUEVO! Parseamos la configuración de la tómbola
+                if (sorteo.configuracion_tombola) {
+                    sorteo.configuracion_tombola = JSON.parse(sorteo.configuracion_tombola);
+                } else {
+                    sorteo.configuracion_tombola = null;
                 }
             } catch (e) {
                 console.error(`Error parseando JSON para sorteo ID ${sorteo.id_sorteo}:`, e);
-                sorteo.paquetes_json = []; // En caso de error, también lo dejamos como array vacío
+                sorteo.paquetes_json = [];
+                sorteo.configuracion_tombola = null;
             }
             return sorteo;
         });
@@ -307,6 +297,85 @@ app.get('/api/sorteos-visibles', async (req, res) => {
     }
 });
 
+
+// PEGA ESTAS TRES NUEVAS RUTAS
+
+// NUEVA RUTA: OBTENER DETALLES DE UN SORTEO ESPECÍFICO
+app.get('/api/sorteo-details/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const sql = `SELECT id_sorteo, nombre_premio_display, tipo_sorteo, configuracion_tombola FROM sorteos_config WHERE id_sorteo = $1`;
+        const sorteo = await new Promise((resolve, reject) => {
+            db.get(sql, [id], (err, row) => err ? reject(err) : resolve(row));
+        });
+
+        if (!sorteo) {
+            return res.status(404).json({ error: 'Sorteo no encontrado.' });
+        }
+
+        if (sorteo.configuracion_tombola) {
+            sorteo.configuracion_tombola = JSON.parse(sorteo.configuracion_tombola);
+        }
+        res.json({ success: true, sorteo });
+    } catch (error) {
+        console.error("Error al obtener detalles del sorteo:", error);
+        res.status(500).json({ success: false, error: 'Error interno del servidor.' });
+    }
+});
+
+// NUEVA RUTA: OBTENER NÚMEROS OCUPADOS PARA UN SORTEO DE TÓMBOLA
+app.get('/api/numeros-ocupados/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        // Obtenemos tanto los números ya confirmados (en `participaciones`) como los pendientes (en `pedidos`)
+        const sql = `
+            (SELECT numeros_elegidos FROM participaciones WHERE id_sorteo_config_fk = $1 AND numeros_elegidos IS NOT NULL)
+            UNION
+            (SELECT numeros_elegidos FROM pedidos WHERE id_sorteo_fk = $1 AND numeros_elegidos IS NOT NULL AND estado_pedido = 'pendiente');
+        `;
+        const result = await new Promise((resolve, reject) => {
+            db.all(sql, [id], (err, rows) => err ? reject(err) : resolve(rows));
+        });
+
+        const numerosOcupados = result
+            .filter(r => r.numeros_elegidos)
+            .flatMap(r => JSON.parse(r.numeros_elegidos));
+            
+        res.json({ success: true, numerosOcupados });
+    } catch (error) {
+        console.error("Error al obtener números ocupados:", error);
+        res.status(500).json({ success: false, error: 'Error interno del servidor.' });
+    }
+});
+
+// NUEVA RUTA: OBTENER LISTA PÚBLICA PARA TÓMBOLA
+app.get('/api/public-list/tombola/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const sql = `
+            SELECT p.nombre, p.numeros_elegidos, s.nombre_premio_display
+            FROM participaciones p
+            JOIN sorteos_config s ON p.id_sorteo_config_fk = s.id_sorteo
+            WHERE p.id_sorteo_config_fk = $1 AND p.numeros_elegidos IS NOT NULL
+            ORDER BY p.orden_id ASC;
+        `;
+        const result = await new Promise((resolve, reject) => {
+            db.all(sql, [id], (err, rows) => err ? reject(err) : resolve(rows));
+        });
+
+        const listado = result.map(row => ({
+            nombre: row.nombre,
+            numeros: JSON.parse(row.numeros_elegidos)
+        }));
+
+        const nombreSorteo = result.length > 0 ? result[0].nombre_premio_display : "Sorteo de Tómbola";
+        
+        res.json({ success: true, listado, nombreSorteo });
+    } catch (error) {
+        console.error("Error al obtener lista pública de tómbola:", error);
+        res.status(500).json({ success: false, error: 'Error interno del servidor.' });
+    }
+});
 app.get('/api/public-list/:sorteo_id', async (req, res) => {
     const { sorteo_id } = req.params;
 
@@ -576,9 +645,8 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
 
     const client = await dbClient.connect();
     try {
-        await client.query('BEGIN'); // Inicia transacción
+        await client.query('BEGIN');
 
-        // 1. Obtiene los datos del pedido y del sorteo
         const pedidoSql = "SELECT * FROM pedidos WHERE id_pedido = $1 AND estado_pedido = 'pendiente'";
         const pedidoResult = await client.query(pedidoSql, [pedido_id]);
         if (pedidoResult.rows.length === 0) throw new Error("Pedido no encontrado o ya procesado.");
@@ -587,7 +655,7 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
         const sorteoSql = "SELECT * FROM sorteos_config WHERE id_sorteo = $1";
         const sorteoResult = await client.query(sorteoSql, [pedido.id_sorteo_fk]);
         const sorteoInfo = sorteoResult.rows[0];
-        if (!sorteoInfo) throw new Error("El sorteo asociado a este pedido no existe.");
+        if (!sorteoInfo) throw new Error("El sorteo asociado no existe.");
 
         // 2. Busca el nombre del afiliado si existe
         let nombreAfiliado = null;
@@ -599,27 +667,34 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
             }
         }
         
-        // 3. Calcula y crea los nuevos boletos
-        const matches = pedido.paquete_elegido.match(/\((\d+)\s*x/);
-        const cantidad_a_anadir = matches ? parseInt(matches[1], 10) : 1;
+        // --- LÓGICA PARA ASIGNAR BOLETOS ---
+        const numerosElegidos = pedido.numeros_elegidos ? JSON.parse(pedido.numeros_elegidos) : null;
+        let cantidad_a_anadir = 1; // Por defecto
+        if (numerosElegidos && Array.isArray(numerosElegidos)) {
+            cantidad_a_anadir = numerosElegidos.length;
+        } else {
+             const matches = pedido.paquete_elegido.match(/\((\d+)\s*x/);
+             cantidad_a_anadir = matches ? parseInt(matches[1], 10) : 1;
+        }
+
         const maxTicketSql = 'SELECT MAX(numero_boleto_sorteo) as max_num FROM participaciones WHERE id_sorteo_config_fk = $1';
         const maxTicketRes = await client.query(maxTicketSql, [pedido.id_sorteo_fk]);
         let nextTicketNumber = (maxTicketRes.rows[0].max_num || 0) + 1;
 
-        const sqlInsert = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk, numero_boleto_sorteo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING numero_boleto_sorteo;`;
-        const nuevosBoletosNumeros = [];
+        const sqlInsert = `INSERT INTO participaciones (id_documento, nombre, ciudad, celular, email, paquete_elegido, nombre_afiliado, id_sorteo_config_fk, numero_boleto_sorteo, numeros_elegidos) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING numero_boleto_sorteo;`;
+        
         for (let i = 0; i < cantidad_a_anadir; i++) {
-            const params = [pedido.cedula_cliente, pedido.nombre_cliente, pedido.ciudad_cliente, pedido.celular_cliente, pedido.email_cliente, pedido.paquete_elegido, nombreAfiliado, pedido.id_sorteo_fk, nextTicketNumber];
-            const result = await client.query(sqlInsert, params);
-            nuevosBoletosNumeros.push(result.rows[0].numero_boleto_sorteo);
+            const numerosParaEsteBoleto = numerosElegidos ? JSON.stringify([numerosElegidos[i]]) : null;
+            const params = [pedido.cedula_cliente, pedido.nombre_cliente, pedido.ciudad_cliente, pedido.celular_cliente, pedido.email_cliente, pedido.paquete_elegido, nombreAfiliado, pedido.id_sorteo_fk, nextTicketNumber, numerosParaEsteBoleto];
+            await client.query(sqlInsert, params);
             nextTicketNumber++;
         }
 
-        // 4. Marca el pedido como completado
         await client.query("UPDATE pedidos SET estado_pedido = 'completado' WHERE id_pedido = $1", [pedido_id]);
+        await client.query('COMMIT');
 
         // 5. Prepara las notificaciones
-        const boletosTexto = `Tus números de boleto son: ${nuevosBoletosNumeros.join(', ')}.`;
+        const boletosTexto = `Tus números son: ${nuevosBoletosNumeros.join(', ')}.`;
         let linkWhatsApp = null;
         if (pedido.celular_cliente) {
             let numeroFormateado = String(pedido.celular_cliente).trim().replace(/\D/g, '').replace(/^0+/, '');
@@ -748,25 +823,23 @@ app.get('/api/countdown-status', async (req, res) => {
 });
 app.post('/api/admin/sorteos', requireAdminLogin, async (req, res) => {
     try {
-        // Añadimos paquetes_json a los datos que recibimos
-        const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, activo, paquetes_json } = req.body;
+        const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, tipo_sorteo, configuracion_tombola } = req.body;
 
         if (!nombre_premio_display || !nombre_base_archivo_guia || !meta_participaciones) {
             return res.status(400).json({ error: "Nombre, guía y meta son requeridos." });
         }
 
-        const statusInicial = activo ? 'activo' : 'programado';
-        // Convertimos el array de paquetes a un string JSON para guardarlo
-        const paquetesString = JSON.stringify(paquetes_json || []);
+        const paquetesString = JSON.stringify([]); // Los paquetes se añaden al editar
+        const configTombolaString = tipo_sorteo === 'tombola_interactiva' ? JSON.stringify(configuracion_tombola) : null;
 
-        const sql = `INSERT INTO sorteos_config (nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, status_sorteo, paquetes_json) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id_sorteo`;
-        const params = [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, statusInicial, paquetesString];
+        const sql = `INSERT INTO sorteos_config (nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, tipo_sorteo, configuracion_tombola, paquetes_json) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id_sorteo`;
+        const params = [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, tipo_sorteo, configTombolaString, paquetesString];
 
         const result = await new Promise((resolve, reject) => {
             db.get(sql, params, (err, row) => err ? reject(err) : resolve(row));
         });
 
-        res.status(201).json({ message: "Sorteo añadido con éxito.", id_sorteo: result.id_sorteo });
+        res.status(201).json({ message: "Sorteo añadido con éxito. Ahora puedes editarlo para añadir paquetes.", id_sorteo: result.id_sorteo });
     } catch (error) {
         console.error("Error al añadir sorteo:", error);
         res.status(500).json({ error: "Error en la base de datos al añadir el sorteo." });
@@ -777,17 +850,15 @@ app.post('/api/admin/sorteos', requireAdminLogin, async (req, res) => {
 app.put('/api/admin/sorteos/:id_sorteo', requireAdminLogin, async (req, res) => {
     try {
         const { id_sorteo } = req.params;
-        // Obtenemos los datos del cuerpo de la petición, incluyendo los paquetes
-        const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, paquetes_json } = req.body;
+        const { nombre_premio_display, imagen_url, nombre_base_archivo_guia, meta_participaciones, paquetes_json, tipo_sorteo, configuracion_tombola } = req.body;
 
         if (!nombre_premio_display || !nombre_base_archivo_guia || !meta_participaciones) {
             return res.status(400).json({ error: "Nombre, guía y meta son requeridos." });
         }
         
-        // Convertimos el array de paquetes a un string JSON para guardarlo en la base de datos
         const paquetesString = JSON.stringify(paquetes_json || []);
+        const configTombolaString = tipo_sorteo === 'tombola_interactiva' ? JSON.stringify(configuracion_tombola) : null;
 
-        // La consulta SQL para actualizar, usando placeholders de PostgreSQL
         const sql = `
             UPDATE sorteos_config 
             SET 
@@ -795,15 +866,17 @@ app.put('/api/admin/sorteos/:id_sorteo', requireAdminLogin, async (req, res) => 
                 imagen_url = $2, 
                 nombre_base_archivo_guia = $3, 
                 meta_participaciones = $4, 
-                paquetes_json = $5 
-            WHERE id_sorteo = $6
+                paquetes_json = $5,
+                tipo_sorteo = $6,
+                configuracion_tombola = $7
+            WHERE id_sorteo = $8
         `;
-        const params = [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, paquetesString, id_sorteo];
+        const params = [nombre_premio_display, imagen_url, nombre_base_archivo_guia, parseInt(meta_participaciones) || 200, paquetesString, tipo_sorteo, configTombolaString, id_sorteo];
 
         const result = await new Promise((resolve, reject) => {
             db.run(sql, params, function(err) {
                 if (err) return reject(err);
-                resolve(this); // 'this' contiene la propiedad .changes
+                resolve(this);
             });
         });
 
@@ -818,6 +891,8 @@ app.put('/api/admin/sorteos/:id_sorteo', requireAdminLogin, async (req, res) => 
         res.status(500).json({ error: "Error interno al editar el sorteo." });
     }
 });
+
+
 app.put('/api/admin/sorteos/activar/:id_sorteo', requireAdminLogin, (req, res) => {
     const { id_sorteo } = req.params;
     const { activar } = req.body; // Esto será 'true' si se presiona "Activar" o 'false' si es "Desactivar"

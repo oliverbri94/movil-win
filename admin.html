@@ -315,7 +315,20 @@
                                 <div class="form-group">
                                     <label for="nombreBaseArchivoGuia">Nombre Base Archivo Guía:</label>
                                     <input type="text" id="nombreBaseArchivoGuia" required>
-                                </div>                                <div class="form-group"><label for="metaParticipacionesSorteo">Meta de Boletos:</label><input type="number" id="metaParticipacionesSorteo" value="200" min="1" required></div>
+                                </div>                                
+                                <div class="form-group"><label for="metaParticipacionesSorteo">Meta de Boletos:</label><input type="number" id="metaParticipacionesSorteo" value="200" min="1" required></div>
+                                <div class="form-group">
+                                    <label for="tipo_sorteo">Tipo de Sorteo:</label>
+                                    <select id="tipo_sorteo" name="tipo_sorteo">
+                                        <option value="ruleta_digital">Ruleta Digital (Clásico)</option>
+                                        <option value="tombola_interactiva">Tómbola Interactiva (Elegir Números)</option>
+                                    </select>
+                                </div>
+                                <div id="configuracion-tombola-container" class="admin-section oculto" style="border: 1px solid var(--clr-dark-border); padding: 15px; border-radius: 8px;">
+                                    <h4><i class="fas fa-cogs"></i> Configuración de Bolas de la Tómbola</h4>
+                                    <div id="bolas-editor-container"></div>
+                                    <button type="button" id="btnAnadirBola" class="admin-button" style="margin-top: 10px; background-color: var(--clr-secondary); max-width: 200px;">+ Añadir Bola</button>
+                                </div>                                  
                                 <div class="form-group">
                                     <label>Configuración de Paquetes:</label>
                                     <div id="paquetes-editor-container" class="paquetes-editor-container">

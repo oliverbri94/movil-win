@@ -141,7 +141,44 @@ function initializeRafflePage() {
     // Todas las funciones que ayudan a formatear datos, dibujar, etc.
 // En script.js, añade esta nueva función de ayuda
 
+    async function renderizarListaPublicaTombola(sorteoId, slideElement) {
+        const contenedorTombola = slideElement.querySelector('.contenedor-tombola');
+        const listaContainer = slideElement.querySelector('.lista-tombola-publica');
+        if (!contenedorTombola || !listaContainer) return;
 
+        // Mostramos el contenedor y un loader
+        contenedorTombola.classList.remove('oculto');
+        listaContainer.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/public-list/tombola/${sorteoId}`);
+            const result = await response.json();
+            if (!result.success) throw new Error(result.error);
+
+            if (result.listado.length === 0) {
+                listaContainer.innerHTML = '<p class="empty-list">Aún no hay participantes. ¡Sé el primero en elegir tus números!</p>';
+                return;
+            }
+
+            // Mapeamos cada participante a su HTML
+            const itemsHTML = result.listado.flatMap(participante => 
+                participante.numeros.map(comboNumeros => {
+                    const bolasHTML = comboNumeros.map(n => `<div class="bola-small">${n}</div>`).join('');
+                    return `
+                        <div class="participante-item-publico">
+                            <span class="nombre">${participante.nombre}</span>
+                            <div class="bolas-container">${bolasHTML}</div>
+                        </div>
+                    `;
+                })
+            ).join('');
+            
+            listaContainer.innerHTML = itemsHTML;
+
+        } catch(error) {
+            listaContainer.innerHTML = `<p class="error-message">Error al cargar la lista: ${error.message}</p>`;
+        }
+    }
     // --- Lógica para el acordeón de Top Participantes ---
     prizeCarouselTrack?.addEventListener('click', (e) => {
         const toggleButton = e.target.closest('.collapsible-toggle');
@@ -595,38 +632,60 @@ function initializeRafflePage() {
             }
         }
         const currentWheelCanvas = activeSlide.querySelector('.price-wheel-canvas');
-        if (sorteoActual && sorteoActual.id_sorteo && currentWheelCanvas && sorteoActual.status_sorteo !== 'programado') {
-            wheelCanvas = currentWheelCanvas;
-            wheelCtx = wheelCanvas.getContext('2d');
-            const container = activeSlide.querySelector('.wheel-price-is-right-container');
-            if (container) {
-                wheelWidth = container.clientWidth;
-                wheelHeight = SEGMENT_HEIGHT_FRONT * VISIBLE_SEGMENTS_COUNT;
-                wheelCanvas.width = wheelWidth;
-                wheelCanvas.height = wheelHeight;
-            }
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/participantes?sorteoId=${sorteoActual.id_sorteo}`);
-                if (!response.ok) { throw new Error(`El servidor respondió con un error ${response.status}`); }
-                participantes = await response.json() || [];
-                currentYOffset = 0;
-                addWheelEventListeners(wheelCanvas);
-                drawFrontWheel(participantes);
-            } catch (err) {
-                console.error("Error al cargar participantes para la rueda:", err);
-                participantes = [];
-                drawFrontWheel(participantes);
+        const contenedorRueda = activeSlide.querySelector('.contenedor-sorteo');
+        const contenedorTombola = activeSlide.querySelector('.contenedor-tombola');
+
+        if (sorteoActual && sorteoActual.status_sorteo !== 'programado') {
+            if (sorteoActual.tipo_sorteo === 'tombola_interactiva') {
+                contenedorRueda?.classList.add('oculto');
+                contenedorTombola?.classList.remove('oculto');
+                renderizarListaPublicaTombola(sorteoActual.id_sorteo, activeSlide);
+                participantes = []; // Reseteamos por si acaso
+            } else {
+                // Lógica original de la ruleta digital
+                contenedorRueda?.classList.remove('oculto');
+                contenedorTombola?.classList.add('oculto');
+                const currentWheelCanvas = activeSlide.querySelector('.price-wheel-canvas');
+                if (currentWheelCanvas) {
+                    wheelCanvas = currentWheelCanvas;
+                    wheelCtx = wheelCanvas.getContext('d');
+                    const container = activeSlide.querySelector('.wheel-price-is-right-container');
+                    if (container) {
+                        wheelWidth = container.clientWidth;
+                        wheelHeight = SEGMENT_HEIGHT_FRONT * VISIBLE_SEGMENTS_COUNT;
+                        wheelCanvas.width = wheelWidth;
+                        wheelCanvas.height = wheelHeight;
+                    }
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/api/participantes?sorteoId=${sorteoActual.id_sorteo}`);
+                        if (!response.ok) { throw new Error(`El servidor respondió con un error ${response.status}`); }
+                        participantes = await response.json() || [];
+                        currentYOffset = 0;
+                        addWheelEventListeners(wheelCanvas);
+                        drawFrontWheel(participantes);
+                    } catch (err) {
+                        console.error("Error al cargar participantes para la rueda:", err);
+                        participantes = [];
+                        drawFrontWheel(participantes);
+                    }
+                } else {
+                    participantes = [];
+                    wheelCanvas = null;
+                    wheelCtx = null;
+                    if(activeSlide.querySelector('.wheel-price-is-right-container')) {
+                        drawFrontWheel([]); // Dibuja el estado vacío si el canvas existe pero el sorteo es programado
+                    }
+                }
             }
         } else {
+            // Si el sorteo es 'programado', ocultamos ambos
+            contenedorRueda?.classList.add('oculto');
+            contenedorTombola?.classList.add('oculto');
             participantes = [];
             wheelCanvas = null;
             wheelCtx = null;
-            if(activeSlide.querySelector('.wheel-price-is-right-container')) {
-                 drawFrontWheel([]); // Dibuja el estado vacío si el canvas existe pero el sorteo es programado
-            }
         }
     }
-
     async function cargarSorteosVisibles() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/sorteos-visibles`);
@@ -902,18 +961,26 @@ function initializeRafflePage() {
                             </div>
                         </div>
                         <div class="winner-card-container oculto">
-                             <div class="winner-card">
-                                 <h3>¡Tenemos un Ganador!</h3>
-                                 <p class="winner-prize"></p>
-                                 <p class="winner-name"></p>
-                                 <p class="winner-id"></p>
-                                 <p class="winner-contact-note">¡Nos pondremos en contacto contigo pronto!</p>
-                             </div>
-                         </div>
+                            <div class="winner-card">
+                                <h3>¡Tenemos un Ganador!</h3>
+                                <p class="winner-prize"></p>
+                                <p class="winner-name"></p>
+                                <p class="winner-id"></p>
+                                <p class="winner-contact-note">¡Nos pondremos en contacto contigo pronto!</p>
+                            </div>
+                        </div>
                         </div>
                     </div>
+
                     <div class="contenedor-sorteo content-section">
                         <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2><p class="rueda-subtitulo">¡El sorteo empieza al llegar a la meta de boletos!</p><div class="price-is-right-wheel-frame"><div class="wheel-price-is-right-container"><canvas class="price-wheel-canvas"></canvas></div><div class="clacker-container"><div class="clacker-border"></div><div class="clacker-top"></div></div></div>
+                    </div>
+                    
+                    <div class="contenedor-tombola oculto content-section">
+                        <h2 class="titulo-dorado" data-text="NÚMEROS PARTICIPANTES">NÚMEROS PARTICIPANTES</h2>
+                        <p class="rueda-subtitulo">¡Estos son los números elegidos! El ganador saldrá de una tómbola en vivo.</p>
+                        <div class="lista-tombola-publica">
+                            </div>
                     </div>
                 `;
             }

@@ -228,6 +228,59 @@ document.addEventListener('DOMContentLoaded', async () => {
             fila.remove();
         });
     }
+    /**
+     * Añade una fila para configurar una nueva bola en la tómbola.
+     * @param {object} [bola] - Datos opcionales para rellenar la fila.
+     */
+    function anadirFilaBola(bola = { digitos: 2, max: 99 }) {
+        const container = document.getElementById('bolas-editor-container');
+        if (!container) return;
+
+        const fila = document.createElement('div');
+        fila.className = 'paquete-editor-fila'; // Reutilizamos el estilo
+        fila.innerHTML = `
+            <input type="number" placeholder="Nº de dígitos" value="${bola.digitos}" class="bola-digitos" required min="1" max="3">
+            <input type="number" placeholder="Número Máximo (ej: 99)" value="${bola.max}" class="bola-max" required>
+            <button type="button" class="btn-eliminar-paquete" title="Eliminar esta bola">&times;</button>
+        `;
+        container.appendChild(fila);
+
+        fila.querySelector('.btn-eliminar-paquete').addEventListener('click', () => {
+            fila.remove();
+        });
+    }
+
+    /**
+     * Recoge los datos de configuración de las bolas del formulario.
+     * @returns {Array<object>}
+     */
+    function recogerDatosBolas() {
+        const bolas = [];
+        document.querySelectorAll('#bolas-editor-container .paquete-editor-fila').forEach(fila => {
+            const digitos = parseInt(fila.querySelector('.bola-digitos').value, 10);
+            const max = parseInt(fila.querySelector('.bola-max').value, 10);
+            if (!isNaN(digitos) && !isNaN(max)) {
+                bolas.push({ digitos, max });
+            }
+        });
+        return bolas;
+    }
+
+    /**
+     * Renderiza el editor de bolas a partir de una configuración guardada.
+     * @param {Array<object>} [configuracion]
+     */
+    function renderizarEditorBolas(configuracion = []) {
+        const container = document.getElementById('bolas-editor-container');
+        if (!container) return;
+        container.innerHTML = '';
+        if (configuracion && configuracion.length > 0) {
+            configuracion.forEach(bola => anadirFilaBola(bola));
+        } else {
+            anadirFilaBola({ digitos: 1, max: 9 }); // Bola 1 por defecto
+            anadirFilaBola({ digitos: 2, max: 99 }); // Bola 2 por defecto
+        }
+    }
     // Función para resetear el formulario al estado "Añadir"
     function resetearFormularioAfiliado() {
         editAffiliateIdInput.value = '';
@@ -1128,6 +1181,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Renderiza los paquetes existentes del sorteo
         renderizarEditorPaquetes(sorteo.paquetes_json);
 
+        const tipoSorteoSelect = document.getElementById('tipo_sorteo');
+        const configTombolaContainer = document.getElementById('configuracion-tombola-container');
+        tipoSorteoSelect.value = sorteo.tipo_sorteo || 'ruleta_digital';
+
+        if (tipoSorteoSelect.value === 'tombola_interactiva') {
+            configTombolaContainer.classList.remove('oculto');
+            renderizarEditorBolas(sorteo.configuracion_tombola);
+        } else {
+            configTombolaContainer.classList.add('oculto');
+        }
         btnGuardarSorteo.textContent = 'Actualizar Sorteo';
         btnCancelarEdicionSorteo.style.display = 'inline-block';
         formGestionSorteo.scrollIntoView({ behavior: 'smooth' });
@@ -1148,6 +1211,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Limpia y resetea el editor de paquetes
         renderizarEditorPaquetes(); 
 
+        document.getElementById('tipo_sorteo').value = 'ruleta_digital';
+        document.getElementById('configuracion-tombola-container').classList.add('oculto');
+        renderizarEditorBolas();
         btnGuardarSorteo.textContent = 'Guardar Sorteo';
         btnCancelarEdicionSorteo.style.display = 'none';
     }
@@ -1162,14 +1228,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const id = sorteoEditIdInput.value;
         const paquetesData = recogerDatosPaquetes();
 
-        const data = {
-            nombre_premio_display: nombrePremioDisplayInput.value.trim(),
-            imagen_url: document.getElementById('imagenUrlSorteo').value.trim(),
-            nombre_base_archivo_guia: nombreBaseArchivoGuiaInput.value.trim(),
-            meta_participaciones: parseInt(metaParticipacionesSorteoInput.value, 10),
-            activo: sorteoActivoCheckbox.checked,
-            paquetes_json: paquetesData
-        };
+    const data = {
+        nombre_premio_display: nombrePremioDisplayInput.value.trim(),
+        imagen_url: document.getElementById('imagenUrlSorteo').value.trim(),
+        nombre_base_archivo_guia: nombreBaseArchivoGuiaInput.value.trim(),
+        meta_participaciones: parseInt(metaParticipacionesSorteoInput.value, 10),
+        activo: false, // Los sorteos siempre se crean como 'programados'
+        paquetes_json: paquetesData,
+        tipo_sorteo: document.getElementById('tipo_sorteo').value,
+        configuracion_tombola: recogerDatosBolas()
+    };
 
         if (!data.nombre_premio_display || !data.nombre_base_archivo_guia || isNaN(data.meta_participaciones) || data.meta_participaciones < 1) {
             showGenericStatusMessage(statusGestionSorteo, "Nombre del premio, nombre base de guía y meta válida son requeridos.", true);
@@ -1683,7 +1751,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const packageSelect = document.getElementById('packageChosen');
     // --- 1. Lógica de Sesión ---
 
+    document.getElementById('tipo_sorteo')?.addEventListener('change', (e) => {
+        const container = document.getElementById('configuracion-tombola-container');
+        if (e.target.value === 'tombola_interactiva') {
+            container.classList.remove('oculto');
+            // Si no hay bolas, añade las de por defecto
+            if (document.querySelectorAll('#bolas-editor-container .paquete-editor-fila').length === 0) {
+                renderizarEditorBolas();
+            }
+        } else {
+            container.classList.add('oculto');
+        }
+    });
 
+    document.getElementById('btnAnadirBola')?.addEventListener('click', () => anadirFilaBola());
 
     // --- 2. Formularios de Gestión ---
     addParticipantForm?.addEventListener('submit', handleAddParticipant);
