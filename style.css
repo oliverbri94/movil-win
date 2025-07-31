@@ -3747,12 +3747,13 @@ nav.bg-custom-dark-bg-frame a:hover {
 /* Botón secundario para "Anterior" */
 .admin-button-secondary {
     background-color: transparent;
-    border: 2px solid var(--clr-dark-text-alt);
-    color: var(--clr-dark-text-alt);
+    border: 2px solid var(--clr-primary); /* Borde con el color principal */
+    color: var(--clr-primary); /* Texto con el color principal */
+    font-weight: 600;
 }
 .admin-button-secondary:hover {
-    background-color: var(--clr-dark-text-alt);
-    color: var(--clr-dark-bg);
+    background-color: var(--clr-primary);
+    color: white; /* El color del texto cambia a blanco al pasar el mouse */
 }
 
 /* --- Feedback de Validación --- */
@@ -3893,4 +3894,42 @@ nav.bg-custom-dark-bg-frame a:hover {
 }
 .secure-checkout-badge i {
     font-size: 1.5em;
+}
+
+/* ================================================= */
+/* == ESTILOS PARA CABECERAS DE SECCIÓN DEL FORMULARIO == */
+/* ================================================= */
+
+.form-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--clr-dark-bg);
+    padding: 12px 15px;
+    border-radius: var(--border-radius-medium);
+    border-left: 4px solid var(--clr-primary);
+    margin-bottom: 20px;
+}
+
+.form-section-header i {
+    color: var(--clr-primary);
+    font-size: 1.2em;
+}
+
+.form-section-header h4 {
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--clr-dark-text);
+}
+
+/* Estilo para el contador de números elegidos */
+#contador-numeros {
+    background-color: var(--clr-primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.9em;
+    font-weight: bold;
+    margin-left: 5px;
 }

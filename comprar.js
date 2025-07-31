@@ -165,7 +165,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const renderizarSelectoresDeBolas = () => {
-        selectorContainer.innerHTML = '<h4><i class="fas fa-hand-pointer"></i> Elige tu combinación de la suerte</h4>';
+        const headerHTML = `
+            <div class="form-section-header">
+                <i class="fas fa-hand-pointer"></i>
+                <h4>Elige tu combinación de la suerte</h4>
+            </div>`;
+        selectorContainer.innerHTML = headerHTML;
         selectorContainer.classList.remove('oculto');
         misNumerosContainer.style.display = 'block';
 
