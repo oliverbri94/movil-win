@@ -3517,7 +3517,7 @@ nav.bg-custom-dark-bg-frame a:hover {
     overflow-y: scroll;
     border-radius: 50%; /* ¡Esto lo hace circular! */
     border: 4px solid var(--clr-dark-border); /* Borde para definir la bola */
-    background-color: #f0f0f0; /* Color de fondo similar a la madera clara */
+    background-color: #c4b38b; /* Color de fondo similar a la madera clara */
     position: relative;
     scroll-snap-type: y mandatory;
     text-align: center; /* Centramos el número */

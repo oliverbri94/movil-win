@@ -78,18 +78,22 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
     // DESPUÉS (Reemplázala con esta versión mejorada)
     function renderizarSelectoresDeBolas() {
-        selectorContainer.innerHTML = '<h4><i class="fas fas fa-arrow-down"></i> Opción 1: Elige deslizando</h4>';
+        selectorContainer.innerHTML = '<h4><i class="fas fa-hand-pointer"></i> Elige tu combinación de la suerte</h4>';
         selectorContainer.classList.remove('oculto');
         misNumerosContainer.style.display = 'block';
 
         const configBolas = sorteoData.configuracion_tombola;
         if (!configBolas || configBolas.length === 0) return;
 
-        // --- Renderiza los Selectores Deslizantes (Pickers) ---
+        // --- Contenedor principal para selectores y inputs ---
         const selectorWrapper = document.createElement('div');
         selectorWrapper.className = 'selector-wrapper';
 
         configBolas.forEach((bola, index) => {
+            const pickerContainer = document.createElement('div');
+            pickerContainer.className = 'picker-column';
+
+            // 1. Selector Deslizante (la bola)
             const pickerHTML = `
                 <div class="number-picker">
                     <div class="picker-wheel" id="wheel-${index}">
@@ -99,66 +103,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 </div>
             `;
-            selectorWrapper.innerHTML += pickerHTML;
+            pickerContainer.innerHTML = pickerHTML;
+            
+            // 2. Input Manual (justo debajo de la bola)
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'manual-input';
+            input.placeholder = String(0).padStart(bola.digitos, '0');
+            input.maxLength = bola.digitos; // Importante para la validación
+            pickerContainer.appendChild(input);
+
+            selectorWrapper.appendChild(pickerContainer);
         });
 
         selectorContainer.appendChild(selectorWrapper);
         
+        // 3. Un único botón para añadir
         const addButton = document.createElement('button');
         addButton.type = 'button';
         addButton.id = 'btn-add-number';
         addButton.className = 'admin-button';
-        addButton.innerHTML = '<i class="fas fa-plus"></i> Añadir esta combinación';
+        addButton.innerHTML = '<i class="fas fa-plus"></i> Añadir Combinación';
         selectorContainer.appendChild(addButton);
         
+        // 4. Un único div de estado
         const statusCombinacion = document.createElement('div');
         statusCombinacion.id = 'status-combinacion';
         statusCombinacion.className = 'status-container oculto';
         selectorContainer.appendChild(statusCombinacion);
 
+        // 5. Asignar el evento al único botón
         addButton.addEventListener('click', anadirNumeroSeleccionado);
-        
-        document.querySelectorAll('.number-picker').forEach(picker => {
-            picker.addEventListener('scroll', () => {
-                setTimeout(comprobarDisponibilidad, 200);
-            });
-        });
-
-        // --- Renderiza los Inputs Manuales ---
-        const manualInputContainer = document.getElementById('manual-input-container');
-        manualInputContainer.classList.remove('oculto');
-        manualInputContainer.innerHTML = '<h4><i class="fas fa-keyboard"></i> Opción 2: Escribe tus números</h4>';
-        
-        const manualWrapper = document.createElement('div');
-        manualWrapper.className = 'selector-wrapper'; // Reutilizamos el estilo
-
-        configBolas.forEach((bola, index) => {
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.className = 'manual-input';
-            input.placeholder = String(0).padStart(bola.digitos, '0');
-            input.maxLength = bola.digitos;
-            input.min = 0;
-            input.max = bola.max;
-            manualWrapper.appendChild(input);
-        });
-        manualInputContainer.appendChild(manualWrapper);
-        
-        const addManualButton = document.createElement('button');
-        addManualButton.type = 'button';
-        addManualButton.id = 'btn-add-manual';
-        addManualButton.className = 'admin-button';
-        addManualButton.innerHTML = '<i class="fas fa-plus"></i> Añadir manualmente';
-        manualInputContainer.appendChild(addManualButton);
-        
-        const statusManual = document.createElement('div');
-        statusManual.id = 'status-combinacion-manual';
-        statusManual.className = 'status-container oculto';
-        manualInputContainer.appendChild(statusManual);
-
-        addManualButton.addEventListener('click', anadirNumeroManual);
-
-        comprobarDisponibilidad();
     }
     /**
      * Obtiene la combinación de números actualmente seleccionada en los pickers.
@@ -178,7 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log(`  -> Altura del Item (itemHeight): ${itemHeight}`);
 
             if (itemHeight && itemHeight > 0) {
-                const selectedIndex = Math.round(scrollTop / itemHeight);
+                const selectedIndex = Math.floor(scrollTop / itemHeight);
                 console.log(`  -> Índice Calculado: ${selectedIndex}`);
                 seleccion.push(selectedIndex);
             } else {
@@ -270,10 +245,53 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const seleccion = getSeleccionActual();
-        misNumerosSeleccionados.push(seleccion);
+        const manualInputs = document.querySelectorAll('.manual-input');
+        const hayInputManual = Array.from(manualInputs).some(input => input.value !== '');
+        
+        let seleccionFinal = [];
+
+        if (hayInputManual) {
+            // --- Lógica para Ingreso Manual ---
+            let esValido = true;
+            manualInputs.forEach(input => {
+                const valor = parseInt(input.value, 10);
+                if (isNaN(valor) || input.value.length !== input.maxLength) {
+                    esValido = false;
+                }
+                seleccionFinal.push(valor);
+            });
+
+            if (!esValido) {
+                alert('Por favor, introduce un número válido en cada casilla con el número correcto de dígitos.');
+                return;
+            }
+
+        } else {
+            // --- Lógica para Selector Deslizante ---
+            seleccionFinal = getSeleccionActual();
+        }
+
+        const seleccionString = JSON.stringify(seleccionFinal);
+        const statusDiv = document.getElementById('status-combinacion');
+
+        if (numerosOcupados.includes(seleccionString)) {
+            statusDiv.textContent = 'Esta combinación ya está ocupada. Prueba otra.';
+            statusDiv.className = 'status-container error';
+            return;
+        }
+        
+        if (misNumerosSeleccionados.map(n => JSON.stringify(n)).includes(seleccionString)) {
+            statusDiv.textContent = 'Ya has añadido esta combinación a tu lista.';
+            statusDiv.className = 'status-container error';
+            return;
+        }
+
+        statusDiv.className = 'status-container oculto';
+        misNumerosSeleccionados.push(seleccionFinal);
         actualizarListaMisNumeros();
-        comprobarDisponibilidad(); // Re-comprueba para mostrar que ahora está en tu lista
+        
+        // Limpiar campos manuales después de añadir
+        manualInputs.forEach(input => input.value = '');
     }
     
     /**
