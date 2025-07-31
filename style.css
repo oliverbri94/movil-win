@@ -3512,20 +3512,42 @@ nav.bg-custom-dark-bg-frame a:hover {
 }
 
 .number-picker {
-    height: 100px; /* Ajustamos la altura para mostrar una bola centrada */
-    width: 100px; /* Damos un ancho fijo para que parezca una bola */
-    overflow-y: scroll;
-    border-radius: 50%; /* ¡Esto lo hace circular! */
-    border: 4px solid var(--clr-dark-border); /* Borde para definir la bola */
-    background-color: #e6d8c2; /* Color de fondo similar a la madera clara */
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
     position: relative;
+    overflow: hidden; /* Ocultamos el scrollbar y el contenido que se desborda */
+    
+    /* Fondo con gradiente para simular luz y volumen */
+    background: radial-gradient(circle at 50% 30%, #fdf5e6 10%, #f0e6d2 80%);
+    
+    /* Sombra múltiple para un efecto 3D convincente */
+    box-shadow: 
+        inset -4px -4px 12px rgba(0, 0, 0, 0.15), /* Sombra interior para curvatura */
+        inset 4px 4px 12px rgba(255, 255, 255, 0.5), /* Brillo interior */
+        0px 5px 15px rgba(0, 0, 0, 0.3); /* Sombra exterior proyectada */
+
+    /* Hacemos que el scroll funcione, aunque no se vea */
+    overflow-y: scroll;
     scroll-snap-type: y mandatory;
-    text-align: center; /* Centramos el número */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE */
 }
-.number-picker::-webkit-scrollbar {
-    display: none;
+.number-picker::-webkit-scrollbar { 
+    display: none; /* Chrome, Safari */
+}
+/* El número dentro de la bola */
+.picker-item {
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Anton', sans-serif; /* Tipografía de impacto */
+    font-size: 2.8em;
+    color: #4a3f35; /* Un color café oscuro para el número */
+    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.7); /* Sutil sombra de texto */
+    scroll-snap-align: center;
+    width: 100%;
 }
 
 .picker-wheel {
@@ -3619,31 +3641,25 @@ nav.bg-custom-dark-bg-frame a:hover {
 }
 
 /* El campo de texto para ingreso manual, ahora con estilo de bola */
+/* El campo de texto para ingreso manual, ahora con un diseño pulido */
 .manual-input {
-    /* --- La magia para hacerlo circular --- */
-    width: 80px;  /* Ancho y alto iguales para un círculo perfecto */
-    height: 80px;
-    border-radius: 50%; /* Esto lo convierte en un círculo */
-
-    /* --- Estilos del texto y fondo --- */
-    font-family: 'Anton', sans-serif; /* Misma fuente que las bolas deslizables */
-    font-size: 2.2em; /* Texto grande para que se vea bien */
-    text-align: center; /* Centra el número horizontalmente */
-    color: #4a3f35;
-    background-color: #f0e6d2; /* Mismo color de fondo que las bolas deslizables */
-    border: 3px solid #b3a07d;
-    padding: 0; /* Quitamos el padding para un mejor centrado */
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.15); /* Sombra interior suave */
+    width: 80px; /* Ancho ajustado */
+    height: auto; /* Altura automática */
+    padding: 10px;
+    font-size: 1.5em; /* Tamaño de fuente normal */
+    font-weight: bold;
+    text-align: center;
+    background-color: var(--clr-dark-bg-frame);
+    color: var(--clr-dark-text);
+    border: 2px solid var(--clr-dark-border);
+    border-radius: var(--border-radius-small); /* Bordes ligeramente redondeados */
 }
 
-/* Oculta las flechas de los inputs de tipo number (ya lo tenías, lo mantenemos) */
+/* Oculta las flechas de los inputs (sin cambios) */
 .manual-input::-webkit-outer-spin-button,
 .manual-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
-}
-.manual-input[type=number] {
-  -moz-appearance: textfield;
 }
 
 /* Centrar el selector en pantallas pequeñas */

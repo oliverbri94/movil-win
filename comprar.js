@@ -208,6 +208,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         addButton.innerHTML = '<i class="fas fa-plus"></i> Añadir Combinación';
         selectorContainer.appendChild(addButton);
         
+        const randomButton = document.createElement('button');
+        randomButton.type = 'button';
+        randomButton.id = 'btn-random';
+        // Usamos el estilo de botón secundario
+        randomButton.className = 'admin-button-secondary'; 
+        randomButton.innerHTML = '<i class="fas fa-random"></i> Llenar con Números Aleatorios';
+        randomButton.style.marginTop = '10px'; // Un poco de espacio
+
+        // Insertamos el botón aleatorio ANTES del botón de añadir normal
+        selectorContainer.insertBefore(randomButton, addButton);
+
+        // Le damos vida al botón
+        randomButton.addEventListener('click', anadirNumerosAleatorios);
         const statusCombinacion = document.createElement('div');
         statusCombinacion.id = 'status-combinacion';
         statusCombinacion.className = 'status-container oculto';
@@ -278,7 +291,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         actualizarListaMisNumeros();
         manualInputs.forEach(input => input.value = '');
     };
-    
+    const anadirNumerosAleatorios = () => {
+        const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
+        const numerosRestantes = paqueteBoletos - misNumerosSeleccionados.length;
+
+        if (numerosRestantes <= 0) {
+            alert('¡Ya has completado tu paquete de boletos!');
+            return;
+        }
+
+        const configBolas = sorteoData.configuracion_tombola;
+        const statusDiv = document.getElementById('status-combinacion');
+        let numerosAnadidos = 0;
+
+        for (let i = 0; i < numerosRestantes; i++) {
+            let comboAleatorio;
+            let comboString;
+            let intentos = 0;
+            const MAX_INTENTOS = 500; // Límite para evitar bucles infinitos
+
+            do {
+                comboAleatorio = configBolas.map(bola => Math.floor(Math.random() * (bola.max + 1)));
+                comboString = JSON.stringify(comboAleatorio);
+                intentos++;
+                if (intentos > MAX_INTENTOS) {
+                    alert('No se pudieron encontrar combinaciones aleatorias disponibles. ¡El sorteo está casi lleno! Elige los números restantes manualmente.');
+                    return; // Sale de la función si no encuentra números
+                }
+            } while (numerosOcupados.includes(comboString) || misNumerosSeleccionados.map(n => JSON.stringify(n)).includes(comboString));
+
+            misNumerosSeleccionados.push(comboAleatorio);
+            numerosAnadidos++;
+        }
+
+        actualizarListaMisNumeros();
+        statusDiv.textContent = `¡Se añadieron ${numerosAnadidos} combinaciones aleatorias!`;
+        statusDiv.className = 'status-container success';
+        setTimeout(() => statusDiv.classList.add('oculto'), 3000);
+    };
     const actualizarListaMisNumeros = () => {
         listaNumerosElegidos.innerHTML = '';
         contadorNumerosSpan.textContent = misNumerosSeleccionados.length;
@@ -352,7 +402,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         button.addEventListener('click', () => {
             if (validateStep(currentStep)) {
                 currentStep++;
-                if (currentStep === 2) {
+                if (currentStep === 3) {
                     populateConfirmationStep();
                 }
                 showStep(currentStep);
