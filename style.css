@@ -3591,7 +3591,7 @@ nav.bg-custom-dark-bg-frame a:hover {
     justify-content: center;
     width: 45px;
     height: 45px;
-    background-color: #f0f0f0; /* Color de fondo similar a la madera clara */
+    background-color: #e6d8c2; /* Color de fondo similar a la madera clara */
     border-radius: 50%;
     font-weight: bold;
     color: var(--clr-dark-text);

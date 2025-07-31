@@ -76,14 +76,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     /**
      * Crea y muestra los selectores de bolas basados en la configuración del sorteo.
      */
+    // DESPUÉS (Reemplázala con esta versión mejorada)
     function renderizarSelectoresDeBolas() {
-        selectorContainer.innerHTML = '<h4><i class="fas fa-arrow-down"></i> Elige tu combinación de la suerte:</h4>';
+        selectorContainer.innerHTML = '<h4><i class="fas fas fa-arrow-down"></i> Opción 1: Elige deslizando</h4>';
         selectorContainer.classList.remove('oculto');
         misNumerosContainer.style.display = 'block';
 
         const configBolas = sorteoData.configuracion_tombola;
         if (!configBolas || configBolas.length === 0) return;
 
+        // --- Renderiza los Selectores Deslizantes (Pickers) ---
         const selectorWrapper = document.createElement('div');
         selectorWrapper.className = 'selector-wrapper';
 
@@ -116,44 +118,72 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         addButton.addEventListener('click', anadirNumeroSeleccionado);
         
-        // Comprobar disponibilidad al hacer scroll en las ruedas
-        document.querySelectorAll('.picker-wheel').forEach(wheel => {
-            wheel.addEventListener('scroll', () => {
-                // Pequeña demora para no sobrecargar de checks
+        document.querySelectorAll('.number-picker').forEach(picker => {
+            picker.addEventListener('scroll', () => {
                 setTimeout(comprobarDisponibilidad, 200);
             });
         });
 
+        // --- Renderiza los Inputs Manuales ---
+        const manualInputContainer = document.getElementById('manual-input-container');
+        manualInputContainer.classList.remove('oculto');
+        manualInputContainer.innerHTML = '<h4><i class="fas fa-keyboard"></i> Opción 2: Escribe tus números</h4>';
+        
+        const manualWrapper = document.createElement('div');
+        manualWrapper.className = 'selector-wrapper'; // Reutilizamos el estilo
+
+        configBolas.forEach((bola, index) => {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'manual-input';
+            input.placeholder = String(0).padStart(bola.digitos, '0');
+            input.maxLength = bola.digitos;
+            input.min = 0;
+            input.max = bola.max;
+            manualWrapper.appendChild(input);
+        });
+        manualInputContainer.appendChild(manualWrapper);
+        
+        const addManualButton = document.createElement('button');
+        addManualButton.type = 'button';
+        addManualButton.id = 'btn-add-manual';
+        addManualButton.className = 'admin-button';
+        addManualButton.innerHTML = '<i class="fas fa-plus"></i> Añadir manualmente';
+        manualInputContainer.appendChild(addManualButton);
+        
+        const statusManual = document.createElement('div');
+        statusManual.id = 'status-combinacion-manual';
+        statusManual.className = 'status-container oculto';
+        manualInputContainer.appendChild(statusManual);
+
+        addManualButton.addEventListener('click', anadirNumeroManual);
+
         comprobarDisponibilidad();
     }
-
     /**
      * Obtiene la combinación de números actualmente seleccionada en los pickers.
      * @returns {Array<number>}
      */
     function getSeleccionActual() {
         const seleccion = [];
-        // Mensaje para saber que la función se está ejecutando
         console.log("--- Calculando Selección Actual ---");
 
-        document.querySelectorAll('.picker-wheel').forEach((wheel, index) => {
-            const scrollTop = wheel.scrollTop;
-            // Usamos 'optional chaining' (?.) para evitar errores si no encuentra el item
-            const itemHeight = wheel.querySelector('.picker-item')?.offsetHeight;
+        // ¡CORRECCIÓN CLAVE! Seleccionamos .number-picker, que es el elemento que realmente tiene el scroll.
+        document.querySelectorAll('.number-picker').forEach((picker, index) => {
+            const scrollTop = picker.scrollTop;
+            const itemHeight = picker.querySelector('.picker-item')?.offsetHeight;
 
-            // Mensajes de depuración para ver los valores internos
-            console.log(`Rueda #${index + 1}:`);
+            console.log(`Rodillo #${index + 1}:`);
             console.log(`  -> Posición del Scroll (scrollTop): ${scrollTop}`);
             console.log(`  -> Altura del Item (itemHeight): ${itemHeight}`);
 
-            // Solo hacemos el cálculo si tenemos una altura válida
             if (itemHeight && itemHeight > 0) {
                 const selectedIndex = Math.round(scrollTop / itemHeight);
                 console.log(`  -> Índice Calculado: ${selectedIndex}`);
                 seleccion.push(selectedIndex);
             } else {
-                console.error(`  -> ERROR: No se pudo determinar la altura del item para la rueda #${index + 1}. Se usará 0.`);
-                seleccion.push(0); // Si hay un error, devolvemos 0 para evitar que la app se rompa
+                console.error(`  -> ERROR: No se pudo determinar la altura del item para el rodillo #${index + 1}. Se usará 0.`);
+                seleccion.push(0);
             }
         });
 
@@ -184,6 +214,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+
+
+    function anadirNumeroManual() {
+        const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
+        if (misNumerosSeleccionados.length >= paqueteBoletos) {
+            alert(`Ya has elegido los ${paqueteBoletos} números de tu paquete.`);
+            return;
+        }
+
+        const manualInputs = document.querySelectorAll('.manual-input');
+        const seleccionManual = [];
+        let esValido = true;
+
+        manualInputs.forEach(input => {
+            const valor = parseInt(input.value, 10);
+            if (isNaN(valor)) {
+                esValido = false;
+            }
+            seleccionManual.push(valor);
+        });
+
+        if (!esValido) {
+            alert('Por favor, introduce un número válido en cada casilla.');
+            return;
+        }
+
+        const seleccionString = JSON.stringify(seleccionManual);
+        const statusDiv = document.getElementById('status-combinacion-manual');
+
+        if (numerosOcupados.includes(seleccionString)) {
+            statusDiv.textContent = 'Esta combinación ya está ocupada. Prueba otra.';
+            statusDiv.className = 'status-container error';
+            return;
+        }
+        
+        if (misNumerosSeleccionados.map(n => JSON.stringify(n)).includes(seleccionString)) {
+            statusDiv.textContent = 'Ya has añadido esta combinación a tu lista.';
+            statusDiv.className = 'status-container error';
+            return;
+        }
+
+        statusDiv.className = 'status-container oculto';
+        misNumerosSeleccionados.push(seleccionManual);
+        actualizarListaMisNumeros();
+        comprobarDisponibilidad();
+    }
     /**
      * Añade la combinación actual a la lista de "mis números".
      */
