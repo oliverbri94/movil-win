@@ -3569,25 +3569,6 @@ nav.bg-custom-dark-bg-frame a:hover {
     width: 100%; /* Ocupar todo el ancho del picker */
 }
 
-/* Efecto de sombra suave para dar profundidad a la bola */
-.number-picker {
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Un pequeño brillo interior (opcional) */
-.number-picker::before {
-    content: '';
-    position: absolute;
-    top: 10%;
-    left: 10%;
-    right: 10%;
-    bottom: 10%;
-    background: radial-gradient(circle at 50% 30%, #fff 20%, transparent 70%);
-    border-radius: 50%;
-    opacity: 0.3;
-    pointer-events: none;
-    z-index: 1;
-}
 
 /* Estilos para la lista de números elegidos (manteniendo el diseño de bolas pequeñas) */
 #lista-numeros-elegidos {
