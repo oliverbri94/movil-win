@@ -3517,7 +3517,7 @@ nav.bg-custom-dark-bg-frame a:hover {
     overflow-y: scroll;
     border-radius: 50%; /* ¡Esto lo hace circular! */
     border: 4px solid var(--clr-dark-border); /* Borde para definir la bola */
-    background-color: #c4b38b; /* Color de fondo similar a la madera clara */
+    background-color: #e6d8c2; /* Color de fondo similar a la madera clara */
     position: relative;
     scroll-snap-type: y mandatory;
     text-align: center; /* Centramos el número */
@@ -3618,10 +3618,192 @@ nav.bg-custom-dark-bg-frame a:hover {
     margin-left: 10px;
 }
 
+/* El campo de texto para ingreso manual, ahora con estilo de bola */
+.manual-input {
+    /* --- La magia para hacerlo circular --- */
+    width: 80px;  /* Ancho y alto iguales para un círculo perfecto */
+    height: 80px;
+    border-radius: 50%; /* Esto lo convierte en un círculo */
+
+    /* --- Estilos del texto y fondo --- */
+    font-family: 'Anton', sans-serif; /* Misma fuente que las bolas deslizables */
+    font-size: 2.2em; /* Texto grande para que se vea bien */
+    text-align: center; /* Centra el número horizontalmente */
+    color: #4a3f35;
+    background-color: #f0e6d2; /* Mismo color de fondo que las bolas deslizables */
+    border: 3px solid #b3a07d;
+    padding: 0; /* Quitamos el padding para un mejor centrado */
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.15); /* Sombra interior suave */
+}
+
+/* Oculta las flechas de los inputs de tipo number (ya lo tenías, lo mantenemos) */
+.manual-input::-webkit-outer-spin-button,
+.manual-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.manual-input[type=number] {
+  -moz-appearance: textfield;
+}
+
 /* Centrar el selector en pantallas pequeñas */
 @media (max-width: 600px) {
     .selector-wrapper {
         flex-direction: column;
         align-items: center;
+    }
+}
+
+/* ============================================= */
+/* == ESTILOS PARA EL FORMULARIO MULTI-STEP == */
+/* ============================================= */
+
+/* --- Barra de Progreso --- */
+.progress-bar-container {
+    position: relative;
+    width: 100%;
+    margin: 0 auto 30px;
+}
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+    padding: 0;
+    position: relative;
+    z-index: 1;
+}
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: var(--clr-dark-text-alt);
+    transition: color 0.4s ease;
+}
+.step-icon {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--clr-dark-border);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    background-color: var(--clr-dark-bg);
+    transition: border-color 0.4s ease, background-color 0.4s ease;
+}
+.step-label {
+    margin-top: 10px;
+    font-weight: 500;
+    font-size: 0.9em;
+}
+/* Estilos para el paso activo */
+.step.active .step-icon {
+    border-color: var(--clr-primary);
+    background-color: var(--clr-primary);
+    color: white;
+}
+.step.active {
+    color: var(--clr-dark-text);
+}
+/* Líneas de la barra de progreso */
+.progress-bar-line-bg {
+    position: absolute;
+    top: 25px; /* Mitad de la altura del ícono */
+    left: 10%;
+    right: 10%;
+    height: 4px;
+    background-color: var(--clr-dark-border);
+    z-index: 0;
+    transform: translateY(-50%);
+}
+.progress-bar-line {
+    height: 100%;
+    width: 0%; /* Se animará con JS */
+    background-color: var(--clr-primary);
+    transition: width 0.5s ease-in-out;
+}
+
+/* --- Contenedor y Pasos del Formulario --- */
+.multistep-form {
+    overflow: hidden; /* Clave para las animaciones de slide */
+    position: relative;
+}
+.form-step {
+    display: none; /* Ocultamos todos los pasos por defecto */
+    animation: fadeOut 0.5s forwards;
+}
+.form-step.active {
+    display: block;
+    animation: fadeIn 0.5s forwards;
+}
+.step-title {
+    text-align: center;
+    margin-bottom: 25px;
+    color: var(--clr-primary);
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-20px); }
+}
+
+/* --- Navegación del Formulario --- */
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    border-top: 1px solid var(--clr-dark-border);
+    padding-top: 20px;
+}
+/* Botón secundario para "Anterior" */
+.admin-button-secondary {
+    background-color: transparent;
+    border: 2px solid var(--clr-dark-text-alt);
+    color: var(--clr-dark-text-alt);
+}
+.admin-button-secondary:hover {
+    background-color: var(--clr-dark-text-alt);
+    color: var(--clr-dark-bg);
+}
+
+/* --- Feedback de Validación --- */
+.form-group.valid input {
+    border-color: var(--clr-green);
+}
+.form-group.invalid input {
+    border-color: var(--clr-red);
+}
+
+/* --- Resumen Final --- */
+#resumen-final {
+    background-color: var(--clr-dark-bg);
+    padding: 20px;
+    border-radius: var(--border-radius-medium);
+    border-left: 5px solid var(--clr-primary);
+}
+#resumen-final h4 {
+    margin-top: 0;
+    color: var(--clr-dark-text);
+}
+#resumen-final p {
+    margin: 5px 0;
+    color: var(--clr-dark-text-alt);
+}
+#resumen-final .resumen-seccion {
+    margin-bottom: 15px;
+}
+
+/* --- Responsividad --- */
+@media (max-width: 600px) {
+    .step-label {
+        display: none; /* Ocultamos el texto en móvil para ahorrar espacio */
+    }
+    .progress-bar-line-bg {
+        left: 15%;
+        right: 15%;
     }
 }

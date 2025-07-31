@@ -1,21 +1,110 @@
-// REEMPLAZA TODO EL CONTENIDO DE comprar.js CON ESTO
-
 document.addEventListener('DOMContentLoaded', async () => {
-    // --- 1. ELEMENTOS DEL DOM Y VARIABLES ---
+    // --- 1. DECLARACIÓN DE VARIABLES Y ELEMENTOS ---
     const params = new URLSearchParams(window.location.search);
     const sorteoId = params.get('sorteoId');
     
-    const resumenDiv = document.getElementById('resumen-pedido');
+    // Elementos del formulario
     const form = document.getElementById('form-pedido');
-    const statusDiv = document.getElementById('pedido-status');
-    const selectorContainer = document.getElementById('selector-numeros-container');
-    const misNumerosContainer = document.getElementById('mis-numeros-container');
-    const listaNumerosElegidos = document.getElementById('lista-numeros-elegidos');
+    const steps = document.querySelectorAll('.form-step');
+    const nextButtons = document.querySelectorAll('.btn-next');
+    const prevButtons = document.querySelectorAll('.btn-prev');
+    
+    // Elementos de la barra de progreso
+    const progressSteps = document.querySelectorAll('.progress-steps .step');
+    const progressBarLine = document.querySelector('.progress-bar-line');
 
+    // Elementos de contenido dinámico
+    const resumenDiv = document.getElementById('resumen-pedido');
+    const contadorNumerosSpan = document.getElementById('contador-numeros');
+    const resumenFinalDiv = document.getElementById('resumen-final');
+    const statusDiv = document.getElementById('pedido-status');
+    
+    // Variables de estado
+    let currentStep = 0;
     let sorteoData = null;
     let numerosOcupados = [];
-    let misNumerosSeleccionados = []; // Carrito de compras de números
+    let misNumerosSeleccionados = [];
 
+
+    // --- 2. FUNCIONES DEL FORMULARIO MULTI-STEP ---
+
+    const showStep = (stepIndex) => {
+        steps.forEach((step, index) => {
+            step.classList.toggle('active', index === stepIndex);
+        });
+        updateProgressBar(stepIndex);
+    };
+
+    const updateProgressBar = (stepIndex) => {
+        progressSteps.forEach((step, index) => {
+            step.classList.toggle('active', index <= stepIndex);
+        });
+        const progressPercentage = (stepIndex / (steps.length - 1)) * 100;
+        progressBarLine.style.width = `${progressPercentage}%`;
+    };
+
+    const validateStep = (stepIndex) => {
+        // Validación del Paso 1: Selección de números
+        if (stepIndex === 0) {
+            const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
+            if (sorteoData.tipo_sorteo === 'tombola_interactiva' && misNumerosSeleccionados.length !== paqueteBoletos) {
+                alert(`Debes elegir exactamente ${paqueteBoletos} combinación(es) para tu paquete.`);
+                return false;
+            }
+        }
+        // Validación del Paso 2: Datos del usuario
+        if (stepIndex === 1) {
+            const inputs = steps[stepIndex].querySelectorAll('input[required]');
+            let allValid = true;
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.parentElement.classList.add('invalid');
+                    allValid = false;
+                } else {
+                    input.parentElement.classList.remove('invalid');
+                    input.parentElement.classList.add('valid');
+                }
+            });
+            if (!allValid) {
+                alert('Por favor, completa todos los campos requeridos.');
+                return false;
+            }
+        }
+        return true;
+    };
+    
+    const populateConfirmationStep = () => {
+        const nombre = document.getElementById('nombre').value;
+        const cedula = document.getElementById('cedula').value;
+
+        let numerosHTML = misNumerosSeleccionados.map(combo => {
+            const bolas = combo.map(n => `<div class="bola-small">${n}</div>`).join('');
+            return `<div class="numero-elegido-item">${bolas}</div>`;
+        }).join('');
+
+        if (sorteoData.tipo_sorteo !== 'tombola_interactiva') {
+            const cantidad = params.get('paqueteBoletos') || 1;
+            numerosHTML = `<p>${cantidad} boleto(s) para sorteo con ruleta digital.</p>`;
+        }
+
+        resumenFinalDiv.innerHTML = `
+            <div class="resumen-seccion">
+                <h4><i class="fas fa-gift"></i> Tu Sorteo</h4>
+                <p>${sorteoData.nombre_premio_display}</p>
+                <p><strong>Paquete:</strong> ${params.get('paqueteNombre')}</p>
+            </div>
+            <div class="resumen-seccion">
+                <h4><i class="fas fa-ticket-alt"></i> Tus Números</h4>
+                ${numerosHTML}
+            </div>
+            <div class="resumen-seccion">
+                <h4><i class="fas fa-user"></i> Tus Datos</h4>
+                <p><strong>Nombre:</strong> ${nombre}</p>
+                <p><strong>Cédula:</strong> ${cedula}</p>
+            </div>
+        `;
+    };
+ 
     // --- 2. FUNCIONES PRINCIPALES ---
 
     /**
@@ -384,6 +473,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+
+    document.getElementById('lista-numeros-elegidos').addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn-eliminar-numero')) {
+            const indexToRemove = parseInt(e.target.dataset.index, 10);
+            misNumerosSeleccionados.splice(indexToRemove, 1);
+            actualizarListaMisNumeros();
+        }
+    });
+
     // --- 4. EJECUCIÓN INICIAL ---
+    showStep(currentStep);
     cargarDatosIniciales();
 });
