@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 fbq('track', 'Lead');
             }
             
-            window.location.href = `gracias.html?pedidoId=${result.pedidoId}`;
+            window.location.href = `gracias.html?pedidoId=${result.pedidoId}&numeros=${numerosQuery}`;
 
         } catch (error) {
             statusDiv.textContent = `Error: ${error.message}`;

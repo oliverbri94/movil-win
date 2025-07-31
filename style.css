@@ -3938,3 +3938,93 @@ nav.bg-custom-dark-bg-frame a:hover {
     font-weight: bold;
     margin-left: 5px;
 }
+
+/* --- ESTILOS MEJORADOS PARA PÁGINA DE GRACIAS --- */
+#resumen-y-timer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    background-color: var(--clr-dark-bg);
+    padding: 20px;
+    border-radius: var(--border-radius-medium);
+    margin: 30px 0;
+}
+.resumen-seccion { flex: 1; min-width: 250px; }
+.resumen-seccion h4 { margin-top: 0; color: var(--clr-dark-text-alt); }
+#numeros-elegidos-resumen { display: flex; flex-wrap: wrap; gap: 10px; }
+#countdown-timer {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: var(--clr-accent);
+}
+
+.pasos-pago-container {
+    display: grid;
+    gap: 25px;
+}
+.paso-pago {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    background-color: var(--clr-dark-bg-frame);
+    padding: 25px;
+    border-radius: var(--border-radius-medium);
+    border: 1px solid var(--clr-dark-border);
+}
+.paso-numero {
+    flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: var(--clr-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+.paso-contenido h4 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: var(--clr-dark-text);
+}
+.paso-contenido p {
+    margin: 0;
+    color: var(--clr-dark-text-alt);
+    line-height: 1.6;
+}
+.lista-datos-pago {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+}
+.lista-datos-pago li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--clr-dark-border);
+}
+.lista-datos-pago li:last-child { border-bottom: none; }
+.copy-container { display: flex; align-items: center; gap: 10px; }
+.btn-copy {
+    background: var(--clr-dark-bg);
+    border: 1px solid var(--clr-dark-border);
+    color: var(--clr-dark-text-alt);
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.btn-copy.copied { background-color: var(--clr-green); color: white; }
+.boton-whatsapp { margin-top: 20px; }
+
+/* Efecto de flash al copiar */
+.highlight-flash {
+    animation: flash 0.7s ease;
+}
+@keyframes flash {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(127, 90, 240, 0.2); }
+    100% { background-color: transparent; }
+}

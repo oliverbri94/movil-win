@@ -57,48 +57,65 @@
     
     <main class="site-main">
         <section class="content-section page-text-container">
-            <h1 class="text-center"><i class="fas fa-check-circle" style="color: var(--clr-primary);"></i> ¡Pedido Recibido!</h1>
-            <p class="subtitle text-center" style="font-size: 1.2em;">Solo falta un paso para asegurar tus boletos.</p>
-            
-            <div class="datos-pago">
-                <h3>Instrucciones de Pago</h3>
-                <p>Por favor, realiza el pago a través de transferencia o depósito a la siguiente cuenta y envía tu comprobante a nuestro WhatsApp para validar tu compra.</p>
-                <ul>
-                    <li>
-                        <span><strong>Banco:</strong> Banco Pichincha</span>
-                    </li>
-                    <li>
-                        <span><strong>Tipo de Cuenta:</strong> Ahorros</span>
-                    </li>
-                    <li>
-                        <span class="copy-label"><strong>Número de Cuenta:</strong></span>
-                        <div class="copy-container">
-                            <span id="info-cuenta">2201235826</span>
-                            <button class="btn-copy" data-copy-target="info-cuenta" title="Copiar número">
-                                <i class="far fa-copy"></i>
-                            </button>
-                        </div>
-                    </li>
-                    <li>
-                        <span><strong>Titular:</strong> Oliver Briceño</span>
-                    </li>
-                    <li>
-                        <span class="copy-label"><strong>Cédula:</strong></span>
-                        <div class="copy-container">
-                            <span id="info-cedula">1718997925</span>
-                            <button class="btn-copy" data-copy-target="info-cedula" title="Copiar cédula">
-                                <i class="far fa-copy"></i>
-                            </button>
-                        </div>
-                    </li>
-                    <li>
-                        <span><strong>Email para registro(opcional):</strong> ceo@movilwin.com</span>
-                    </li>
-                </ul>
-                <a href="https://wa.me/593959687438?text=Hola%2C%20acabo%20de%20realizar%20un%20pedido%20y%20quiero%20enviar%20mi%20comprobante%20de%20pago." target="_blank" class="boton-whatsapp" id="whatsapp-btn">
-                    <i class="fab fa-whatsapp"></i> Enviar Comprobante o consultar dudas
-                </a>
+            <h1 class="text-center"><i class="fas fa-check-circle" style="color: var(--clr-primary);"></i> ¡Pedido Recibido con Éxito!</h1>
+            <p class="subtitle text-center" style="font-size: 1.2em;">Estás a un solo paso de asegurar tu participación.</p>
+
+            <div id="resumen-y-timer">
+                <div id="resumen-pedido-gracias" class="resumen-seccion">
+                    <h4>Tus Números Reservados:</h4>
+                    <div id="numeros-elegidos-resumen"></div>
+                </div>
+                <div id="timer-container" class="resumen-seccion">
+                    <h4>Tu pedido expira en:</h4>
+                    <div id="countdown-timer">30:00</div>
+                </div>
             </div>
+
+            <div class="pasos-pago-container">
+                <div class="paso-pago">
+                    <div class="paso-numero">1</div>
+                    <div class="paso-contenido">
+                        <h4>Copia los Datos para el Pago</h4>
+                        <p>Usa los botones para copiar la información fácilmente.</p>
+                        <ul class="lista-datos-pago">
+                            <li><span>Banco:</span> <strong>Banco Pichincha</strong></li>
+                            <li>
+                                <span>Cuenta:</span>
+                                <div class="copy-container">
+                                    <strong id="info-cuenta">2201235826</strong>
+                                    <button class="btn-copy" data-copy-target="info-cuenta" title="Copiar"><i class="far fa-copy"></i></button>
+                                </div>
+                            </li>
+                            <li><span>Titular:</span> <strong>Oliver Briceño</strong></li>
+                            <li>
+                                <span>Cédula/RUC:</span>
+                                <div class="copy-container">
+                                    <strong id="info-cedula">1718997925</strong>
+                                    <button class="btn-copy" data-copy-target="info-cedula" title="Copiar"><i class="far fa-copy"></i></button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="paso-pago">
+                    <div class="paso-numero">2</div>
+                    <div class="paso-contenido">
+                        <h4>Realiza la Transferencia o Depósito</h4>
+                        <p>Desde la app de tu banco o en una agencia. Guarda el comprobante.</p>
+                    </div>
+                </div>
+                <div class="paso-pago">
+                    <div class="paso-numero">3</div>
+                    <div class="paso-contenido">
+                        <h4>Envía tu Comprobante por WhatsApp</h4>
+                        <p>Haz clic en el botón para abrir WhatsApp y adjuntar tu comprobante. ¡Validaremos tu compra al instante!</p>
+                        <a href="https://wa.me/593959687438?text=Hola%2C%20acabo%20de%20realizar%20un%20pedido%20y%20quiero%20enviar%20mi%20comprobante%20de%20pago." target="_blank" class="boton-whatsapp" id="whatsapp-btn">
+                            <i class="fab fa-whatsapp"></i> Enviar Comprobante Ahora
+                        </a>
+                    </div>
+                </div>
+            </div>
+
         </section>
     </main>
 
