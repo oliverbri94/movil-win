@@ -3557,18 +3557,6 @@ nav.bg-custom-dark-bg-frame a:hover {
     align-items: center;
 }
 
-.picker-item {
-    height: 100px; /* Debe coincidir con la altura del picker */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2.5em;
-    font-weight: bold;
-    color: var(--clr-dark-text);
-    scroll-snap-align: center;
-    width: 100%; /* Ocupar todo el ancho del picker */
-}
-
 
 /* Estilos para la lista de números elegidos (manteniendo el diseño de bolas pequeñas) */
 #lista-numeros-elegidos {
@@ -3803,4 +3791,106 @@ nav.bg-custom-dark-bg-frame a:hover {
         left: 15%;
         right: 15%;
     }
+}
+
+.resumen-pedido-card {
+    background-color: var(--clr-dark-bg);
+    border: 1px solid var(--clr-dark-border);
+    border-left: 5px solid var(--clr-primary);
+    border-radius: var(--border-radius-medium);
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.resumen-linea {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1em;
+    color: var(--clr-dark-text-alt);
+    margin-bottom: 10px;
+}
+.resumen-linea strong {
+    color: var(--clr-dark-text);
+    font-weight: 600;
+}
+.resumen-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--clr-dark-border);
+    font-size: 1.2em;
+    color: var(--clr-dark-text-alt);
+}
+.resumen-total strong {
+    font-size: 1.8em;
+    color: var(--clr-primary);
+    font-weight: 800;
+}
+
+/* Estilos para los slots de números a elegir */
+#lista-numeros-elegidos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px; /* Espacio entre slots */
+    list-style: none;
+    padding: 0;
+}
+.bola-small-slot {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+    border: 2px dashed var(--clr-dark-border);
+    color: var(--clr-dark-text-alt);
+    font-size: 1.5em;
+}
+.bola-small-slot.filled {
+    border-style: solid;
+    border-color: var(--clr-primary);
+    color: var(--clr-primary);
+    font-size: 0.8em;
+    text-align: center;
+    font-weight: bold;
+}
+
+.form-group {
+    position: relative; /* Necesario para posicionar el ícono */
+}
+/* Estilo para los íconos de validación */
+.form-group.valid::after, .form-group.invalid::after {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    position: absolute;
+    right: 15px;
+    top: 55%; /* Alineado con el input */
+    font-size: 1.2em;
+}
+.form-group.valid::after {
+    content: '\f058'; /* Icono de check-circle */
+    color: var(--clr-green);
+}
+.form-group.invalid::after {
+    content: '\f071'; /* Icono de exclamation-triangle */
+    color: var(--clr-red);
+}
+
+.secure-checkout-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px;
+    margin-top: 25px;
+    background-color: rgba(44, 182, 125, 0.1); /* Verde muy suave */
+    border: 1px solid var(--clr-green);
+    border-radius: var(--border-radius-small);
+    color: var(--clr-green);
+}
+.secure-checkout-badge i {
+    font-size: 1.5em;
 }

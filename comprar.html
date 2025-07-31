@@ -85,7 +85,22 @@
             <form id="form-pedido" class="site-form multistep-form" style="max-width: 600px; margin: 40px auto 0;">
 
                 <div class="form-step active" id="step-1">
-                    <div id="resumen-pedido" class="resumen-pedido">Cargando detalles del paquete...</div>
+                    <div id="resumen-pedido" class="resumen-pedido">...</div>
+
+                    <div id="resumen-pedido" class="resumen-pedido-card">
+                        <div class="resumen-linea">
+                            <span>Sorteo:</span>
+                            <strong id="resumen-sorteo-nombre">Cargando...</strong>
+                        </div>
+                        <div class="resumen-linea">
+                            <span>Paquete:</span>
+                            <strong id="resumen-paquete-nombre">Cargando...</strong>
+                        </div>
+                        <div class="resumen-total">
+                            <span>Total a Pagar:</span>
+                            <strong id="resumen-total-pagar">$0</strong>
+                        </div>
+                    </div>
                     <div id="selector-numeros-container"></div>
                     <div id="mis-numeros-container" style="margin-top: 20px;">
                         <h4><i class="fas fa-ticket-alt"></i> Tus Números Elegidos (<span id="contador-numeros">0</span>):</h4>
@@ -136,6 +151,10 @@
                     <h3 class="step-title">Revisa tu pedido antes de finalizar</h3>
                     <div id="resumen-final"></div>
                     <div id="pedido-status" class="status-container oculto"></div>
+                    <div class="secure-checkout-badge">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Proceso de pedido seguro y verificado.</span>
+                    </div>
                     <div class="form-navigation">
                         <button type="button" class="btn-prev admin-button-secondary"><i class="fas fa-arrow-left"></i> Anterior</button>
                         <button type="submit" class="admin-button">Generar Pedido y Ver Datos de Pago</button>

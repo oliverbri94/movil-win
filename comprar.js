@@ -329,22 +329,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         statusDiv.className = 'status-container success';
         setTimeout(() => statusDiv.classList.add('oculto'), 3000);
     };
-    const actualizarListaMisNumeros = () => {
+    function actualizarListaMisNumeros() {
+        const listaNumerosElegidos = document.getElementById('lista-numeros-elegidos');
+        const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
         listaNumerosElegidos.innerHTML = '';
-        contadorNumerosSpan.textContent = misNumerosSeleccionados.length;
+        contadorNumerosSpan.textContent = `${misNumerosSeleccionados.length}/${paqueteBoletos}`;
 
-        if (misNumerosSeleccionados.length === 0) {
-            listaNumerosElegidos.innerHTML = '<li class="empty-list">Aún no has elegido números.</li>';
-            return;
-        }
+        // Dibuja los números ya seleccionados
         misNumerosSeleccionados.forEach((numeros, index) => {
             const li = document.createElement('li');
             li.className = 'numero-elegido-item';
-            
+
             let contenido = '';
             if (numeros === null) {
-                contenido = `<span>Boleto #${index + 1} (Ruleta Digital)</span>`;
+                // Para sorteos de ruleta
+                contenido = `<div class="bola-small-slot filled">Boleto #${index + 1}</div>`;
             } else {
+                // Para sorteos de tómbola
                 const bolasHTML = numeros.map(n => `<div class="bola-small">${n}</div>`).join('');
                 contenido = `
                     <div class="bolas-container">${bolasHTML}</div>
@@ -354,8 +355,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             li.innerHTML = contenido;
             listaNumerosElegidos.appendChild(li);
         });
-    };
 
+        // Dibuja los slots vacíos restantes
+        const slotsRestantes = paqueteBoletos - misNumerosSeleccionados.length;
+        for (let i = 0; i < slotsRestantes; i++) {
+            const li = document.createElement('li');
+            li.className = 'numero-elegido-item';
+            li.innerHTML = '<div class="bola-small-slot"><i class="fas fa-plus"></i></div>';
+            listaNumerosElegidos.appendChild(li);
+        }
+    }
+    // Validación en tiempo real para el paso de datos
+    const step2Inputs = document.querySelectorAll('#step-2 input[required], #step-3 input[required]');
+    step2Inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            if (input.value.trim() !== "") {
+                input.parentElement.classList.add('valid');
+                input.parentElement.classList.remove('invalid');
+            } else {
+                input.parentElement.classList.add('invalid');
+                input.parentElement.classList.remove('valid');
+            }
+        });
+    });
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         
