@@ -270,13 +270,18 @@ document.addEventListener('DOMContentLoaded', async () => {
      * Renderiza el editor de bolas a partir de una configuración guardada.
      * @param {Array<object>} [configuracion]
      */
-    function renderizarEditorBolas(configuracion = []) {
+    function renderizarEditorBolas(configuracion) { // Quitamos el valor por defecto []
         const container = document.getElementById('bolas-editor-container');
         if (!container) return;
         container.innerHTML = '';
-        if (configuracion && configuracion.length > 0) {
+
+        // --- INICIO DE LA CORRECCIÓN ---
+        // Verificamos si 'configuracion' es realmente un array y tiene elementos.
+        if (Array.isArray(configuracion) && configuracion.length > 0) {
             configuracion.forEach(bola => anadirFilaBola(bola));
+        // --- FIN DE LA CORRECCIÓN ---
         } else {
+            // Si no es un array o está vacío, creamos la configuración por defecto.
             anadirFilaBola({ digitos: 1, max: 9 }); // Bola 1 por defecto
             anadirFilaBola({ digitos: 2, max: 99 }); // Bola 2 por defecto
         }
