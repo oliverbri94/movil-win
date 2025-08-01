@@ -141,60 +141,6 @@ function initializeRafflePage() {
     // Todas las funciones que ayudan a formatear datos, dibujar, etc.
 // En script.js, añade esta nueva función de ayuda
 
-    // REEMPLAZA la función anterior con esta
-    async function renderizarAcuarioDeLaSuerte(sorteo, slideElement) {
-        const contenedorAcuario = slideElement.querySelector('.acuario-suerte-container');
-        const orbesContainer = slideElement.querySelector('.acuario-orbes');
-        if (!contenedorAcuario || !orbesContainer) return;
-
-        orbesContainer.innerHTML = ''; // Limpiamos las bolas anteriores
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/public-list/tombola/${sorteo.id_sorteo}`);
-            const result = await response.json();
-            if (!result.success) return;
-
-            const participantesAgrupados = new Map();
-            result.listado.forEach(p => {
-                const nombre = p.nombre || 'Anónimo';
-                if (!participantesAgrupados.has(nombre)) {
-                    participantesAgrupados.set(nombre, []);
-                }
-                participantesAgrupados.get(nombre).push(...p.numeros);
-            });
-
-            participantesAgrupados.forEach((numeros, nombre) => {
-                const totalBoletos = numeros.length;
-                if (totalBoletos === 0) return;
-
-                const bola = document.createElement('div');
-                bola.className = 'bola-flotante';
-                
-                // 1. Tamaño proporcional a los boletos
-                const tamano = Math.min(40 + totalBoletos * 6, 120);
-                bola.style.width = `${tamano}px`;
-                bola.style.height = `${tamano}px`;
-                bola.style.fontSize = `${Math.min(1.2 + totalBoletos * 0.1, 3)}em`;
-                
-                // 2. Posición horizontal y animación aleatorias
-                bola.style.left = `${Math.random() * 90}%`; // Posición X aleatoria
-                bola.style.animationDuration = `${10 + Math.random() * 10}s`; // Duración aleatoria (entre 10 y 20s)
-                bola.style.animationDelay = `${Math.random() * 10}s`; // Retardo aleatorio para que no empiecen todas a la vez
-                
-                const iniciales = nombre.trim().split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-                bola.textContent = iniciales;
-                
-                // 3. Tooltip con el detalle de los números
-                const numerosTexto = numeros.map(combo => `[${combo.join('-')}]`).join('\\A'); // '\A' crea un salto de línea en CSS
-                bola.dataset.title = `${nombre}\\A${totalBoletos} combinaciones:\\A${numerosTexto}`;
-
-                orbesContainer.appendChild(bola);
-            });
-
-        } catch(error) {
-            console.error("Error al renderizar el acuario de la suerte:", error);
-        }
-    }
     /**
      * Anonimiza un número de cédula, mostrando solo los primeros y últimos dos dígitos.
      * @param {string} id_documento - El número de cédula de 10 dígitos.
@@ -667,12 +613,10 @@ function initializeRafflePage() {
         const contenedorTombola = activeSlide.querySelector('.contenedor-tombola');
 
         if (sorteoActual && sorteoActual.status_sorteo !== 'programado') {
+            const filaInferior = activeSlide.closest('.slide-wrapper').querySelector('.fila-inferior');
             if (sorteoActual.tipo_sorteo === 'tombola_interactiva') {
-                contenedorRueda?.classList.add('oculto');
-                contenedorTombola?.classList.remove('oculto');
-                renderizarAcuarioDeLaSuerte(sorteoActual, activeSlide);
-                inicializarTamborSocial(sorteoActual, activeSlide); 
-                participantes = []; // Reseteamos por si acaso
+                // Si es tómbola, simplemente ocultamos toda la fila inferior.
+                if (filaInferior) filaInferior.style.display = 'none';
             } else {
                 // Lógica original de la ruleta digital
                 contenedorRueda?.classList.remove('oculto');
@@ -1007,17 +951,6 @@ function initializeRafflePage() {
                             <div class="price-is-right-wheel-frame">
                                 <div class="wheel-price-is-right-container"><canvas class="price-wheel-canvas"></canvas></div>
                                 <div class="clacker-container"><div class="clacker-border"></div><div class="clacker-top"></div></div>
-                            </div>
-                        </div>
-                        
-                        <div class="contenedor-tombola oculto content-section">
-                            <div class="acuario-suerte-container">
-                                <div class="tombola-grafico-2d"></div>
-                                <div class="acuario-orbes">
-                                    </div>
-                                <div class="acuario-cta">
-                                    <h4>¡Tu suerte está en juego!</h4>
-                                </div>
                             </div>
                         </div>
                     </div>

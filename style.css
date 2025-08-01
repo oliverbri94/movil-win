@@ -4100,15 +4100,23 @@ nav.bg-custom-dark-bg-frame a:hover {
     opacity: 1;
     visibility: visible;
 }
-/* ============================================= */
-/* == NUEVO LAYOUT Y TABLERO 3D (REDISEÑO) == */
-/* ============================================= */
 
-/* --- Estructura de Filas y Columnas (Sin cambios) --- */
-.fila-superior { /* ... */ }
-.fila-inferior { /* ... */ }
-.columna-izquierda, .columna-derecha { /* ... */ }
+.fila-superior {
+    display: flex; /* Usamos Flexbox, es más robusto para este caso */
+    flex-direction: row; /* Aseguramos la dirección horizontal */
+    gap: 30px;
+    align-items: flex-start;
+}
 
+.columna-izquierda {
+    flex: 0 0 40%; /* No crece, no se encoge, base del 40% */
+    width: 40%;
+}
+
+.columna-derecha {
+    flex: 1; /* Ocupa el espacio restante */
+    width: 60%;
+}
 /* --- Estilos del Tablero de Lotería --- */
 .tablero-loteria-container {
     background-color: var(--clr-dark-bg);
@@ -4202,118 +4210,56 @@ nav.bg-custom-dark-bg-frame a:hover {
 @media (max-width: 992px) { /* ... */ }
 
 
-/* ============================================= */
-/* == ESTILOS PARA EL TAMBOR SOCIAL GIRATORIO == */
-/* ============================================= */
-
-.tambor-social-container {
-    position: relative;
-    width: 100%;
-    min-height: 220px; /* Altura para dar espacio a la animación */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 25px 0;
-    /* Activa la perspectiva 3D para los elementos hijos */
-    perspective: 1000px;
-}
-
-.tambor-texto-central {
-    position: absolute;
-    text-align: center;
-    color: var(--clr-dark-text-alt);
-}
-.tambor-texto-central i {
-    font-size: 2em;
-}
-.tambor-texto-central span {
-    display: block;
-    font-size: 0.9em;
-    font-weight: 500;
-    margin-top: 5px;
-}
-
-.tambor-anillo {
-    position: relative;
-    width: 200px;
-    height: 200px;
-    /* Mantiene el estado 3D */
-    transform-style: preserve-3d;
-    /* La animación de rotación perpetua */
-    animation: rotarTambor 30s linear infinite;
-}
-
-/* La bola de madera individual */
-.participante-bola {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 70px;
-    height: 70px;
-    margin: -35px 0 0 -35px; /* Centra la bola perfectamente */
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    
-    /* Estilos 3D de la bola de madera */
-    background: radial-gradient(circle at 50% 30%, #fdf5e6 10%, #f0e6d2 80%);
-    box-shadow: inset -2px -2px 8px rgba(0,0,0,0.15), 0px 2px 5px rgba(0,0,0,0.2);
-    
-    font-family: 'Anton', sans-serif;
-    font-size: 1.8em;
-    color: #4a3f35;
-    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.7);
-}
-
-/* Animación para que las nuevas bolas "caigan" en el tambor */
-.participante-bola.nueva {
-    animation: caerEnTambor 0.8s ease-out;
-}
-
-/* Definición de las animaciones */
-@keyframes rotarTambor {
-    from { transform: rotateY(0deg); }
-    to { transform: rotateY(360deg); }
-}
-
-@keyframes caerEnTambor {
-    0% { transform: translateY(-200px) scale(0.5); opacity: 0; }
-    70% { transform: translateY(10px) scale(1.1); opacity: 1; }
-    100% { transform: translateY(0) scale(1); opacity: 1; }
-}
-
 /* ================================================= */
-/* == ESTILOS PARA BARRA DE PROGRESO TÓMBOLA == */
+/* == REDISEÑO VISUAL BARRA DE PROGRESO TÓMBOLA == */
 /* ================================================= */
 
 .tombola-progress-wrapper {
     position: relative;
     width: 100%;
     text-align: center;
+    padding: 20px 0;
 }
 
 .tombola-shape {
-    width: 180px; /* Ancho del cuerpo de la tómbola */
-    height: 120px; /* Alto del cuerpo de la tómbola */
-    background-color: var(--clr-dark-bg);
-    border: 4px solid #b3a07d; /* Borde de madera oscura */
-    border-radius: 25px; /* Bordes redondeados del cilindro */
+    width: 200px;
+    height: 140px;
+    background-color: rgba(0, 0, 0, 0.1); /* Fondo oscuro semi-transparente */
+    border: 8px solid #c8b89a; /* Borde de madera más claro */
+    border-bottom-width: 15px; /* Base más gruesa */
+    border-top-width: 15px;  /* Borde superior más grueso */
+    border-radius: 35px / 60px; /* Forma elíptica de tómbola */
     margin: 0 auto;
     position: relative;
-    overflow: hidden; /* Clave para el efecto de llenado */
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+    overflow: hidden;
+    box-shadow: 
+        inset 0 0 25px rgba(0,0,0,0.4), /* Sombra interior para profundidad */
+        0 5px 20px rgba(0,0,0,0.2);     /* Sombra exterior proyectada */
 }
 
-/* El líquido o las "bolas" que llenan la tómbola */
+/* Brillo superior para efecto de cristal */
+.tombola-shape::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 10%;
+    right: 10%;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+}
+
+/* El "líquido" de bolas que llena la tómbola */
 .tombola-fill {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 0%; /* Se controlará con JS */
-    background: linear-gradient(to top, #ff8906, #f9c80e); /* Gradiente de bolas naranjas/amarillas */
-    transition: height 0.8s ease-out;
+    height: 0%; /* Controlado con JS */
+    /* Gradiente vibrante que simula un montón de bolas */
+    background: linear-gradient(to top, var(--clr-primary) 0%, var(--clr-accent) 100%);
+    transition: height 0.8s cubic-bezier(0.25, 1, 0.5, 1); /* Transición más elástica */
+    opacity: 0.8;
 }
 
 /* El texto que va sobre la tómbola */
@@ -4324,114 +4270,14 @@ nav.bg-custom-dark-bg-frame a:hover {
     transform: translate(-50%, -50%);
     color: white;
     font-family: 'Anton', sans-serif;
-    font-size: 1.8em;
-    text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    font-size: 2.2em;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+    white-space: nowrap;
 }
 
 .tombola-motivation-text {
-    margin-top: 10px;
+    margin-top: 15px;
+    font-size: 1.1em;
     font-weight: 600;
-    color: var(--clr-accent);
-}
-
-
-/* ================================================= */
-/* == ESTILOS PARA EL ACUARIO DE LA SUERTE (2D) == */
-/* ================================================= */
-
-.acuario-suerte-container {
-    position: relative;
-    width: 100%;
-    height: 450px; /* Altura fija para el área de animación */
-    background: var(--clr-dark-bg);
-    border-radius: var(--border-radius-medium);
-    overflow: hidden; /* Clave para que las bolas aparezcan y desaparezcan */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* El gráfico de la tómbola (hecho con CSS) */
-.tombola-grafico-2d {
-    width: 220px;
-    height: 220px;
-    border: 8px solid rgba(179, 160, 125, 0.5); /* Borde de madera semi-transparente */
-    border-radius: 45px 45px 80px 80px; /* Forma de tómbola de cristal */
-    position: relative;
-    z-index: 1;
-}
-/* Patas de la tómbola */
-.tombola-grafico-2d::before, .tombola-grafico-2d::after {
-    content: '';
-    position: absolute;
-    bottom: -40px;
-    width: 15px;
-    height: 40px;
-    background-color: rgba(179, 160, 125, 0.5);
-}
-.tombola-grafico-2d::before { left: 40px; transform: rotate(-15deg); }
-.tombola-grafico-2d::after { right: 40px; transform: rotate(15deg); }
-
-
-.acuario-orbes {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-.bola-flotante {
-    position: absolute;
-    bottom: -100px; /* Empieza fuera de la pantalla, abajo */
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: radial-gradient(circle at 50% 30%, #fdf5e6 10%, #f0e6d2 80%);
-    box-shadow: inset -2px -2px 8px rgba(0,0,0,0.15), 0px 2px 5px rgba(0,0,0,0.2);
-    font-family: 'Anton', sans-serif;
-    color: #4a3f35;
-    cursor: pointer;
-    /* La animación que las hace flotar hacia arriba */
-    animation: flotarHaciaArriba linear infinite;
-}
-.bola-flotante:hover {
-    animation-play-state: paused; /* Pausa la animación al pasar el cursor */
-    box-shadow: 0 0 25px var(--clr-primary);
-}
-
-/* Tooltip (igual que antes) */
-.bola-flotante::before {
-    content: attr(data-title);
-    position: absolute;
-    bottom: 110%;
-    /* ... (resto de estilos del tooltip no cambian) ... */
-    background-color: #222; color: white; padding: 8px 12px; border-radius: 5px; font-size: 0.8rem; font-family: 'Poppins', sans-serif; white-space: pre; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; z-index: 100; transform: translateX(-50%); left: 50%;
-}
-.bola-flotante:hover::before { opacity: 1; visibility: visible; }
-
-.acuario-cta {
-    position: absolute;
-    bottom: 20px;
-    text-align: center;
-    color: var(--clr-dark-text-alt);
-    font-weight: 500;
-    z-index: 2;
-}
-
-
-/* La animación clave de flotación */
-@keyframes flotarHaciaArriba {
-    0% {
-        transform: translateY(0);
-        opacity: 1;
-    }
-    99% {
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-600px); /* Distancia que recorren hacia arriba */
-        opacity: 0;
-    }
+    color: var(--clr-dark-text);
 }
