@@ -141,43 +141,56 @@ function initializeRafflePage() {
     // Todas las funciones que ayudan a formatear datos, dibujar, etc.
 // En script.js, añade esta nueva función de ayuda
 
-    async function renderizarListaPublicaTombola(sorteoId, slideElement) {
+    async function renderizarTableroLoteria(sorteo, slideElement) {
         const contenedorTombola = slideElement.querySelector('.contenedor-tombola');
-        const listaContainer = slideElement.querySelector('.lista-tombola-publica');
-        if (!contenedorTombola || !listaContainer) return;
+        if (!contenedorTombola) return;
 
         contenedorTombola.classList.remove('oculto');
-        listaContainer.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
+        contenedorTombola.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/public-list/tombola/${sorteoId}`);
+            const response = await fetch(`${API_BASE_URL}/api/public-list/tombola/${sorteo.id_sorteo}`);
             const result = await response.json();
             if (!result.success) throw new Error(result.error);
 
-            if (result.listado.length === 0) {
-                listaContainer.innerHTML = '<p class="empty-list">Aún no hay participantes. ¡Sé el primero en elegir tus números!</p>';
-                return;
+            const totalNumeros = sorteo.configuracion_tombola[0].max + 1; // Asumimos una bola por ahora para simplificar
+            const numerosOcupados = result.listado;
+            const totalOcupados = numerosOcupados.length;
+            const totalDisponibles = totalNumeros - totalOcupados;
+
+            // --- 1. Crear el HTML del Tablero ---
+            let tableroHTML = `
+                <div class="tablero-loteria-container">
+                    <div class="tablero-resumen">
+                        <span>Total: <strong>${totalNumeros}</strong></span>
+                        <span class="disponibles">Disponibles: <strong>${totalDisponibles}</strong></span>
+                        <span class="ocupados">Ocupados: <strong>${totalOcupados}</strong></span>
+                    </div>
+                    <div class="tablero-grid">
+            `;
+
+            // Creamos un mapa para buscar rápidamente quién compró cada número
+            const mapaOcupados = new Map();
+            numerosOcupados.forEach(p => {
+                const numero = p.numeros[0][0]; // Asumimos una bola de un dígito/número
+                mapaOcupados.set(numero, p.nombre);
+            });
+
+            // --- 2. Llenar la cuadrícula ---
+            for (let i = 0; i < totalNumeros; i++) {
+                if (mapaOcupados.has(i)) {
+                    const nombre = mapaOcupados.get(i);
+                    tableroHTML += `<div class="tablero-casilla ocupado" data-title="Comprado por: ${nombre}">${i}</div>`;
+                } else {
+                    tableroHTML += `<div class="tablero-casilla disponible">${i}</div>`;
+                }
             }
 
-            // Mapeamos cada participante y sus combinaciones a un hexágono
-            const itemsHTML = result.listado.flatMap(participante => 
-                participante.numeros.map(comboNumeros => {
-                    // El nombre del participante se guarda en el atributo 'data-title' para el tooltip
-                    const nombreParticipante = participante.nombre || 'Participante';
-                    const bolasHTML = comboNumeros.map(n => `<div class="bola-small">${n}</div>`).join('');
-                    
-                    return `
-                        <div class="hexagono" data-title="${nombreParticipante}">
-                            <div class="bolas-container">${bolasHTML}</div>
-                        </div>
-                    `;
-                })
-            ).join('');
-            
-            listaContainer.innerHTML = itemsHTML;
+            tableroHTML += `</div></div>`; // Cierre de grid y container
+            contenedorTombola.innerHTML = tableroHTML;
 
         } catch(error) {
-            listaContainer.innerHTML = `<p class="error-message">Error al cargar la lista: ${error.message}</p>`;
+            contenedorTombola.innerHTML = `<p class="error-message">Error al cargar el tablero: ${error.message}</p>`;
         }
     }
     // --- Lógica para el acordeón de Top Participantes ---
@@ -640,7 +653,7 @@ function initializeRafflePage() {
             if (sorteoActual.tipo_sorteo === 'tombola_interactiva') {
                 contenedorRueda?.classList.add('oculto');
                 contenedorTombola?.classList.remove('oculto');
-                renderizarListaPublicaTombola(sorteoActual.id_sorteo, activeSlide);
+                renderizarTableroLoteria(sorteoActual, activeSlide);
                 participantes = []; // Reseteamos por si acaso
             } else {
                 // Lógica original de la ruleta digital
@@ -932,60 +945,62 @@ function initializeRafflePage() {
 
 
                 slideWrapper.innerHTML = `
-                    <div class="prize-carousel-slide" data-sorteo-id="${sorteo.id_sorteo}">
-                        <div class="prize-image-container">
-                            ${renderMedia(mediaParaRenderizar)}
-                        </div>
-                        <div class="prize-info-container">
-                            <h2 class="prize-title">${tituloMostrado}</h2>
-                            <div class="mini-package-selector">${miniPaquetesHTML}</div>
-                            <div class="progress-info-wrapper">
-                                <div class="boletos-restantes-container"><span class="boletos-restantes-numero">${boletosRestantes}</span><span class="boletos-restantes-texto">Boletos Disponibles</span></div>
-                                <div class="progress-bar-wrapper ${urgenciaClass}"><div class="progress-bar-fill" style="width: ${percentageRemaining.toFixed(2)}%;"><span class="progress-bar-percentage-text">${percentageRemaining.toFixed(1)}% Disponible</span></div></div>
-                                <p class="motivational-text-integrated">${motivationalMessage}</p>
+                    <div class="fila-superior">
+                        <div class="columna-izquierda">
+                            <div class="prize-image-container">
+                                ${renderMedia(mediaParaRenderizar)}
                             </div>
-                        <div class="top-participants-wrapper">
-                            <button type="button" class="top-list-header collapsible-toggle">
-                                <div class="header-title">
-                                    <i class="fas fa-crown"></i>
-                                    <span>Top 5 Participantes</span>
+                        </div>
+                        <div class="columna-derecha">
+                            <div class="prize-info-container">
+                                <h2 class="prize-title">${tituloMostrado}</h2>
+                                <div class="mini-package-selector">${miniPaquetesHTML}</div>
+                                <div class="progress-info-wrapper ${urgenciaClass}">
+                                    <div class="boletos-restantes-container">
+                                        <span class="boletos-restantes-numero">${boletosRestantes}</span>
+                                        <span class="boletos-restantes-texto">Boletos Disponibles</span>
+                                    </div>
+                                    <div class="progress-bar-wrapper">
+                                        <div class="progress-bar-fill" style="width: ${percentageSold.toFixed(2)}%;">
+                                            <span class="progress-bar-percentage-text">${percentageSold.toFixed(1)}% Vendido</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="header-action">
-                                    <span class="text-ver-mas">Ver más</span>
-                                    <span class="text-ver-menos">Ver menos</span>
-                                    <i class="fas fa-chevron-down"></i>
+                                <div class="top-participants-wrapper">
+                                    <button type="button" class="top-list-header collapsible-toggle">
+                                        <div class="header-title">
+                                            <i class="fas fa-crown"></i>
+                                            <span>Top 5 Participantes</span>
+                                        </div>
+                                        <div class="header-action">
+                                            <span class="text-ver-mas">Ver más</span>
+                                            <span class="text-ver-menos">Ver menos</span>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </button>
+                                    <div class="collapsible-list-content">
+                                        <div class="loader-container oculto"></div>
+                                        <ol class="top-participants-list"></ol>
+                                    </div>
                                 </div>
-                            </button>
-                            <div class="collapsible-list-content">
-                                <div class="loader-container oculto"></div>
-                                <ol class="top-participants-list"></ol>
                             </div>
-                        </div>
-                        <div class="winner-card-container oculto">
-                            <div class="winner-card">
-                                <h3>¡Tenemos un Ganador!</h3>
-                                <p class="winner-prize"></p>
-                                <p class="winner-name"></p>
-                                <p class="winner-id"></p>
-                                <p class="winner-contact-note">¡Nos pondremos en contacto contigo pronto!</p>
-                            </div>
-                        </div>
                         </div>
                     </div>
 
-                    <div class="contenedor-sorteo content-section">
-                        <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2><p class="rueda-subtitulo">¡El sorteo empieza al llegar a la meta de boletos!</p><div class="price-is-right-wheel-frame"><div class="wheel-price-is-right-container"><canvas class="price-wheel-canvas"></canvas></div><div class="clacker-container"><div class="clacker-border"></div><div class="clacker-top"></div></div></div>
-                    </div>
-                    
-                    <div class="contenedor-tombola oculto content-section">
-                        <h2 class="titulo-dorado" data-text="NÚMEROS PARTICIPANTES">NÚMEROS PARTICIPANTES</h2>
-                        <p class="rueda-subtitulo">¡Estos son los números elegidos! El ganador saldrá de una tómbola en vivo.</p>
-                        <div class="lista-tombola-publica">
+                    <div class="fila-inferior">
+                        <div class="contenedor-sorteo content-section">
+                            <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
+                            <div class="price-is-right-wheel-frame">
+                                <div class="wheel-price-is-right-container"><canvas class="price-wheel-canvas"></canvas></div>
+                                <div class="clacker-container"><div class="clacker-border"></div><div class="clacker-top"></div></div>
+                            </div>
+                        </div>
+                        
+                        <div class="contenedor-tombola oculto content-section">
                             </div>
                     </div>
                 `;
             }
-            
             prizeCarouselTrack.appendChild(slideWrapper);
         }
         
