@@ -899,9 +899,17 @@ function initializeRafflePage() {
                 const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
                 percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
                 boletosRestantes = goal - currentCount;
-                if (percentageSold >= 90) { urgenciaClass = 'critico'; motivationalMessage = "¡QUEDAN LOS ÚLTIMOS!"; } 
-                else if (percentageSold >= 70) { urgenciaClass = 'urgente'; motivationalMessage = "¡Se acaban rápido!"; } 
-                else { motivationalMessage = "Cada boleto es una nueva oportunidad de ganar."; }
+                let completedClass = '';
+                if (percentageSold >= 100) {
+                    motivationalMessage = "¡Tómbola Llena! El sorteo será en vivo muy pronto.";
+                    completedClass = 'completed'; // Clase especial para el mensaje de 100%
+                } else if (percentageSold >= 90) {
+                    motivationalMessage = "¡QUEDAN LOS ÚLTIMOS BOLETOS!";
+                } else if (percentageSold >= 70) {
+                    motivationalMessage = "¡No te quedes fuera, se acaban rápido!";
+                } else {
+                    motivationalMessage = "Cada boleto es una nueva oportunidad de ganar.";
+                }
                 const percentageRemaining = 100 - percentageSold;
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
 
@@ -922,7 +930,7 @@ function initializeRafflePage() {
                                         <div class="tombola-fill" style="height: ${percentageSold.toFixed(2)}%;"></div>
                                         <div class="tombola-text">${percentageSold.toFixed(0)}% Lleno</div>
                                     </div>
-                                    <p class="tombola-motivation-text">${motivationalMessage}</p>
+                                    <p class="tombola-motivation-text ${completedClass}">${motivationalMessage}</p>
                                 </div>
                                 <div class="top-participants-wrapper">
                                     <button type="button" class="top-list-header collapsible-toggle">
