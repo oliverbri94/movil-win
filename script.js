@@ -1018,13 +1018,7 @@ function initializeRafflePage() {
         }
     }
         // Añadimos el evento de clic para los paneles de navegación
-// Dispara la animación de las barras de progreso recién creadas
-document.querySelectorAll('.prize-carousel-slide[data-sorteo-id="' + sorteo.id_sorteo + '"] .progress-radial-fg-circle').forEach(circle => {
-    setTimeout(() => {
-        const finalOffset = circle.getAttribute('data-final-offset');
-        circle.style.strokeDashoffset = finalOffset;
-    }, 100);
-});
+
     async function actualizarTopParticipantes(sorteoId, slideElement) {
         const listElement = slideElement.querySelector('.top-participants-list');
         const loader = slideElement.querySelector('.top-participants-wrapper .loader-container');
