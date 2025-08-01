@@ -146,7 +146,6 @@ function initializeRafflePage() {
         const listaContainer = slideElement.querySelector('.lista-tombola-publica');
         if (!contenedorTombola || !listaContainer) return;
 
-        // Mostramos el contenedor y un loader
         contenedorTombola.classList.remove('oculto');
         listaContainer.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
 
@@ -160,13 +159,15 @@ function initializeRafflePage() {
                 return;
             }
 
-            // Mapeamos cada participante a su HTML
+            // Mapeamos cada participante y sus combinaciones a un hexágono
             const itemsHTML = result.listado.flatMap(participante => 
                 participante.numeros.map(comboNumeros => {
+                    // El nombre del participante se guarda en el atributo 'data-title' para el tooltip
+                    const nombreParticipante = participante.nombre || 'Participante';
                     const bolasHTML = comboNumeros.map(n => `<div class="bola-small">${n}</div>`).join('');
+                    
                     return `
-                        <div class="participante-item-publico">
-                            <span class="nombre">${participante.nombre}</span>
+                        <div class="hexagono" data-title="${nombreParticipante}">
                             <div class="bolas-container">${bolasHTML}</div>
                         </div>
                     `;

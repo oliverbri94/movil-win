@@ -4028,3 +4028,75 @@ nav.bg-custom-dark-bg-frame a:hover {
     50% { background-color: rgba(127, 90, 240, 0.2); }
     100% { background-color: transparent; }
 }
+
+
+/* ============================================= */
+/* == ESTILOS PARA EL PANAL INTERACTIVO DE NÚMEROS == */
+/* ============================================= */
+
+/* Contenedor principal del panal */
+.contenedor-tombola .lista-tombola-publica {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+    padding: 10px;
+}
+
+/* El hexágono individual */
+.hexagono {
+    position: relative; /* Necesario para el tooltip */
+    width: 120px;
+    height: 138px;
+    background-color: var(--clr-dark-bg);
+    border: 2px solid var(--clr-dark-border);
+    
+    /* La magia del hexágono con clip-path */
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    cursor: default;
+}
+
+/* El contenedor para las bolas de números dentro del hexágono */
+.hexagono .bolas-container {
+    display: flex;
+    gap: 5px;
+}
+
+/* El tooltip que muestra el nombre del participante */
+.hexagono::before {
+    content: attr(data-title); /* Muestra el texto del atributo data-title */
+    position: absolute;
+    bottom: 105%; /* Se posiciona arriba del hexágono */
+    left: 50%;
+    transform: translateX(-50%);
+    
+    background-color: var(--clr-primary);
+    color: white;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-small);
+    font-size: 0.9em;
+    font-weight: 600;
+    white-space: nowrap;
+    
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 10;
+}
+
+/* Efecto al pasar el mouse */
+.hexagono:hover {
+    transform: scale(1.1);
+    border-color: var(--clr-primary);
+}
+.hexagono:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
