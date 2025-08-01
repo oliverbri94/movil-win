@@ -615,10 +615,15 @@ function initializeRafflePage() {
         if (sorteoActual && sorteoActual.status_sorteo !== 'programado') {
             const filaInferior = activeSlide.closest('.slide-wrapper').querySelector('.fila-inferior');
             if (sorteoActual.tipo_sorteo === 'tombola_interactiva') {
-                // Si es tómbola, simplemente ocultamos toda la fila inferior.
+                // --- CORRECCIÓN ---
+                // Si es tómbola, OCULTAMOS la fila inferior Y AJUSTAMOS LA ALTURA del slide.
                 if (filaInferior) filaInferior.style.display = 'none';
+                if (prizeCarouselSlideElement) prizeCarouselSlideElement.style.minHeight = 'auto'; // Colapsa la altura para eliminar el espacio.
+                // --- FIN CORRECCIÓN ---
             } else {
                 // Lógica original de la ruleta digital
+                if (filaInferior) filaInferior.style.display = 'block'; 
+                if (prizeCarouselSlideElement) prizeCarouselSlideElement.style.minHeight = ''; // Usa la altura del CSS.
                 contenedorRueda?.classList.remove('oculto');
                 contenedorTombola?.classList.add('oculto');
                 const currentWheelCanvas = activeSlide.querySelector('.price-wheel-canvas');
@@ -912,7 +917,20 @@ function initializeRafflePage() {
                 }
                 const percentageRemaining = 100 - percentageSold;
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
-
+                const progressBarHTML = `
+                    <div class="progress-info-wrapper">
+                        <div class="boletos-restantes-container">
+                            <span class="boletos-restantes-numero">${boletosRestantes > 0 ? boletosRestantes : '¡AGOTADOS!'}</span>
+                            <span class="boletos-restantes-texto">Boletos Restantes</span>
+                        </div>
+                        <div class="progress-bar-wrapper ${urgenciaClass}">
+                            <div class="progress-bar-fill" style="width: ${percentageSold.toFixed(2)}%;">
+                                <span class="progress-bar-percentage-text">${percentageSold.toFixed(0)}% Vendido</span>
+                            </div>
+                        </div>
+                        <p class="motivational-text-integrated">${motivationalMessage}</p>
+                    </div>
+                `;
 
                 slideWrapper.innerHTML = `
                     <div class="fila-superior">
@@ -925,13 +943,7 @@ function initializeRafflePage() {
                             <div class="prize-info-container">
                                 <h2 class="prize-title">${tituloMostrado}</h2>
                                 <div class="mini-package-selector">${miniPaquetesHTML}</div>
-                                <div class="tombola-progress-wrapper">
-                                    <div class="tombola-shape">
-                                        <div class="tombola-fill" style="height: ${percentageSold.toFixed(2)}%;"></div>
-                                        <div class="tombola-text">${percentageSold.toFixed(0)}% Lleno</div>
-                                    </div>
-                                    <p class="tombola-motivation-text ${completedClass}">${motivationalMessage}</p>
-                                </div>
+                                ${progressBarHTML}
                                 <div class="top-participants-wrapper">
                                     <button type="button" class="top-list-header collapsible-toggle">
                                         <div class="header-title">

@@ -4058,120 +4058,108 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 /* --- Ajustes para Móviles (Sin cambios) --- */
 @media (max-width: 992px) { /* ... */ }
-/* ===================================================== */
-/* == REDISEÑO COMPLETO: BARRA DE PROGRESO TÓMBOLA == */
-/* ===================================================== */
+/* ================================================= */
+/* --- REDISEÑO: BARRA DE PROGRESO "NEÓN" Y ESCASEZ --- */
+/* ================================================= */
 
-.tombola-progress-wrapper {
-    position: relative;
+/* Contenedor principal de toda la sección de progreso */
+.progress-info-wrapper {
     width: 100%;
-    max-width: 320px; /* Ancho máximo para que no se vea gigante en escritorio */
-    margin: 0 auto; /* Centramos el componente */
+}
+
+/* Contenedor del contador de boletos restantes */
+.boletos-restantes-container {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.boletos-restantes-numero {
+    font-family: 'Anton', sans-serif;
+    font-size: 2.5em; /* Número grande e impactante */
+    line-height: 1;
+    color: var(--clr-primary); /* Color principal */
+    display: block;
+    margin-bottom: 5px;
+    transition: color 0.4s ease;
+}
+
+.boletos-restantes-texto {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--clr-light-text-alt);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* El wrapper de la barra de progreso */
+.progress-bar-wrapper {
+    width: 100%;
+    height: 28px; /* Una barra más gruesa y visible */
+    background-color: var(--clr-light-bg);
+    border-radius: 14px; /* Totalmente redondeada */
+    border: 1px solid var(--clr-light-border);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+    overflow: hidden;
+    position: relative; 
+}
+
+/* El relleno de la barra de progreso */
+.progress-bar-fill {
+    height: 100%;
+    width: 0%; /* Esta anchura se controla con JS */
+    border-radius: 14px;
+    transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1), background 0.4s ease;
+    
+    /* Estilo por defecto (Verde) */
+    background: linear-gradient(90deg, #30d158, var(--clr-primary));
+    box-shadow: 0 0 8px 1px rgba(var(--clr-primary-rgb), 0.6);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px 0;
 }
 
-/* El cuerpo principal de la tómbola (el cilindro de cristal) */
-.tombola-shape {
-    width: 280px;
-    height: 180px;
-    /* Fondo que simula el cristal y su reflejo */
-    background: radial-gradient(ellipse at 50% 120%, rgba(255, 255, 255, 0.2), transparent 70%),
-                linear-gradient(to top, rgba(0,0,0,0.1), transparent 50%);
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    border-top-color: rgba(255, 255, 255, 0.3);
-    border-bottom-color: rgba(0, 0, 0, 0.2);
-    border-radius: 50%; /* Esto crea la forma de elipse/esfera */
-    
-    margin: 0 auto;
-    position: relative;
-    overflow: hidden; /* Clave para el efecto de llenado */
-    
-    /* Sombras para dar profundidad y efecto de cristal */
-    box-shadow: inset 0 0 40px rgba(0,0,0,0.5),
-                0 10px 20px rgba(0,0,0,0.3);
+/* --- Lógica de Urgencia --- */
+
+/* Estilo para cuando el sorteo está en estado URGENTE (ej. > 75%) */
+.progress-bar-wrapper.urgente .progress-bar-fill {
+    background: linear-gradient(90deg, var(--clr-primary), var(--clr-accent));
+    box-shadow: 0 0 10px 2px rgba(var(--clr-accent-rgb), 0.6);
+}
+.progress-bar-wrapper.urgente .boletos-restantes-numero {
+    color: var(--clr-accent);
 }
 
-/* La base y el soporte de la tómbola */
-.tombola-shape::before, .tombola-shape::after {
-    content: '';
-    position: absolute;
-    background: linear-gradient(to top, #7d6c52, #c5b398);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-    z-index: -1;
+/* Estilo para cuando el sorteo está en estado CRÍTICO (ej. > 90%) */
+.progress-bar-wrapper.critico .progress-bar-fill {
+    background: linear-gradient(90deg, var(--clr-red), var(--clr-accent));
+    animation: pulse-red 1.5s infinite;
+}
+.progress-bar-wrapper.critico .boletos-restantes-numero {
+    color: var(--clr-red);
 }
 
-.tombola-shape::before { /* Pie izquierdo */
-    left: 20px;
-    bottom: -20px;
-    width: 25px;
-    height: 40px;
-    transform: skewX(-15deg);
-    border-radius: 4px;
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 8px 1px rgba(var(--clr-red-rgb), 0.7); }
+    50% { box-shadow: 0 0 14px 4px rgba(var(--clr-red-rgb), 0.9); }
+    100% { box-shadow: 0 0 8px 1px rgba(var(--clr-red-rgb), 0.7); }
 }
 
-.tombola-shape::after { /* Pie derecho */
-    right: 20px;
-    bottom: -20px;
-    width: 25px;
-    height: 40px;
-    transform: skewX(15deg);
-    border-radius: 4px;
-}
 
-/* El líquido/contenido que llena la tómbola */
-.tombola-fill {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 0%; /* Esta altura es la que se controla con JavaScript */
-    background: linear-gradient(to top, var(--clr-secondary) 0%, var(--clr-primary) 70%, var(--clr-accent) 100%);
-    transition: height 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-    opacity: 0.9;
-}
-
-/* El texto del porcentaje, ahora centrado dentro del área visible del llenado */
-.tombola-text {
-    position: absolute;
-    bottom: 5px; /* Lo posicionamos un poco arriba de la base */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    text-align: center;
-    color: white;
-    font-family: 'Anton', sans-serif;
-    font-size: 3em;
+/* Texto del porcentaje dentro de la barra */
+.progress-bar-percentage-text {
+    font-size: 0.85em;
     font-weight: 700;
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
-    z-index: 3;
-    /* Transición suave para el texto */
-    transition: bottom 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    color: var(--clr-white);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+    white-space: nowrap; 
 }
 
-/* Texto motivacional debajo de la tómbola */
-.tombola-motivation-text {
-    margin-top: 35px; /* Más espacio desde la base */
-    font-size: 1.1em;
-    font-weight: 600;
-    color: var(--clr-light-text);
+/* Texto motivacional que va debajo de la barra */
+.motivational-text-integrated {
+    font-size: 0.95em;
+    font-weight: 500;
+    min-height: 1.5em;
+    margin-top: 15px;
     text-align: center;
-    transition: all 0.4s ease;
-}
-
-/* Estilo especial cuando se completa la meta */
-.tombola-motivation-text.completed {
-    color: var(--clr-green);
-    font-size: 1.25em;
-    text-shadow: 0 0 10px rgba(48, 209, 88, 0.5);
-    animation: pulse-green 1.5s infinite;
-}
-
-@keyframes pulse-green {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    transition: opacity 0.3s ease;
 }
