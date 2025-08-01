@@ -905,32 +905,24 @@ function initializeRafflePage() {
                     </div>
                 `;
             } else {
-                // Estructura de dos columnas para sorteos "activos"
-                
-                // --- INICIO DE LA CORRECCIÓN ---
-                // Definimos la variable que faltaba para el sorteo activo
                 const mediaParaRenderizar = sorteo;
                 const tituloMostrado = sorteo.nombre_premio_display;
-                // --- FIN DE LA CORRECCIÓN ---
-
-                let percentageSold = 0, motivationalMessage = "¡El sorteo ha comenzado!", boletosRestantes = 0, urgenciaClass = '';
                 const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
                 const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
-                percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
-                boletosRestantes = goal - currentCount;
-                let completedClass = '';
-                if (percentageSold >= 100) {
-                    motivationalMessage = "¡Tómbola Llena! El sorteo será en vivo muy pronto.";
-                    completedClass = 'completed'; // Clase especial para el mensaje de 100%
-                } else if (percentageSold >= 90) {
-                    motivationalMessage = "¡QUEDAN LOS ÚLTIMOS BOLETOS!";
-                } else if (percentageSold >= 70) {
-                    motivationalMessage = "¡No te quedes fuera, se acaban rápido!";
-                } else {
-                    motivationalMessage = "Cada boleto es una nueva oportunidad de ganar.";
-                }
-                const percentageRemaining = 100 - percentageSold;
+                const percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
+                const circumference = 2 * Math.PI * 54; // 2 * PI * radio (el radio es la mitad del tamaño del círculo, menos el grosor del borde)
+
+                let motivationalMessage = "Cada boleto es una nueva oportunidad de ganar.";
+                if (percentageSold >= 100) motivationalMessage = "¡Meta alcanzada! El sorteo será en vivo muy pronto.";
+                else if (percentageSold >= 90) motivationalMessage = "¡QUEDAN LOS ÚLTIMOS BOLETOS!";
+                else if (percentageSold >= 75) motivationalMessage = "¡No te quedes fuera, se acaban rápido!";
+
+                let urgenciaClass = '';
+                if (percentageSold >= 90) urgenciaClass = 'critico';
+                else if (percentageSold >= 75) urgenciaClass = 'urgente';
+
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
+                
                 const progressBarHTML = `
                     <div class="progress-radial-wrapper ${urgenciaClass}">
                         <svg class="progress-radial-svg" width="120" height="120" viewBox="0 0 120 120">
