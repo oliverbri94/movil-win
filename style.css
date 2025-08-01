@@ -172,28 +172,45 @@ body {
     max-width: 100%; /* Ocupa todo el ancho disponible */
 }
 
-.prize-carousel-container {
-    position: relative;
-    width: 100%;
-    overflow: hidden; /* Clave para el efecto carrusel */
-}
-
-.prize-carousel-track {
-    display: flex;
-    transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1); /* Transición suave */
-}
 
 
 /* ================================================= */
 /* == SOLUCIÓN DEFINITIVA DE LAYOUT Y ESPACIOS == */
 /* ================================================= */
+/* ================================================= */
+/* == SOLUCIÓN DEFINITIVA DE ALTURA PARA EL CARRUSEL == */
+/* ================================================= */
 
+/* 1. La "Caja de Cristal": Le damos una altura mínima a todo el contenedor */
+.prize-carousel-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    min-height: 80vh; /* Altura mínima del 80% de la pantalla */
+}
+
+/* 2. Hacemos que todas las capas internas hereden esa altura */
+.prize-carousel-track,
+.slide-wrapper {
+    height: 100%;
+}
+.prize-carousel-track {
+    display: flex;
+    transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.slide-wrapper {
+    width: 100%;
+    flex-shrink: 0;
+}
+
+/* 3. Preparamos el slide para que pueda expandir su contenido */
 .prize-carousel-slide {
     display: flex;
-    flex-direction: column; /* SIEMPRE apila las filas verticalmente */
+    flex-direction: column;
     width: 100%;
+    height: 100%; /* Ocupa toda la altura del slide-wrapper */
     padding: 20px;
-    gap: 30px; /* Espacio entre fila superior e inferior */
+    gap: 30px;
 }
 
 .fila-superior {
