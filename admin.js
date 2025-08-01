@@ -1881,7 +1881,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!sorteoId) return;
             showGenericStatusMessage(statusGestionSorteo, `Cargando datos del sorteo ID ${sorteoId}...`);
             try {
-                // El adminSorteosData ya lo tenemos cargado, lo buscamos ahí
                 const sorteoAEditar = adminSorteosData.find(s => s.id_sorteo == sorteoId);
                 if (sorteoAEditar) {
                     prepararEdicionSorteo(sorteoAEditar);
@@ -1906,7 +1905,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const premioNombre = target.dataset.premio;
             await mostrarHistorialParticipantes(sorteoId, premioNombre);
         }
-        // --- INICIO DE LA LÓGICA DE ELIMINAR INTEGRADA ---
         else if (target.classList.contains('btn-eliminar')) {
             if (!sorteoId) return;
             const sorteoNombre = target.dataset.nombre;
@@ -1918,21 +1916,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (confirmacion2) {
                     handleEliminarSorteo(sorteoId);
                 }
-            } else if (confirmacion1 !== null) { // Solo muestra alerta si el usuario escribió algo incorrecto
+            } else if (confirmacion1 !== null) {
                 alert("Eliminación cancelada. La palabra no coincidió.");
             }
         }
-    if (boton.classList.contains('btn-copiar-listado')) {
-        const sorteoId = boton.dataset.id;
-        const publicURL = `https://movilwin.com/listado.html?sorteo=${sorteoId}`;
+        // --- INICIO DE LA CORRECCIÓN ---
+        else if (target.classList.contains('btn-copiar-listado')) { // Se cambió 'boton' por 'target'
+            const sorteoId = target.dataset.id; // Se cambió 'boton' por 'target'
+            const publicURL = `https://movilwin.com/listado.html?sorteo=${sorteoId}`;
 
-        navigator.clipboard.writeText(publicURL).then(() => {
-            showGenericStatusMessage(statusSorteoMessage, '¡Enlace del listado copiado al portapapeles!', false);
-        }).catch(err => {
-            showGenericStatusMessage(statusSorteoMessage, 'Error al copiar el enlace.', true);
-        });
-    }
-        // --- FIN DE LA LÓGICA DE ELIMINAR ---
+            navigator.clipboard.writeText(publicURL).then(() => {
+                // Se cambió 'statusSorteoMessage' por la variable correcta 'statusGestionSorteo'
+                showGenericStatusMessage(statusGestionSorteo, '¡Enlace del listado copiado al portapapeles!', false);
+            }).catch(err => {
+                showGenericStatusMessage(statusGestionSorteo, 'Error al copiar el enlace.', true);
+            });
+        }
+        // --- FIN DE LA CORRECCIÓN ---
     });
 
     // Para la tabla de gestión de ganadores (editar foto)
