@@ -301,7 +301,7 @@ function initializeRafflePage() {
                 const stats = data.stats;
                 const statsHTML = `
                     <div class="ticker-item"><i class="fas fa-trophy"></i> <span>Sorteos Realizados:</span> <strong>${stats.sorteosRealizados}</strong></div>
-                    <div class="ticker-item"><i class="fas fa-ticket-alt"></i> <span>Boletos Vendidos:</span> <strong>${stats.totalBoletos}</strong></div>
+                    <div class="ticker-item"><i class="fas fa-ticket-alt"></i> <span>Números Vendidos:</span> <strong>${stats.totalBoletos}</strong></div>
                     <div class="ticker-item"><i class="fas fa-users"></i> <span>Participantes:</span> <strong>${stats.totalParticipantes}</strong></div>
                     <div class="ticker-item"><i class="fas fa-handshake"></i> <span>Afiliados:</span> <strong>${stats.totalAfiliados}</strong></div>
                 `;
@@ -333,7 +333,7 @@ function initializeRafflePage() {
 
 
         if (!paquetes || paquetes.length === 0) {
-            contenedor.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">No hay paquetes de boletos disponibles para este sorteo en este momento.</p>';
+            contenedor.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">No hay paquetes de números disponibles para este sorteo en este momento.</p>';
             return;
         }
 
@@ -351,7 +351,7 @@ function initializeRafflePage() {
                 if (ahorro > 0) {
                     valorRealHTML = `<span class="precio-original-tachado">$${valorReal.toFixed(0)}</span>`;
                     const boletosGratis = Math.floor(ahorro / precioIndividual);
-                    if (boletosGratis > 0) boletosGratisHTML = `<div class="etiqueta-ahorro">+${boletosGratis} Boleto(s) GRATIS</div>`;
+                    if (boletosGratis > 0) boletosGratisHTML = `<div class="etiqueta-ahorro">+${boletosGratis} Número(s) GRATIS</div>`;
                 }
             }
             let descripcion = "Una excelente opción para aumentar tus probabilidades de ganar.";
@@ -376,7 +376,7 @@ function initializeRafflePage() {
                     <div class="paquete-icono">${iconoHTML}</div>
                     <h4>${paquete.nombre}</h4>
                     <div class="paquete-precio">$${paquete.precio} ${valorRealHTML}</div>
-                    <div class="paquete-cantidad">${paquete.boletos} Boleto(s) Digital(es)</div>
+                    <div class="paquete-cantidad">${paquete.boletos} Número(s) Digital(es)</div>
                     ${boletosGratisHTML}
                     <p class="paquete-descripcion">${descripcion}</p>
                     <a href="${enlaceCompra}" class="boton-paquete">Elegir Paquete</a>
@@ -406,7 +406,7 @@ function initializeRafflePage() {
             const enlaceCompra = `comprar.html?${params.toString()}`;
             html += `
                 <a href="${enlaceCompra}" class="mini-package-btn">
-                    <strong>${paqueteIndividual.boletos} Boleto</strong>
+                    <strong>${paqueteIndividual.boletos} Número</strong>
                     <span>por $${paqueteIndividual.precio}</span>
                 </a>
             `;        }
@@ -416,7 +416,7 @@ function initializeRafflePage() {
             const enlaceCompra = `comprar.html?${params.toString()}`;
             html += `
                 <a href="${enlaceCompra}" class="mini-package-btn popular">
-                    <strong>${paqueteMejorValor.boletos} Boletos</strong>
+                    <strong>${paqueteMejorValor.boletos} Números</strong>
                     <span>por $${paqueteMejorValor.precio}</span>
                     <span class="popular-tag">¡Recomendado!</span>
                 </a>
@@ -772,7 +772,7 @@ function initializeRafflePage() {
 
         titleDiv.textContent = `¡Felicidades al ganador del ${ganadorInfo.nombre_premio_display}!`;
         // Creamos un HTML más detallado para el banner
-        timerDiv.innerHTML = `<span class="winner-banner-name">🎉 ${nombreFormateado} | <span class="winner-banner-ticket">Boleto #${boletoGanador}</span> 🎉</span>`;
+        timerDiv.innerHTML = `<span class="winner-banner-name">🎉 ${nombreFormateado} | <span class="winner-banner-ticket">Número #${boletoGanador}</span> 🎉</span>`;
         
         countdownContainer.classList.remove('oculto');
         countdownContainer.classList.remove('is-urgent', 'is-critical');
@@ -902,7 +902,7 @@ function initializeRafflePage() {
                 } else if (percentageSold >= 50) {
                     motivationalMessage = '¡Más de la mitad del camino! Tú puedes ser el ganador.';
                 } else {
-                    motivationalMessage = '¡Compra tus boletos y participa ya!';
+                    motivationalMessage = '¡Compra tus números y participa ya!';
                 }
                 const metaMessage = '<p style="font-size: 0.9em; color: var(--clr-light-text-alt); margin-top: 5px;">Al llegar al 100% se realizará el sorteo EN VIVO. ¡Mucha suerte!</p>';
 

@@ -24,47 +24,114 @@
     <script src="tailwind-config.js"></script>
     <style>
         /* Estilos adicionales específicos para esta página, si son necesarios */
-        .page-container {
-            max-width: 900px; /* Ancho máximo para el contenido */
-            margin: 40px auto;
-            padding: 20px;
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 30px;
-            color: var(--clr-primary);
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s ease;
-        }
-        .back-link:hover {
-            color: var(--clr-accent);
-            text-decoration: underline;
-        }
-        .faq-page-item { /* Estilo para cada pregunta/respuesta en esta página */
-            background-color: var(--clr-dark-bg); /* Un fondo ligeramente diferente al de .content-section */
-            border: 1px solid var(--clr-dark-border);
-            border-radius: var(--border-radius-medium);
-            margin-bottom: 20px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        }
-        .faq-page-item h3 {
-            color: var(--clr-primary);
-            font-size: 1.4em; /* Un poco más grande para las preguntas */
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-        }
-        .faq-page-item h3 i {
-            margin-right: 10px;
-            color: var(--clr-secondary);
-        }
-        .faq-page-item p {
-            color: var(--clr-dark-text-alt);
-            line-height: 1.8;
-            font-size: 1em;
-        }
+    /* EN FAQ.HTML, DENTRO DE <style> - REEMPLAZA TODO CON ESTO */
+    .page-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    .back-link {
+        display: inline-block;
+        margin-bottom: 30px;
+        color: var(--clr-primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .back-link:hover {
+        color: var(--clr-accent);
+    }
+
+    /* --- Estilos del Acordeón --- */
+    .seccion-faq {
+        width: 100%;
+    }
+    .faq-item {
+        background-color: var(--clr-dark-bg);
+        border: 1px solid var(--clr-dark-border);
+        border-radius: var(--border-radius-medium);
+        margin-bottom: 15px;
+        overflow: hidden; /* ¡Muy importante para la animación! */
+        transition: all 0.3s ease;
+    }
+    .faq-item:hover {
+        border-color: var(--clr-primary);
+    }
+
+    .faq-question {
+        width: 100%;
+        background-color: transparent;
+        color: var(--clr-dark-text);
+        padding: 20px 25px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 1.2em;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background-color 0.2s ease;
+    }
+    .faq-question i {
+        margin-right: 15px;
+        color: var(--clr-secondary);
+        font-size: 1.1em;
+    }
+
+    .faq-question::after {
+        content: '\f078'; /* Icono de flecha hacia abajo de Font Awesome */
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        transition: transform 0.3s ease;
+        color: var(--clr-dark-text-alt);
+        font-size: 0.8em;
+    }
+
+    .faq-question.active::after {
+        transform: rotate(180deg); /* La flecha apunta hacia arriba */
+    }
+
+    .faq-answer {
+        padding: 0px 25px 0 65px; /* Padding izquierdo alineado con el texto */
+        color: var(--clr-dark-text-alt);
+        font-size: 1em;
+        line-height: 1.8;
+        max-height: 0; /* Oculto por defecto */
+        overflow: hidden;
+        transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+    }
+
+    .faq-answer.active {
+        max-height: 300px; /* Altura suficiente para cualquier respuesta */
+        padding-top: 0;
+        padding-bottom: 25px;
+    }
+
+    /* --- Estilos para la llamada a la acción final --- */
+    .cta-final-faq {
+        margin-top: 50px;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(var(--clr-primary-rgb), 0.1), rgba(var(--clr-secondary-rgb), 0.1));
+        padding: 40px;
+        border-radius: var(--border-radius-large);
+    }
+    .cta-final-faq h2 {
+        font-size: 2em;
+        font-weight: 700;
+        color: var(--clr-primary);
+        margin-bottom: 10px;
+    }
+    .cta-final-faq p {
+        color: var(--clr-dark-text-alt);
+        margin-bottom: 25px;
+        max-width: 450px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .boton-cta-grande {
+        padding: 15px 40px;
+        font-size: 1.2em;
+    }
     </style>
     <!-- Meta Pixel Code -->
     <script>
@@ -136,32 +203,71 @@
     <main class="page-container">
         <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver al Sorteo Principal</a>
 
-        <section class="content-section">
-            <div class="faq-page-item">
-                <h3><i class="fas fa-shield-alt"></i>¿Cómo sé que el sorteo es real y transparente?</h3>
-                <p>En MOVIL WIN nos comprometemos con la transparencia. El sorteo se realiza utilizando un sistema de selección aleatoria automatizado con el uso de IA. Ningún miembro del equipo de Movil Win se involucra en la selección del ganador. Y el sorteo se transmitirá en vivo o se grabará para que todos puedan ver el proceso. Publicamos las bases y condiciones claramente y la lista de ganadores es anunciada públicamente, así como el código elaborado para realizar todo el proceso.</p>
+        <section id="faq-container" class="seccion-faq">
+            <div class="faq-item">
+                <button class="faq-question">
+                    <i class="fas fa-shield-alt"></i>¿Cómo sé que el sorteo es real y transparente?
+                </button>
+                <div class="faq-answer">
+                    <p>¡La transparencia es nuestra máxima prioridad! Realizamos nuestros sorteos usando una tómbola física tradicional y en un lugar público (según la actividad). Se van obteniendo números al azar desde la tombola hasta que una combinación sea el ganador y el sorteo se transmite totalmente en vivo a través de nuestras redes sociales. Podrás ver con tus propios ojos cómo se extrae el boleto ganador. ¡Es un proceso 100% público, auditable y emocionante, como en los grandes sorteos de siempre!</p>
+                </div>
             </div>
-            <div class="faq-page-item">
-                <h3><i class="fas fa-truck"></i>¿Puedo participar desde cualquier lugar de Ecuador?</h3>
-                <p>¡Así es! Si resultas ganador y resides dentro de la región peninsular del Ecuador (según el ámbito territorial definido en nuestras bases), coordinaremos contigo la entrega segura de tu premio. Revisa nuestras bases para más detalles sobre la entrega.</p>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    <i class="fas fa-truck"></i>¿Puedo participar desde cualquier lugar de Ecuador?
+                </button>
+                <div class="faq-answer">
+                    <p>¡Así es! Si resultas ganador y resides dentro de la región peninsular del Ecuador (según el ámbito territorial definido en nuestras bases), coordinaremos contigo la entrega segura de tu premio. Revisa nuestras bases para más detalles sobre la entrega.</p>
+                </div>
             </div>
-            <div class="faq-page-item">
-                <h3><i class="fas fa-credit-card"></i>¿Cuáles son los métodos de pago aceptados?</h3>
-                <p>Actualmente aceptamos pagos mediante transferencia bancaria o depósito a la cuenta que te indicaremos por WhatsApp al momento de confirmar tu participación. Estamos trabajando para añadir más opciones en el futuro.</p>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    <i class="fas fa-credit-card"></i>¿Cuáles son los métodos de pago aceptados?
+                </button>
+                <div class="faq-answer">
+                    <p>Actualmente aceptamos pagos mediante transferencia bancaria o depósito a la cuenta que te indicaremos por WhatsApp al momento de confirmar tu participación. Estamos trabajando para añadir más opciones en el futuro.</p>
+                </div>
             </div>
-            <div class="faq-page-item">
-                <h3><i class="fas fa-calendar-alt"></i>¿Hasta cuándo puedo participar en el sorteo actual?</h3>
-                <p>Puedes adquirir participaciones hasta que se alcance la meta de participaciones. ¡Revisa la barra de progreso en la página principal para ver cuán cerca estamos!</p>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    <i class="fas fa-calendar-alt"></i>¿Hasta cuándo puedo participar en el sorteo actual?
+                </button>
+                <div class="faq-answer">
+                    <p>Puedes adquirir participaciones hasta que se alcance la meta de participaciones. ¡Revisa la barra de progreso en la página principal para ver cuán cerca estamos!</p>
+                </div>
             </div>
-             <div class="faq-page-item">
-                <h3><i class="fas fa-random"></i>¿Cómo se elige al ganador?</h3>
-                <p>El ganador se elige de forma completamente aleatoria entre todas las participaciones válidas registradas, utilizando un sistema digital que asegura la imparcialidad, ¡potenciado con IA! El proceso se realiza de forma transparente y se transmite en vivo en nuestras redes sociales.</p>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    <i class="fas fa-random"></i>¿Cómo se elige al ganador?
+                </button>
+                <div class="faq-answer">
+                <p>El ganador se elige de la manera más clásica y transparente: con una tómbola física. Cada boleto o combinación de números que compras se representa físicamente y se introduce en la tómbola. Durante nuestra transmisión en vivo, giraremos la tómbola y una mano inocente sacará el boleto ganador a la vista de todos. ¡Pura suerte y emoción!</strong></p>
+
+                </div>
             </div>
-            <div class="faq-page-item">
-                <h3><i class="fas fa-envelope-open-text"></i>¿Cómo recibiré mi Mini-Guía Digital?</h3>
-                <p>Una vez confirmada tu compra y tu participación, la "Mini-Guía Digital: Trucos para Sacarle el Jugo a tu Smartphone" será enviada directamente al correo electrónico que nos proporciones durante el proceso de registro.</p>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    <i class="fas fa-envelope-open-text"></i>¿Cómo recibiré mi Mini-Guía Digital?
+                </button>
+                <div class="faq-answer">
+                    <p>Una vez confirmada tu compra y tu participación, la "Mini-Guía Digital: Trucos para Sacarle el Jugo a tu Smartphone" será enviada directamente al correo electrónico que nos proporciones durante el proceso de registro.</p>
+                </div>
             </div>
         </section>
+
+        <section class="cta-final-faq content-section">
+            <h2>¿Dudas resueltas?</h2>
+            <p>¡Perfecto! Ahora estás a un paso de ganar. Vuelve al sorteo y elige tu paquete de la suerte.</p>
+            <a href="index.html" class="boton-cta boton-cta-grande">
+                <i class="fas fa-arrow-left"></i> ¡Volver y Participar!
+            </a>
+        </section>
+
     </main>
 
     <footer class="site-footer">
@@ -172,6 +278,6 @@
             <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Instagram"><i class="fab fa-instagram"></i></a>
         </div>
     </footer>
-    <script src="script.js"></script>
+    <script src="script.js"></script> <script src="faq.js"></script>   </body>
 </body>
 </html>
