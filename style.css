@@ -4058,76 +4058,74 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 /* --- Ajustes para Móviles (Sin cambios) --- */
 @media (max-width: 992px) { /* ... */ }
-/* ========================================================== */
-/* --- REDISEÑO 2.1: BARRA TRAPEZOIDAL Y PORCENTAJE FIJO --- */
-/* ========================================================== */
+/* ====================================================== */
+/* --- REDISEÑO: BARRA DE PROGRESO RADIAL ELEGANTE --- */
+/* ====================================================== */
 
-.progress-info-wrapper {
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-/* El contenedor de la barra de progreso con forma de trapecio */
-.progress-bar-wrapper {
-    width: 100%;
-    height: 35px; /* Un poco más alta para mejor impacto visual */
+.progress-radial-wrapper {
     position: relative;
-    /* Usamos clip-path para la forma de trapecio */
-    clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+    width: 120px; /* Tamaño del círculo */
+    height: 120px;
+    margin: 20px auto; /* Centrar el elemento */
 }
 
-/* Capa de fondo del trapecio */
-.progress-bar-wrapper::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-color: var(--clr-light-bg);
-    border: 1px solid var(--clr-light-border);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
-}
-
-/* El relleno de la barra, también con forma de trapecio */
-.progress-bar-fill {
+.progress-radial-background {
+    width: 100%;
     height: 100%;
-    width: 0%; /* Controlado con JS */
-    transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1), background 0.4s ease;
-    background: linear-gradient(90deg, #30d158, var(--clr-primary));
-    box-shadow: 0 0 8px 1px rgba(var(--clr-primary-rgb), 0.6);
-    clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
-}
-
-/* --- Lógica de Urgencia (cambia el color del relleno) --- */
-.progress-bar-wrapper.urgente .progress-bar-fill {
-    background: linear-gradient(90deg, var(--clr-primary), var(--clr-accent));
-    box-shadow: 0 0 10px 2px rgba(var(--clr-accent-rgb), 0.6);
-}
-
-.progress-bar-wrapper.critico .progress-bar-fill {
-    background: linear-gradient(90deg, var(--clr-red), var(--clr-accent));
-    animation: pulse-red 1.5s infinite;
-}
-
-@keyframes pulse-red {
-    50% { box-shadow: 0 0 14px 4px rgba(var(--clr-red-rgb), 0.8); }
-}
-
-/* --- CORRECCIÓN DE LEGIBILIDAD DEL PORCENTAJE --- */
-.progress-bar-percentage-text {
-    position: absolute;
-    /* Se posiciona sobre TODA la barra, no solo sobre el relleno */
-    inset: 0; 
+    border-radius: 50%;
+    background-color: var(--clr-light-bg);
+    border: 2px solid var(--clr-light-border);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 1em;
-    font-weight: 700;
-    color: var(--clr-white);
-    /* Sombra fuerte para que contraste con el fondo vacío y el relleno */
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-    white-space: nowrap; 
+    align-items: center;
 }
 
-/* Texto motivacional debajo de la barra */
+.progress-radial-circle {
+    width: 90%;
+    height: 90%;
+    border-radius: 50%;
+    background-color: transparent;
+    border: 6px solid transparent; /* Grosor del arco */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-90deg); /* Iniciar desde la parte superior */
+    transition: border-color 0.4s ease;
+    /* Color inicial del "vacío" del arco */
+    border-color: var(--clr-light-border);
+}
+
+/* La parte "llena" del arco se genera con JavaScript inline styles */
+.progress-radial-fill {
+    border-color: var(--clr-primary); /* Color principal por defecto */
+    transition: border-color 0.4s ease;
+}
+
+/* Estilos para los estados de urgencia */
+.progress-radial-wrapper.urgente .progress-radial-fill {
+    border-color: var(--clr-accent);
+}
+
+.progress-radial-wrapper.critico .progress-radial-fill {
+    border-color: var(--clr-red);
+    animation: pulse-red-border 1.5s infinite;
+}
+
+@keyframes pulse-red-border {
+    50% { border-color: rgba(var(--clr-red-rgb), 0.8); }
+}
+
+.progress-radial-percentage {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--clr-dark-text);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
 .motivational-text-integrated {
     font-size: 1em;
     font-weight: 500;

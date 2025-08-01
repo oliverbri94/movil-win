@@ -582,9 +582,22 @@ function initializeRafflePage() {
 
     async function moveToSlide(index) {
 
+        // 1. Verificaciones iniciales
         if (!prizeCarouselTrack || index < 0 || index >= sorteosDisponibles.length) return;
         premioActualIndex = index;
         const sorteoActual = sorteosDisponibles[premioActualIndex];
+        sorteoFinalizado = false;
+
+        // 2. Definición de variables del DOM (ESTA ES LA CORRECCIÓN CLAVE)
+        const slideWrapper = prizeCarouselTrack.children[index];
+        if (!slideWrapper) return;
+        
+        const prizeCarouselSlideElement = slideWrapper.querySelector('.prize-carousel-slide');
+        const filaInferior = slideWrapper.querySelector('.fila-inferior');
+        const contenedorRueda = slideWrapper.querySelector('.contenedor-sorteo');
+
+        // 3. Actualizaciones de la interfaz de usuario (mover carrusel, paquetes, etc.)
+        prizeCarouselTrack.style.transform = `translateX(${-index * 100}%)`;
         
         if (sorteoActual && sorteoActual.status_sorteo === 'programado') {
             const carouselSection = document.getElementById('main-carousel-section');
@@ -919,18 +932,17 @@ function initializeRafflePage() {
                 const percentageRemaining = 100 - percentageSold;
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
                 const progressBarHTML = `
-                    <div class="progress-info-wrapper">
-                        <div class="boletos-restantes-container">
-                            <span class="boletos-restantes-numero">${boletosRestantes > 0 ? boletosRestantes : '¡AGOTADOS!'}</span>
-                            <span class="boletos-restantes-texto">Boletos Restantes</span>
-                        </div>
-                        <div class="progress-bar-wrapper ${urgenciaClass}">
-                            <div class="progress-bar-fill" style="width: ${percentageSold.toFixed(2)}%;">
-                                <span class="progress-bar-percentage-text">${percentageSold.toFixed(0)}% Vendido</span>
-                            </div>
-                        </div>
-                        <p class="motivational-text-integrated">${motivationalMessage}</p>
+                    <div class="progress-radial-wrapper ${urgenciaClass}">
+                        <svg class="progress-radial-svg" width="120" height="120" viewBox="0 0 120 120">
+                            <circle class="progress-radial-bg-circle" cx="60" cy="60" r="54" fill="transparent" stroke="var(--clr-light-border)" stroke-width="6"/>
+                            <circle class="progress-radial-fg-circle" cx="60" cy="60" r="54" fill="transparent" stroke="var(--clr-primary)" stroke-width="6"
+                                    stroke-dasharray="${circumference}"
+                                    stroke-dashoffset="${circumference - (percentageSold / 100) * circumference}"
+                                    transform="rotate(-90 60 60)" />
+                        </svg>
+                        <div class="progress-radial-percentage">${percentageSold.toFixed(0)}%</div>
                     </div>
+                    <p class="motivational-text-integrated">${motivationalMessage}</p>
                 `;
 
                 slideWrapper.innerHTML = `
