@@ -184,13 +184,11 @@ body {
 }
 
 .prize-carousel-slide {
-    width: 100%;
-    flex-shrink: 0; /* Asegura que cada slide ocupe el 100% */
     display: flex;
-    flex-direction: column; /* Apilado por defecto en móvil */
-    gap: 20px;
-    padding: 20px 10px; /* Padding para el contenido del slide */
+    flex-direction: column;
+    min-height: 75vh; /* Ocupa al menos el 75% de la altura de la pantalla */
 }
+
 @media (min-width: 768px) {
     .prize-carousel-slide {
         /* REEMPLAZA las reglas anteriores por estas: */
@@ -4029,181 +4027,109 @@ nav.bg-custom-dark-bg-frame a:hover {
     100% { background-color: transparent; }
 }
 
-.prize-carousel-slide {
+.fila-superior {
+    flex-grow: 1; /* Ocupa el espacio vertical si la fila inferior desaparece */
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* ¡AQUÍ ESTÁ LA MAGIA! Dos columnas de igual tamaño */
+    gap: 30px;
+    align-items: start;
+    width: 100%;
+}
+
+
+.columna-izquierda, .columna-derecha {
+    width: 100%;
+    /* Añadimos esto para que el contenido se centre si hay poco */
     display: flex;
     flex-direction: column;
-    min-height: 80vh; /* Ocupa al menos el 80% de la altura de la pantalla */
-    height: 100%;
-}
-
-
-.fila-superior {
-    flex-grow: 1; /* ¡Esta es la propiedad clave! */
-    display: flex; /* Usamos Flexbox, es más robusto para este caso */
-    flex-direction: row; /* Aseguramos la dirección horizontal */
-    gap: 30px;
-    align-items: flex-start;
-}
-
-.columna-izquierda {
-    flex: 0 0 40%; /* No crece, no se encoge, base del 40% */
-    width: 40%;
-}
-
-.columna-derecha {
-    flex: 1; /* Ocupa el espacio restante */
-    width: 60%;
-}
-/* --- Estilos del Tablero de Lotería --- */
-.tablero-loteria-container {
-    background-color: var(--clr-dark-bg);
-    padding: 20px;
-    border-radius: var(--border-radius-medium);
-    border: 1px solid var(--clr-dark-border);
-}
-
-.tablero-resumen { /* ... (Sin cambios) ... */ }
-
-.tablero-paginacion {
-    display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-.tablero-pagina-btn {
-    background-color: var(--clr-dark-bg-frame);
-    border: 1px solid var(--clr-dark-border);
-    color: var(--clr-dark-text-alt);
-    padding: 8px 15px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-.tablero-pagina-btn:hover {
-    background-color: var(--clr-primary);
-    color: white;
-    border-color: var(--clr-primary);
-}
-.tablero-pagina-btn.active {
-    background-color: var(--clr-primary);
-    color: white;
-    border-color: var(--clr-primary);
-    box-shadow: 0 0 10px var(--clr-primary);
 }
 
-.tablero-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 20px; /* Más espacio para el efecto 3D */
-    justify-items: center;
+/* En móviles, las columnas se apilan una sobre otra */
+@media (max-width: 992px) {
+    .fila-superior {
+        grid-template-columns: 1fr; /* Una sola columna */
+    }
 }
 
-.tablero-casilla {
-    position: relative;
-    width: 70px;
-    height: 70px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    font-family: 'Anton', sans-serif;
-    font-size: 1.8em;
-    transition: all 0.3s ease;
-}
-
-.tablero-casilla.disponible {
-    background-color: var(--clr-dark-bg-frame);
-    color: var(--clr-dark-text-alt);
-    border: 2px dashed var(--clr-dark-border);
-}
-
-.tablero-casilla.ocupado {
-    background: radial-gradient(circle at 50% 30%, #fdf5e6 10%, #f0e6d2 80%);
-    box-shadow: inset -3px -3px 10px rgba(0, 0, 0, 0.15), 0px 4px 10px rgba(0, 0, 0, 0.3);
-    color: #4a3f35;
-    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.7);
-    cursor: default;
-}
-
-.tablero-casilla.ocupado:hover::before {
-    content: attr(data-title);
-    position: absolute;
-    bottom: 110%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #222;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 5px;
-    font-size: 0.8rem;
-    font-family: 'Poppins', sans-serif; /* Usamos una fuente más legible para el tooltip */
-    white-space: nowrap;
-    z-index: 10;
-}
 
 /* --- Ajustes para Móviles (Sin cambios) --- */
 @media (max-width: 992px) { /* ... */ }
-
 /* ================================================= */
-/* == REDISEÑO PREMIUM BARRA DE PROGRESO TÓMBOLA == */
+/* == REDISEÑO FINAL BARRA DE PROGRESO TÓMBOLA == */
 /* ================================================= */
 
 .tombola-progress-wrapper {
     position: relative;
     width: 100%;
-    text-align: center;
-    padding: 20px 0;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centra todo el componente */
+    align-items: center;
+    justify-content: center;
 }
 
 /* El cuerpo principal de la tómbola */
 .tombola-shape {
-    width: 220px;
-    height: 150px;
-    background-color: rgba(0, 0, 0, 0.1);
-    border: 10px solid #a18f71; /* Borde de madera más realista */
-    border-radius: 45px / 80px;
+    width: 250px; /* Un poco más ancha */
+    height: 160px; /* Un poco más alta */
+    background-color: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Borde sutil para efecto de cristal */
+    
+    /* Forma de cilindro más realista */
+    border-radius: 80px / 120px; 
+    
     margin: 0 auto;
     position: relative;
     overflow: hidden;
     box-shadow: 
-        inset 0 0 30px rgba(0,0,0,0.5),
-        0 5px 20px rgba(0,0,0,0.2);
-    z-index: 2; /* Se asegura que esté por encima de la base */
+        inset 0 0 30px rgba(0,0,0,0.6);
+    z-index: 2; 
 }
 
-/* La base de la tómbola (creada con pseudo-elementos) */
-.tombola-shape::before {
+/* La base/soporte de la tómbola */
+.tombola-shape::after {
     content: '';
     position: absolute;
-    bottom: -25px; /* Posiciona la base debajo */
+    bottom: -35px;
     left: 50%;
     transform: translateX(-50%);
-    width: 120px; /* Ancho de la base */
-    height: 20px; /* Alto de la base */
-    background-color: #a18f71;
-    border-radius: 5px;
-    box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+    width: 150px;
+    height: 30px;
+    background: #a18f71;
+    border-radius: 5px 5px 10px 10px;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+    border-bottom: 5px solid #7c6c53;
 }
 
-/* El "líquido" de bolas que llena la tómbola (sin cambios) */
-.tombola-fill { /* ... tus estilos anteriores para .tombola-fill ... */ }
+/* El "líquido" de bolas que llena la tómbola */
+.tombola-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0%; /* Controlado con JS */
+    background: linear-gradient(to top, var(--clr-primary) 0%, var(--clr-accent) 100%);
+    transition: height 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    opacity: 0.9;
+}
 
-/* El texto que va sobre la tómbola (sin cambios) */
-.tombola-text { /* ... tus estilos anteriores para .tombola-text ... */ }
+/* El texto que va sobre la tómbola */
+.tombola-text {
+    position: relative; /* Cambiado para mejor posicionamiento */
+    color: white;
+    font-family: 'Anton', sans-serif;
+    font-size: 2.5em; /* Más grande */
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+    z-index: 3; /* Asegura que esté sobre el relleno */
+}
 
 /* El mensaje motivacional */
 .tombola-motivation-text {
-    margin-top: 25px; /* Más espacio desde la base */
+    margin-top: 45px; /* Más espacio para la nueva base */
     font-size: 1.1em;
     font-weight: 600;
     color: var(--clr-dark-text);
 }
-/* Estilo especial para el mensaje de 100% */
 .tombola-motivation-text.completed {
     color: var(--clr-primary);
     font-size: 1.2em;
