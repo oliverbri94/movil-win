@@ -4058,108 +4058,82 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 /* --- Ajustes para Móviles (Sin cambios) --- */
 @media (max-width: 992px) { /* ... */ }
-/* ================================================= */
-/* --- REDISEÑO: BARRA DE PROGRESO "NEÓN" Y ESCASEZ --- */
-/* ================================================= */
+/* ========================================================== */
+/* --- REDISEÑO 2.1: BARRA TRAPEZOIDAL Y PORCENTAJE FIJO --- */
+/* ========================================================== */
 
-/* Contenedor principal de toda la sección de progreso */
 .progress-info-wrapper {
     width: 100%;
+    margin-bottom: 20px;
 }
 
-/* Contenedor del contador de boletos restantes */
-.boletos-restantes-container {
-    text-align: center;
-    margin-bottom: 15px;
-}
-
-.boletos-restantes-numero {
-    font-family: 'Anton', sans-serif;
-    font-size: 2.5em; /* Número grande e impactante */
-    line-height: 1;
-    color: var(--clr-primary); /* Color principal */
-    display: block;
-    margin-bottom: 5px;
-    transition: color 0.4s ease;
-}
-
-.boletos-restantes-texto {
-    font-size: 0.9em;
-    font-weight: 500;
-    color: var(--clr-light-text-alt);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* El wrapper de la barra de progreso */
+/* El contenedor de la barra de progreso con forma de trapecio */
 .progress-bar-wrapper {
     width: 100%;
-    height: 28px; /* Una barra más gruesa y visible */
+    height: 35px; /* Un poco más alta para mejor impacto visual */
+    position: relative;
+    /* Usamos clip-path para la forma de trapecio */
+    clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+}
+
+/* Capa de fondo del trapecio */
+.progress-bar-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
     background-color: var(--clr-light-bg);
-    border-radius: 14px; /* Totalmente redondeada */
     border: 1px solid var(--clr-light-border);
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
-    overflow: hidden;
-    position: relative; 
 }
 
-/* El relleno de la barra de progreso */
+/* El relleno de la barra, también con forma de trapecio */
 .progress-bar-fill {
     height: 100%;
-    width: 0%; /* Esta anchura se controla con JS */
-    border-radius: 14px;
+    width: 0%; /* Controlado con JS */
     transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1), background 0.4s ease;
-    
-    /* Estilo por defecto (Verde) */
     background: linear-gradient(90deg, #30d158, var(--clr-primary));
     box-shadow: 0 0 8px 1px rgba(var(--clr-primary-rgb), 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
 }
 
-/* --- Lógica de Urgencia --- */
-
-/* Estilo para cuando el sorteo está en estado URGENTE (ej. > 75%) */
+/* --- Lógica de Urgencia (cambia el color del relleno) --- */
 .progress-bar-wrapper.urgente .progress-bar-fill {
     background: linear-gradient(90deg, var(--clr-primary), var(--clr-accent));
     box-shadow: 0 0 10px 2px rgba(var(--clr-accent-rgb), 0.6);
 }
-.progress-bar-wrapper.urgente .boletos-restantes-numero {
-    color: var(--clr-accent);
-}
 
-/* Estilo para cuando el sorteo está en estado CRÍTICO (ej. > 90%) */
 .progress-bar-wrapper.critico .progress-bar-fill {
     background: linear-gradient(90deg, var(--clr-red), var(--clr-accent));
     animation: pulse-red 1.5s infinite;
 }
-.progress-bar-wrapper.critico .boletos-restantes-numero {
-    color: var(--clr-red);
-}
 
 @keyframes pulse-red {
-    0% { box-shadow: 0 0 8px 1px rgba(var(--clr-red-rgb), 0.7); }
-    50% { box-shadow: 0 0 14px 4px rgba(var(--clr-red-rgb), 0.9); }
-    100% { box-shadow: 0 0 8px 1px rgba(var(--clr-red-rgb), 0.7); }
+    50% { box-shadow: 0 0 14px 4px rgba(var(--clr-red-rgb), 0.8); }
 }
 
-
-/* Texto del porcentaje dentro de la barra */
+/* --- CORRECCIÓN DE LEGIBILIDAD DEL PORCENTAJE --- */
 .progress-bar-percentage-text {
-    font-size: 0.85em;
+    position: absolute;
+    /* Se posiciona sobre TODA la barra, no solo sobre el relleno */
+    inset: 0; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1em;
     font-weight: 700;
     color: var(--clr-white);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+    /* Sombra fuerte para que contraste con el fondo vacío y el relleno */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
     white-space: nowrap; 
 }
 
-/* Texto motivacional que va debajo de la barra */
+/* Texto motivacional debajo de la barra */
 .motivational-text-integrated {
-    font-size: 0.95em;
+    font-size: 1em;
     font-weight: 500;
     min-height: 1.5em;
     margin-top: 15px;
     text-align: center;
+    color: var(--clr-light-text-alt);
     transition: opacity 0.3s ease;
 }

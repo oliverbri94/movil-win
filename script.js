@@ -608,60 +608,46 @@ function initializeRafflePage() {
 
             }
         }
-        const currentWheelCanvas = activeSlide.querySelector('.price-wheel-canvas');
-        const contenedorRueda = activeSlide.querySelector('.contenedor-sorteo');
-        const contenedorTombola = activeSlide.querySelector('.contenedor-tombola');
+    
+        // --- LÓGICA DE VISIBILIDAD Y ALTURA CORREGIDA ---
+        if (filaInferior && prizeCarouselSlideElement) {
+            const esTipoTombola = sorteoActual.status_sorteo === 'activo' && sorteoActual.tipo_sorteo === 'tombola_interactiva';
+            
+            // Si es tómbola, oculta la fila inferior y contrae la altura. Si no, la muestra y restaura la altura.
+            filaInferior.style.display = esTipoTombola ? 'none' : 'block';
+            prizeCarouselSlideElement.style.minHeight = esTipoTombola ? 'auto' : ''; // Vacío para que use el CSS
+        }
 
-        if (sorteoActual && sorteoActual.status_sorteo !== 'programado') {
-            const filaInferior = activeSlide.closest('.slide-wrapper').querySelector('.fila-inferior');
-            if (sorteoActual.tipo_sorteo === 'tombola_interactiva') {
-                // --- CORRECCIÓN ---
-                // Si es tómbola, OCULTAMOS la fila inferior Y AJUSTAMOS LA ALTURA del slide.
-                if (filaInferior) filaInferior.style.display = 'none';
-                if (prizeCarouselSlideElement) prizeCarouselSlideElement.style.minHeight = 'auto'; // Colapsa la altura para eliminar el espacio.
-                // --- FIN CORRECCIÓN ---
-            } else {
-                // Lógica original de la ruleta digital
-                if (filaInferior) filaInferior.style.display = 'block'; 
-                if (prizeCarouselSlideElement) prizeCarouselSlideElement.style.minHeight = ''; // Usa la altura del CSS.
-                contenedorRueda?.classList.remove('oculto');
-                contenedorTombola?.classList.add('oculto');
-                const currentWheelCanvas = activeSlide.querySelector('.price-wheel-canvas');
-                if (currentWheelCanvas) {
-                    wheelCanvas = currentWheelCanvas;
-                    wheelCtx = wheelCanvas.getContext('d');
-                    const container = activeSlide.querySelector('.wheel-price-is-right-container');
-                    if (container) {
-                        wheelWidth = container.clientWidth;
-                        wheelHeight = SEGMENT_HEIGHT_FRONT * VISIBLE_SEGMENTS_COUNT;
-                        wheelCanvas.width = wheelWidth;
-                        wheelCanvas.height = wheelHeight;
-                    }
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/api/participantes?sorteoId=${sorteoActual.id_sorteo}`);
-                        if (!response.ok) { throw new Error(`El servidor respondió con un error ${response.status}`); }
-                        participantes = await response.json() || [];
-                        currentYOffset = 0;
-                        addWheelEventListeners(wheelCanvas);
-                        drawFrontWheel(participantes);
-                    } catch (err) {
-                        console.error("Error al cargar participantes para la rueda:", err);
-                        participantes = [];
-                        drawFrontWheel(participantes);
-                    }
-                } else {
+        // El resto de la lógica para inicializar la rueda...
+        if (sorteoActual.status_sorteo === 'activo' && sorteoActual.tipo_sorteo !== 'tombola_interactiva') {
+            const contenedorRueda = slideWrapper.querySelector('.contenedor-sorteo');
+            contenedorRueda?.classList.remove('oculto');
+            
+            const currentWheelCanvas = slideWrapper.querySelector('.price-wheel-canvas');
+            if (currentWheelCanvas) {
+                wheelCanvas = currentWheelCanvas;
+                wheelCtx = wheelCanvas.getContext('2d');
+                const container = slideWrapper.querySelector('.wheel-price-is-right-container');
+                if (container) {
+                    wheelWidth = container.clientWidth;
+                    wheelHeight = SEGMENT_HEIGHT_FRONT * VISIBLE_SEGMENTS_COUNT;
+                    wheelCanvas.width = wheelWidth;
+                    wheelCanvas.height = wheelHeight;
+                }
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/participantes?sorteoId=${sorteoActual.id_sorteo}`);
+                    if (!response.ok) throw new Error(`El servidor respondió con error ${response.status}`);
+                    participantes = await response.json() || [];
+                    currentYOffset = 0;
+                    addWheelEventListeners(wheelCanvas);
+                    drawFrontWheel(participantes);
+                } catch (err) {
+                    console.error("Error al cargar participantes:", err);
                     participantes = [];
-                    wheelCanvas = null;
-                    wheelCtx = null;
-                    if(activeSlide.querySelector('.wheel-price-is-right-container')) {
-                        drawFrontWheel([]); // Dibuja el estado vacío si el canvas existe pero el sorteo es programado
-                    }
+                    drawFrontWheel(participantes);
                 }
             }
         } else {
-            // Si el sorteo es 'programado', ocultamos ambos
-            contenedorRueda?.classList.add('oculto');
-            contenedorTombola?.classList.add('oculto');
             participantes = [];
             wheelCanvas = null;
             wheelCtx = null;
@@ -933,44 +919,42 @@ function initializeRafflePage() {
                 `;
 
                 slideWrapper.innerHTML = `
-                    <div class="fila-superior">
-                        <div class="columna-izquierda">
-                            <div class="prize-image-container">
-                                ${renderMedia(mediaParaRenderizar)}
+                    <div class="prize-carousel-slide" data-sorteo-id="${sorteo.id_sorteo}">
+                        <div class="fila-superior">
+                            <div class="columna-izquierda">
+                                <div class="prize-image-container">
+                                    ${renderMedia(mediaParaRenderizar)}
+                                </div>
                             </div>
-                        </div>
-                        <div class="columna-derecha">
-                            <div class="prize-info-container">
-                                <h2 class="prize-title">${tituloMostrado}</h2>
-                                <div class="mini-package-selector">${miniPaquetesHTML}</div>
-                                ${progressBarHTML}
-                                <div class="top-participants-wrapper">
-                                    <button type="button" class="top-list-header collapsible-toggle">
-                                        <div class="header-title">
-                                            <i class="fas fa-crown"></i>
-                                            <span>Top 5 Participantes</span>
+                            <div class="columna-derecha">
+                                <div class="prize-info-container">
+                                    <h2 class="prize-title">${tituloMostrado}</h2>
+                                    <div class="mini-package-selector">${miniPaquetesHTML}</div>
+                                    ${progressBarHTML}
+                                    <div class="top-participants-wrapper">
+                                        <button type="button" class="top-list-header collapsible-toggle">
+                                            <div class="header-title">
+                                                <i class="fas fa-crown"></i> <span>Top 5 Participantes</span>
+                                            </div>
+                                            <div class="header-action">
+                                                <span class="text-ver-mas">Ver más</span><span class="text-ver-menos">Ver menos</span>
+                                                <i class="fas fa-chevron-down"></i>
+                                            </div>
+                                        </button>
+                                        <div class="collapsible-list-content">
+                                            <div class="loader-container oculto"></div><ol class="top-participants-list"></ol>
                                         </div>
-                                        <div class="header-action">
-                                            <span class="text-ver-mas">Ver más</span>
-                                            <span class="text-ver-menos">Ver menos</span>
-                                            <i class="fas fa-chevron-down"></i>
-                                        </div>
-                                    </button>
-                                    <div class="collapsible-list-content">
-                                        <div class="loader-container oculto"></div>
-                                        <ol class="top-participants-list"></ol>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="fila-inferior">
-                        <div class="contenedor-sorteo content-section">
-                            <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
-                            <div class="price-is-right-wheel-frame">
-                                <div class="wheel-price-is-right-container"><canvas class="price-wheel-canvas"></canvas></div>
-                                <div class="clacker-container"><div class="clacker-border"></div><div class="clacker-top"></div></div>
+                        <div class="fila-inferior">
+                            <div class="contenedor-sorteo content-section">
+                                <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
+                                <div class="price-is-right-wheel-frame">
+                                    <div class="wheel-price-is-right-container"><canvas class="price-wheel-canvas"></canvas></div>
+                                    <div class="clacker-container"><div class="clacker-border"></div><div class="clacker-top"></div></div>
+                                </div>
                             </div>
                         </div>
                     </div>
