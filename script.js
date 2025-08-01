@@ -141,128 +141,94 @@ function initializeRafflePage() {
     // Todas las funciones que ayudan a formatear datos, dibujar, etc.
 // En script.js, añade esta nueva función de ayuda
 
-    async function renderizarTableroLoteria(sorteo, slideElement) {
+    // REEMPLAZA la función anterior con esta
+    async function renderizarTombolaAnimada(sorteo, slideElement) {
         const contenedorTombola = slideElement.querySelector('.contenedor-tombola');
         if (!contenedorTombola) return;
 
         contenedorTombola.classList.remove('oculto');
-        contenedorTombola.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
 
+        // --- 1. Construir la estructura base de la Tómbola 3D ---
+        let tombolaHTML = `
+            <div class="tombola-animada-wrapper">
+                <div class="tombola-animada-container">
+                    <div class="tombola-cilindro">
+                        <div class="tombola-tapa frontal"></div>
+                        <div class="tombola-tapa trasera"></div>
+                    </div>
+                    <div class="participante-orbita"></div>
+                </div>
+                <div class="tombola-cta">
+                    <h4>¡Tu número puede ser el siguiente en girar!</h4>
+                </div>
+            </div>
+        `;
+        contenedorTombola.innerHTML = tombolaHTML;
+
+        // Añadir las 20 caras del cilindro con JS para no saturar el HTML
+        const cilindro = contenedorTombola.querySelector('.tombola-cilindro');
+        const numCaras = 20;
+        for (let i = 0; i < numCaras; i++) {
+            const cara = document.createElement('div');
+            cara.className = 'tombola-cara';
+            const angulo = (360 / numCaras) * i;
+            cara.style.transform = `rotateY(${angulo}deg) translateZ(125px)`;
+            cilindro.appendChild(cara);
+        }
+
+        // --- 2. Cargar y procesar los datos de los participantes ---
         try {
             const response = await fetch(`${API_BASE_URL}/api/public-list/tombola/${sorteo.id_sorteo}`);
             const result = await response.json();
-            if (!result.success) throw new Error(result.error);
+            if (!result.success) return;
 
-            const configBolas = sorteo.configuracion_tombola;
-            const numerosOcupados = result.listado;
-
-            // --- Lógica para combinar y formatear números ---
-            const totalDigitos = configBolas.reduce((acc, bola) => acc + bola.digitos, 0);
-            
-            const combinarNumeros = (combo) => {
-                let numeroString = '';
-                combo.forEach((num, index) => {
-                    numeroString += String(num).padStart(configBolas[index].digitos, '0');
-                });
-                return numeroString;
-            };
-            
-            const mapaOcupados = new Map();
-            numerosOcupados.forEach(p => {
-                p.numeros.forEach(combo => {
-                    const numeroCombinado = combinarNumeros(combo);
-                    mapaOcupados.set(numeroCombinado, p.nombre);
-                });
+            const participantesAgrupados = new Map();
+            result.listado.forEach(p => {
+                const nombre = p.nombre || 'Anónimo';
+                if (!participantesAgrupados.has(nombre)) {
+                    participantesAgrupados.set(nombre, []);
+                }
+                participantesAgrupados.get(nombre).push(...p.numeros);
             });
 
-            const totalNumerosPosibles = Math.pow(10, totalDigitos);
-            const totalOcupados = mapaOcupados.size;
-            const totalDisponibles = totalNumerosPosibles - totalOcupados;
+            const orbitaContainer = contenedorTombola.querySelector('.participante-orbita');
+            if (!orbitaContainer) return;
 
-            // --- Estructura HTML Base ---
-            contenedorTombola.innerHTML = `
-                <div class="tablero-loteria-container">
-                    <div class="tablero-resumen">
-                        <span>Total: <strong>${totalNumerosPosibles}</strong></span>
-                        <span class="disponibles">Disponibles: <strong>${totalDisponibles}</strong></span>
-                        <span class="ocupados">Ocupados: <strong>${totalOcupados}</strong></span>
-                    </div>
-                    <div id="tablero-paginacion" class="tablero-paginacion"></div>
-                    <div id="tablero-grid" class="tablero-grid"></div>
-                </div>
-            `;
+            // --- 3. Crear y posicionar las bolas flotantes ---
+            participantesAgrupados.forEach((numeros, nombre) => {
+                const totalBoletos = numeros.length;
+                if (totalBoletos === 0) return;
 
-            const gridContainer = document.getElementById('tablero-grid');
-            const paginationContainer = document.getElementById('tablero-paginacion');
-            const NUMEROS_POR_PAGINA = 100;
-            const totalPaginas = Math.ceil(totalNumerosPosibles / NUMEROS_POR_PAGINA);
+                const bola = document.createElement('div');
+                bola.className = 'participante-bola-flotante';
 
-            // --- Función para renderizar una página específica del tablero ---
-            const renderizarPagina = (pagina) => {
-                gridContainer.innerHTML = '';
-                const inicio = (pagina - 1) * NUMEROS_POR_PAGINA;
-                const fin = inicio + NUMEROS_POR_PAGINA;
+                // El tamaño de la bola es proporcional a los boletos comprados
+                const tamano = Math.min(30 + totalBoletos * 5, 100); // Tamaño base 30px, +5px por boleto, máx 100px
+                bola.style.width = `${tamano}px`;
+                bola.style.height = `${tamano}px`;
+                bola.style.fontSize = `${Math.min(1 + totalBoletos * 0.1, 2.5)}em`;
 
-                for (let i = inicio; i < fin && i < totalNumerosPosibles; i++) {
-                    const numeroFormateado = String(i).padStart(totalDigitos, '0');
-                    let casillaHTML = '';
+                // Posición aleatoria alrededor de la tómbola
+                const anguloOrbita = Math.random() * 360;
+                const distanciaOrbita = 150 + Math.random() * 50;
+                bola.style.top = `calc(50% + ${Math.sin(anguloOrbita * Math.PI / 180) * distanciaOrbita}px - ${tamano/2}px)`;
+                bola.style.left = `calc(50% + ${Math.cos(anguloOrbita * Math.PI / 180) * distanciaOrbita}px - ${tamano/2}px)`;
+                bola.style.animationDelay = `${Math.random() * 8}s`; // Animación de flotar desfasada
 
-                    if (mapaOcupados.has(numeroFormateado)) {
-                        const nombre = mapaOcupados.get(numeroFormateado);
-                        casillaHTML = `<div class="tablero-casilla ocupado" data-title="Comprado por: ${nombre}">${numeroFormateado}</div>`;
-                    } else {
-                        casillaHTML = `<div class="tablero-casilla disponible">${numeroFormateado}</div>`;
-                    }
-                    gridContainer.innerHTML += casillaHTML;
-                }
-            };
+                const iniciales = nombre.trim().split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+                bola.textContent = iniciales;
 
-            // --- Crear y gestionar la paginación ---
-            if (totalPaginas > 1) {
-                for (let i = 1; i <= totalPaginas; i++) {
-                    const inicioRango = (i - 1) * NUMEROS_POR_PAGINA;
-                    const finRango = Math.min(i * NUMEROS_POR_PAGINA - 1, totalNumerosPosibles - 1);
-                    const boton = document.createElement('button');
-                    boton.className = 'tablero-pagina-btn';
-                    boton.textContent = `${String(inicioRango).padStart(totalDigitos, '0')} - ${String(finRango).padStart(totalDigitos, '0')}`;
-                    boton.dataset.pagina = i;
-                    if (i === 1) boton.classList.add('active');
-                    
-                    boton.addEventListener('click', () => {
-                        paginationContainer.querySelector('.active').classList.remove('active');
-                        boton.classList.add('active');
-                        renderizarPagina(i);
-                    });
-                    paginationContainer.appendChild(boton);
-                }
-            }
-            
-            // Renderizar la primera página por defecto
-            renderizarPagina(1);
+                // Tooltip con el detalle de los números
+                const numerosTexto = numeros.map(combo => `[${combo.join('-')}]`).join('\\A'); // '\A' crea un salto de línea en el tooltip
+                bola.dataset.title = `${nombre}\\A${totalBoletos} combinaciones:\\A${numerosTexto}`;
+
+                orbitaContainer.appendChild(bola);
+            });
 
         } catch(error) {
-            contenedorTombola.innerHTML = `<p class="error-message">Error al cargar el tablero: ${error.message}</p>`;
+            console.error("Error al renderizar la tómbola animada:", error);
         }
     }
-    // --- Lógica para el acordeón de Top Participantes ---
-    prizeCarouselTrack?.addEventListener('click', (e) => {
-        const toggleButton = e.target.closest('.collapsible-toggle');
-        if (!toggleButton) return;
-
-        const wrapper = toggleButton.closest('.top-participants-wrapper');
-        const content = wrapper.querySelector('.collapsible-list-content');
-
-        wrapper.classList.toggle('is-expanded');
-
-        if (wrapper.classList.contains('is-expanded')) {
-            // Al abrir, calculamos la altura necesaria para mostrar todo el contenido
-            content.style.maxHeight = content.scrollHeight + "px";
-        } else {
-            // Al cerrar, volvemos a la altura para mostrar solo un elemento
-            const firstItemHeight = content.querySelector('li')?.offsetHeight || 58;
-            content.style.maxHeight = firstItemHeight + "px";
-        }
-    });
     /**
      * Anonimiza un número de cédula, mostrando solo los primeros y últimos dos dígitos.
      * @param {string} id_documento - El número de cédula de 10 dígitos.
@@ -493,6 +459,40 @@ function initializeRafflePage() {
             contenedor.innerHTML += paqueteHTML;
         });
     }
+
+    function inicializarTamborSocial(sorteo, slideElement) {
+        const anillo = slideElement.querySelector('.tambor-anillo');
+        if (!anillo) return;
+
+        // Limpiamos el tambor anterior
+        anillo.innerHTML = '';
+
+        // Usamos los datos de la lista pública que ya cargamos
+        const listaParticipantes = sorteo.listaPublicaTombola || [];
+
+        // Mostramos solo un número limitado de participantes recientes para no saturar
+        const participantesAMostrar = listaParticipantes.slice(-15); // Máximo 15 bolas
+        const totalBolas = participantesAMostrar.length;
+        if (totalBolas === 0) return;
+
+        participantesAMostrar.forEach((p, i) => {
+            const bola = document.createElement('div');
+            bola.className = 'participante-bola';
+
+            // Obtenemos las iniciales del nombre
+            const iniciales = (p.nombre || '??').trim().split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+            bola.textContent = iniciales;
+
+            // La magia de la trigonometría para posicionar en un círculo 3D
+            const angulo = (360 / totalBolas) * i;
+            const radio = 100; // El radio del anillo en píxeles
+
+            // Aplicamos la rotación y la traslación para formar el anillo
+            bola.style.transform = `rotateY(${angulo}deg) translateZ(${radio}px)`;
+
+            anillo.appendChild(bola);
+        });
+    }
     /**
      * Genera el código HTML para los 2-3 botones de paquetes destacados.
      * @param {Array<object>} paquetes - El array de paquetes de un sorteo.
@@ -704,7 +704,8 @@ function initializeRafflePage() {
             if (sorteoActual.tipo_sorteo === 'tombola_interactiva') {
                 contenedorRueda?.classList.add('oculto');
                 contenedorTombola?.classList.remove('oculto');
-                renderizarTableroLoteria(sorteoActual, activeSlide);
+                renderizarTombolaAnimada(sorteoActual, activeSlide);
+                inicializarTamborSocial(sorteoActual, activeSlide); 
                 participantes = []; // Reseteamos por si acaso
             } else {
                 // Lógica original de la ruleta digital
@@ -1006,10 +1007,12 @@ function initializeRafflePage() {
                             <div class="prize-info-container">
                                 <h2 class="prize-title">${tituloMostrado}</h2>
                                 <div class="mini-package-selector">${miniPaquetesHTML}</div>
-                                <div class="progress-info-wrapper">
-                                    <div class="boletos-restantes-container"><span class="boletos-restantes-numero">${boletosRestantes}</span><span class="boletos-restantes-texto">Boletos Disponibles</span></div>
-                                    <div class="progress-bar-wrapper ${urgenciaClass}"><div class="progress-bar-fill" style="width: ${percentageRemaining.toFixed(2)}%;"><span class="progress-bar-percentage-text">${percentageRemaining.toFixed(1)}% Disponible</span></div></div>
-                                    <p class="motivational-text-integrated">${motivationalMessage}</p>
+                                <div class="tombola-progress-wrapper">
+                                    <div class="tombola-shape">
+                                        <div class="tombola-fill" style="height: ${percentageSold.toFixed(2)}%;"></div>
+                                        <div class="tombola-text">${percentageSold.toFixed(0)}% Lleno</div>
+                                    </div>
+                                    <p class="tombola-motivation-text">${motivationalMessage}</p>
                                 </div>
                                 <div class="top-participants-wrapper">
                                     <button type="button" class="top-list-header collapsible-toggle">

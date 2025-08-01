@@ -4200,3 +4200,257 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 /* --- Ajustes para Móviles (Sin cambios) --- */
 @media (max-width: 992px) { /* ... */ }
+
+
+/* ============================================= */
+/* == ESTILOS PARA EL TAMBOR SOCIAL GIRATORIO == */
+/* ============================================= */
+
+.tambor-social-container {
+    position: relative;
+    width: 100%;
+    min-height: 220px; /* Altura para dar espacio a la animación */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 25px 0;
+    /* Activa la perspectiva 3D para los elementos hijos */
+    perspective: 1000px;
+}
+
+.tambor-texto-central {
+    position: absolute;
+    text-align: center;
+    color: var(--clr-dark-text-alt);
+}
+.tambor-texto-central i {
+    font-size: 2em;
+}
+.tambor-texto-central span {
+    display: block;
+    font-size: 0.9em;
+    font-weight: 500;
+    margin-top: 5px;
+}
+
+.tambor-anillo {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    /* Mantiene el estado 3D */
+    transform-style: preserve-3d;
+    /* La animación de rotación perpetua */
+    animation: rotarTambor 30s linear infinite;
+}
+
+/* La bola de madera individual */
+.participante-bola {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70px;
+    height: 70px;
+    margin: -35px 0 0 -35px; /* Centra la bola perfectamente */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* Estilos 3D de la bola de madera */
+    background: radial-gradient(circle at 50% 30%, #fdf5e6 10%, #f0e6d2 80%);
+    box-shadow: inset -2px -2px 8px rgba(0,0,0,0.15), 0px 2px 5px rgba(0,0,0,0.2);
+    
+    font-family: 'Anton', sans-serif;
+    font-size: 1.8em;
+    color: #4a3f35;
+    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.7);
+}
+
+/* Animación para que las nuevas bolas "caigan" en el tambor */
+.participante-bola.nueva {
+    animation: caerEnTambor 0.8s ease-out;
+}
+
+/* Definición de las animaciones */
+@keyframes rotarTambor {
+    from { transform: rotateY(0deg); }
+    to { transform: rotateY(360deg); }
+}
+
+@keyframes caerEnTambor {
+    0% { transform: translateY(-200px) scale(0.5); opacity: 0; }
+    70% { transform: translateY(10px) scale(1.1); opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* ================================================= */
+/* == ESTILOS PARA BARRA DE PROGRESO TÓMBOLA == */
+/* ================================================= */
+
+.tombola-progress-wrapper {
+    position: relative;
+    width: 100%;
+    text-align: center;
+}
+
+.tombola-shape {
+    width: 180px; /* Ancho del cuerpo de la tómbola */
+    height: 120px; /* Alto del cuerpo de la tómbola */
+    background-color: var(--clr-dark-bg);
+    border: 4px solid #b3a07d; /* Borde de madera oscura */
+    border-radius: 25px; /* Bordes redondeados del cilindro */
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden; /* Clave para el efecto de llenado */
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+}
+
+/* El líquido o las "bolas" que llenan la tómbola */
+.tombola-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0%; /* Se controlará con JS */
+    background: linear-gradient(to top, #ff8906, #f9c80e); /* Gradiente de bolas naranjas/amarillas */
+    transition: height 0.8s ease-out;
+}
+
+/* El texto que va sobre la tómbola */
+.tombola-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-family: 'Anton', sans-serif;
+    font-size: 1.8em;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+}
+
+.tombola-motivation-text {
+    margin-top: 10px;
+    font-weight: 600;
+    color: var(--clr-accent);
+}
+
+
+/* ============================================= */
+/* == ESTILOS PARA LA TÓMBOLA ANIMADA 3D == */
+/* ============================================= */
+.contenedor-tombola {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px; /* Espacio para la animación */
+    padding: 20px;
+    background: radial-gradient(circle, var(--clr-dark-bg) 50%, var(--clr-dark-bg-alt) 100%);
+}
+
+.tombola-animada-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.tombola-animada-container {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    perspective: 1500px; /* Profundidad 3D */
+}
+
+/* El cilindro que gira */
+.tombola-cilindro {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: rotar-lento 45s linear infinite;
+    transform: rotateX(-15deg) rotateY(0deg); /* Vista isométrica */
+}
+
+/* Las caras del cilindro (crean el efecto 3D) */
+.tombola-cara {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSJ0cmFuc3BhcmVudCIvPjxjaXJjbGUgY3g9IjUiIGN5PSI1IiByPSIzIiBmaWxsPSJyZ2JhKDAsMCwwLDAuMDUpIi8+PC9zdmc+'); /* Textura sutil */
+    border-left: 3px solid #b3a07d;
+    border-right: 3px solid #b3a07d;
+    /* Posicionamos cada cara alrededor de un círculo */
+}
+
+/* Las tapas del cilindro */
+.tombola-tapa {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, #d4c3a2, #b3a07d);
+    border-radius: 50%;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.4);
+}
+.tombola-tapa.frontal { transform: translateZ(125px); }
+.tombola-tapa.trasera { transform: rotateY(180deg) translateZ(125px); }
+
+/* Las bolas flotantes de participantes */
+.participante-bola-flotante {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at 50% 30%, #fdf5e6 10%, #f0e6d2 80%);
+    box-shadow: inset -2px -2px 8px rgba(0,0,0,0.15), 0px 2px 5px rgba(0,0,0,0.2);
+    font-family: 'Anton', sans-serif;
+    color: #4a3f35;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: flotar 8s ease-in-out infinite;
+}
+.participante-bola-flotante:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 20px var(--clr-primary);
+    z-index: 10;
+}
+.participante-bola-flotante::before { /* Tooltip */
+    content: attr(data-title);
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #222;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-family: 'Poppins', sans-serif;
+    white-space: pre; /* Permite saltos de línea con \A */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+}
+.participante-bola-flotante:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
+
+.tombola-cta {
+    max-width: 200px;
+    text-align: center;
+}
+.tombola-cta h4 {
+    color: var(--clr-dark-text);
+    font-size: 1.5em;
+    line-height: 1.3;
+}
+
+@keyframes rotar-lento {
+    from { transform: rotateX(-15deg) rotateY(0deg); }
+    to { transform: rotateX(-15deg) rotateY(360deg); }
+}
+
+@keyframes flotar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
