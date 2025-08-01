@@ -992,6 +992,16 @@ function initializeRafflePage() {
                 `;
             }
             prizeCarouselTrack.appendChild(slideWrapper);
+
+            // --- INICIO DEL CÓDIGO CORRECTO PARA LA ANIMACIÓN ---
+            const circleToAnimate = slideWrapper.querySelector('.progress-radial-fg-circle');
+            if (circleToAnimate) {
+                setTimeout(() => {
+                    const finalOffset = circleToAnimate.getAttribute('data-final-offset');
+                    circleToAnimate.style.strokeDashoffset = finalOffset;
+                }, 100); // Pequeño retardo para que la transición CSS se aplique correctamente.
+            }
+            // --- FIN DEL CÓDIGO CORRECTO ---
         }
         
         // El resto de la función para añadir el botón de admin no cambia
@@ -1006,15 +1016,15 @@ function initializeRafflePage() {
                 cont.appendChild(btn);
             });
         }
-            // --- Pega esto al final de la función generarSlidesDelCarrusel ---
-        // Dispara la animación de las barras de progreso recién creadas
-        document.querySelectorAll('.prize-carousel-slide[data-sorteo-id="' + sorteo.id_sorteo + '"] .progress-radial-fg-circle').forEach(circle => {
-            setTimeout(() => {
-                const finalOffset = circle.getAttribute('data-final-offset');
-                circle.style.strokeDashoffset = finalOffset;
-            }, 100); // Un pequeño retardo para asegurar que la transición se aplique
-        });
     }
+        // Añadimos el evento de clic para los paneles de navegación
+// Dispara la animación de las barras de progreso recién creadas
+document.querySelectorAll('.prize-carousel-slide[data-sorteo-id="' + sorteo.id_sorteo + '"] .progress-radial-fg-circle').forEach(circle => {
+    setTimeout(() => {
+        const finalOffset = circle.getAttribute('data-final-offset');
+        circle.style.strokeDashoffset = finalOffset;
+    }, 100);
+});
     async function actualizarTopParticipantes(sorteoId, slideElement) {
         const listElement = slideElement.querySelector('.top-participants-list');
         const loader = slideElement.querySelector('.top-participants-wrapper .loader-container');
