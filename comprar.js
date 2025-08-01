@@ -4,29 +4,10 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
     // --- 1. DECLARACIÓN DE VARIABLES Y ELEMENTOS ---
-    const couponCode = params.get('coupon'); // <-- Leemos el cupón del enlace
     const params = new URLSearchParams(window.location.search);
     const sorteoId = params.get('sorteoId');
-    
-    // Elementos del formulario
-    const form = document.getElementById('form-pedido');
-    const steps = document.querySelectorAll('.form-step');
-    const nextButtons = document.querySelectorAll('.btn-next');
-    const prevButtons = document.querySelectorAll('.btn-prev');
-    
-    // Elementos de la barra de progreso
-    const progressSteps = document.querySelectorAll('.progress-steps .step');
-    const progressBarLine = document.querySelector('.progress-bar-line');
+    const couponCode = params.get('coupon');
 
-    // Elementos de contenido dinámico
-    const resumenDiv = document.getElementById('resumen-pedido');
-    const selectorContainer = document.getElementById('selector-numeros-container');
-    const misNumerosContainer = document.getElementById('mis-numeros-container');
-    const listaNumerosElegidos = document.getElementById('lista-numeros-elegidos');
-    const contadorNumerosSpan = document.getElementById('contador-numeros');
-    const resumenFinalDiv = document.getElementById('resumen-final');
-    const statusDiv = document.getElementById('pedido-status');
-    
     // Variables de estado
     let currentStep = 0;
     let sorteoData = null;
@@ -66,6 +47,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("Error al procesar el cupón de migración:", e);
         }
     }
+    // Elementos del formulario
+    const form = document.getElementById('form-pedido');
+    const steps = document.querySelectorAll('.form-step');
+    const nextButtons = document.querySelectorAll('.btn-next');
+    const prevButtons = document.querySelectorAll('.btn-prev');
+    
+    // Elementos de la barra de progreso
+    const progressSteps = document.querySelectorAll('.progress-steps .step');
+    const progressBarLine = document.querySelector('.progress-bar-line');
+
+    // Elementos de contenido dinámico
+    const resumenDiv = document.getElementById('resumen-pedido');
+    const selectorContainer = document.getElementById('selector-numeros-container');
+    const misNumerosContainer = document.getElementById('mis-numeros-container');
+    const listaNumerosElegidos = document.getElementById('lista-numeros-elegidos');
+    const contadorNumerosSpan = document.getElementById('contador-numeros');
+    const resumenFinalDiv = document.getElementById('resumen-final');
+    const statusDiv = document.getElementById('pedido-status');
+    
+
     // --- 2. FUNCIONES DEL FORMULARIO MULTI-STEP ---
 
     const showStep = (stepIndex) => {
