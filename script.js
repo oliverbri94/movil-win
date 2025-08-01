@@ -889,11 +889,17 @@ function initializeRafflePage() {
                     </div>
                 `;
             } else {
+                const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
+                const percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
+                                
+                // INICIO DE LA CORRECCIÓN: Asegúrate de que estas líneas estén aquí y en este orden.
+                const circumference = 2 * Math.PI * 62; // <-- LÍNEA IMPORTANTE (con el nuevo radio de 62)
                 const finalOffset = circumference - (percentageSold / 100) * circumference;
                 let gradientId = 'progressGradientDefault';
-                if (urgenciaClass === 'urgente') gradientId = 'progressGradientUrgent';
-                else if (urgenciaClass === 'critico') gradientId = 'progressGradientCritical';
+                // FIN DE LA CORRECCIÓN
 
+                if (urgenciaClass === 'urgente') gradientId = 'progressGradientUrgent';
+                else if (urgenciaClass === 'critico') gradientId = 'progressGradientCritical'
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
                 
                 const progressBarHTML = `
