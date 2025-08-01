@@ -872,12 +872,28 @@ function initializeRafflePage() {
             } else {
                 const mediaParaRenderizar = sorteo;
                 const tituloMostrado = sorteo.nombre_premio_display;
+
+                // 1. Calculamos el progreso
                 const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
                 const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
                 const percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
-                const circumference = 2 * Math.PI * 62; // Radio de 62 para el nuevo SVG
 
-                // Lógica para el mensaje motivacional
+                // 2. Definimos las variables para la animación del CÍRCULO
+                const circumference = 2 * Math.PI * 62;
+                const finalOffset = circumference * (1 - (percentageSold / 100)); // <-- ¡LA VARIABLE QUE FALTABA!
+
+                // 3. Definimos las clases y IDs para los colores y efectos
+                let urgenciaClass = '';
+                let gradientId = 'progressGradientDefault';
+                if (percentageSold >= 95) {
+                    urgenciaClass = 'critico';
+                    gradientId = 'progressGradientCritical';
+                } else if (percentageSold >= 80) {
+                    urgenciaClass = 'urgente';
+                    gradientId = 'progressGradientUrgent';
+                }
+
+                // 4. Definimos los mensajes de texto
                 let motivationalMessage = '';
                 if (percentageSold >= 100) {
                     motivationalMessage = '🎉 ¡Meta alcanzada! El sorteo se realizará muy pronto. 🎉';
@@ -888,44 +904,19 @@ function initializeRafflePage() {
                 } else {
                     motivationalMessage = '¡Compra tus boletos y ayúdanos a llegar a la meta!';
                 }
-
-                // Este mensaje siempre se mostrará, reforzando la idea principal
                 const metaMessage = '<p style="font-size: 0.9em; color: var(--clr-light-text-alt); margin-top: 5px;">Al llegar al 100% se realizará el sorteo. ¡Mucha suerte!</p>';
 
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
-                let urgenciaClass = '';
-                let gradientId = 'progressGradientDefault'; // <-- AÑADE ESTA LÍNEA (VALOR POR DEFECTO)
-
-                if (percentageSold >= 95) {
-                    urgenciaClass = 'critico'; // Clase para cuando falte poquísimo
-                    gradientId = 'progressGradientCritical'; // <-- AÑADE ESTA LÍNEA
-
-                } else if (percentageSold >= 80) {
-                    urgenciaClass = 'urgente'; // Clase para cuando ya esté avanzado
-                    gradientId = 'progressGradientUrgent'; // <-- AÑADE ESTA LÍNEA
-
-                }
 
                 const progressBarHTML = `
                     <div class="progress-radial-wrapper ${urgenciaClass}">
                         <div class="progress-radial-inner-shadow"></div>
                         <svg class="progress-radial-svg" width="140" height="140" viewBox="0 0 140 140">
                             <defs>
-                                <linearGradient id="progressGradientDefault" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#30d158" />
-                                    <stop offset="100%" stop-color="var(--clr-primary)" />
-                                </linearGradient>
-                                <linearGradient id="progressGradientUrgent" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#FFC837" />
-                                    <stop offset="100%" stop-color="var(--clr-accent)" />
-                                </linearGradient>
-                                <linearGradient id="progressGradientCritical" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#FF8C94" />
-                                    <stop offset="100%" stop-color="var(--clr-red)" />
-                                </linearGradient>
-                                <filter id="glow">
-                                    <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="var(--glow-color)" />
-                                </filter>
+                                <linearGradient id="progressGradientDefault" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#30d158" /><stop offset="100%" stop-color="var(--clr-primary)" /></linearGradient>
+                                <linearGradient id="progressGradientUrgent" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFC837" /><stop offset="100%" stop-color="var(--clr-accent)" /></linearGradient>
+                                <linearGradient id="progressGradientCritical" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF8C94" /><stop offset="100%" stop-color="var(--clr-red)" /></linearGradient>
+                                <filter id="glow"><feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="var(--glow-color)" /></filter>
                             </defs>
                             <circle class="progress-radial-bg-circle" cx="70" cy="70" r="62" fill="transparent" stroke-width="12"/>
                             <circle class="progress-radial-fg-circle" cx="70" cy="70" r="62" fill="transparent" stroke="url(#${gradientId})" stroke-width="12"
@@ -938,8 +929,7 @@ function initializeRafflePage() {
                         <div class="progress-radial-percentage">${percentageSold.toFixed(0)}<span>%</span></div>
                     </div>
                     <p class="motivational-text-integrated">${motivationalMessage}</p>
-                    ${metaMessage} // <-- AÑADIMOS EL NUEVO MENSAJE AQUÍ
-
+                    ${metaMessage}
                 `;
 
                 slideWrapper.innerHTML = `
