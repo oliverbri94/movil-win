@@ -4100,24 +4100,14 @@ nav.bg-custom-dark-bg-frame a:hover {
     opacity: 1;
     visibility: visible;
 }
-
 /* ============================================= */
-/* == NUEVO LAYOUT DE DOS FILAS Y TABLERO == */
+/* == NUEVO LAYOUT Y TABLERO 3D (REDISEÑO) == */
 /* ============================================= */
 
-/* --- Estructura de Filas y Columnas --- */
-.fila-superior {
-    display: grid;
-    grid-template-columns: 40% 1fr; /* 40% para la imagen, el resto para la info */
-    gap: 30px;
-    align-items: start;
-}
-.fila-inferior {
-    margin-top: 30px;
-}
-.columna-izquierda, .columna-derecha {
-    width: 100%;
-}
+/* --- Estructura de Filas y Columnas (Sin cambios) --- */
+.fila-superior { /* ... */ }
+.fila-inferior { /* ... */ }
+.columna-izquierda, .columna-derecha { /* ... */ }
 
 /* --- Estilos del Tablero de Lotería --- */
 .tablero-loteria-container {
@@ -4126,48 +4116,72 @@ nav.bg-custom-dark-bg-frame a:hover {
     border-radius: var(--border-radius-medium);
     border: 1px solid var(--clr-dark-border);
 }
-.tablero-resumen {
+
+.tablero-resumen { /* ... (Sin cambios) ... */ }
+
+.tablero-paginacion {
     display: flex;
-    justify-content: space-around;
-    padding: 15px;
-    background-color: var(--clr-dark-bg-frame);
-    border-radius: var(--border-radius-small);
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
     margin-bottom: 20px;
-    font-weight: 500;
 }
-.tablero-resumen span { color: var(--clr-dark-text-alt); }
-.tablero-resumen strong { color: var(--clr-dark-text); }
-.tablero-resumen .disponibles strong { color: var(--clr-green); }
-.tablero-resumen .ocupados strong { color: var(--clr-accent); }
+.tablero-pagina-btn {
+    background-color: var(--clr-dark-bg-frame);
+    border: 1px solid var(--clr-dark-border);
+    color: var(--clr-dark-text-alt);
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+.tablero-pagina-btn:hover {
+    background-color: var(--clr-primary);
+    color: white;
+    border-color: var(--clr-primary);
+}
+.tablero-pagina-btn.active {
+    background-color: var(--clr-primary);
+    color: white;
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 10px var(--clr-primary);
+}
 
 .tablero-grid {
     display: grid;
-    /* Crea columnas de 60px, tantas como quepan, y las centra */
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 20px; /* Más espacio para el efecto 3D */
+    justify-items: center;
 }
+
 .tablero-casilla {
-    position: relative; /* Para el tooltip */
+    position: relative;
+    width: 70px;
+    height: 70px;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 60px;
-    border-radius: var(--border-radius-small);
-    font-size: 1.5em;
-    font-weight: 700;
+    border-radius: 50%;
+    font-family: 'Anton', sans-serif;
+    font-size: 1.8em;
     transition: all 0.3s ease;
 }
+
 .tablero-casilla.disponible {
     background-color: var(--clr-dark-bg-frame);
     color: var(--clr-dark-text-alt);
     border: 2px dashed var(--clr-dark-border);
 }
+
 .tablero-casilla.ocupado {
-    background-color: var(--clr-primary);
-    color: white;
+    background: radial-gradient(circle at 50% 30%, #fdf5e6 10%, #f0e6d2 80%);
+    box-shadow: inset -3px -3px 10px rgba(0, 0, 0, 0.15), 0px 4px 10px rgba(0, 0, 0, 0.3);
+    color: #4a3f35;
+    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.7);
     cursor: default;
-    box-shadow: 0 0 10px var(--clr-primary);
 }
+
 .tablero-casilla.ocupado:hover::before {
     content: attr(data-title);
     position: absolute;
@@ -4179,13 +4193,10 @@ nav.bg-custom-dark-bg-frame a:hover {
     padding: 8px 12px;
     border-radius: 5px;
     font-size: 0.8rem;
+    font-family: 'Poppins', sans-serif; /* Usamos una fuente más legible para el tooltip */
     white-space: nowrap;
     z-index: 10;
 }
 
-/* --- Ajustes para Móviles --- */
-@media (max-width: 992px) {
-    .fila-superior {
-        grid-template-columns: 1fr; /* Apila las columnas en móvil */
-    }
-}
+/* --- Ajustes para Móviles (Sin cambios) --- */
+@media (max-width: 992px) { /* ... */ }

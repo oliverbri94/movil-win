@@ -153,41 +153,92 @@ function initializeRafflePage() {
             const result = await response.json();
             if (!result.success) throw new Error(result.error);
 
-            const totalNumeros = sorteo.configuracion_tombola[0].max + 1; // Asumimos una bola por ahora para simplificar
+            const configBolas = sorteo.configuracion_tombola;
             const numerosOcupados = result.listado;
-            const totalOcupados = numerosOcupados.length;
-            const totalDisponibles = totalNumeros - totalOcupados;
 
-            // --- 1. Crear el HTML del Tablero ---
-            let tableroHTML = `
+            // --- Lógica para combinar y formatear números ---
+            const totalDigitos = configBolas.reduce((acc, bola) => acc + bola.digitos, 0);
+            
+            const combinarNumeros = (combo) => {
+                let numeroString = '';
+                combo.forEach((num, index) => {
+                    numeroString += String(num).padStart(configBolas[index].digitos, '0');
+                });
+                return numeroString;
+            };
+            
+            const mapaOcupados = new Map();
+            numerosOcupados.forEach(p => {
+                p.numeros.forEach(combo => {
+                    const numeroCombinado = combinarNumeros(combo);
+                    mapaOcupados.set(numeroCombinado, p.nombre);
+                });
+            });
+
+            const totalNumerosPosibles = Math.pow(10, totalDigitos);
+            const totalOcupados = mapaOcupados.size;
+            const totalDisponibles = totalNumerosPosibles - totalOcupados;
+
+            // --- Estructura HTML Base ---
+            contenedorTombola.innerHTML = `
                 <div class="tablero-loteria-container">
                     <div class="tablero-resumen">
-                        <span>Total: <strong>${totalNumeros}</strong></span>
+                        <span>Total: <strong>${totalNumerosPosibles}</strong></span>
                         <span class="disponibles">Disponibles: <strong>${totalDisponibles}</strong></span>
                         <span class="ocupados">Ocupados: <strong>${totalOcupados}</strong></span>
                     </div>
-                    <div class="tablero-grid">
+                    <div id="tablero-paginacion" class="tablero-paginacion"></div>
+                    <div id="tablero-grid" class="tablero-grid"></div>
+                </div>
             `;
 
-            // Creamos un mapa para buscar rápidamente quién compró cada número
-            const mapaOcupados = new Map();
-            numerosOcupados.forEach(p => {
-                const numero = p.numeros[0][0]; // Asumimos una bola de un dígito/número
-                mapaOcupados.set(numero, p.nombre);
-            });
+            const gridContainer = document.getElementById('tablero-grid');
+            const paginationContainer = document.getElementById('tablero-paginacion');
+            const NUMEROS_POR_PAGINA = 100;
+            const totalPaginas = Math.ceil(totalNumerosPosibles / NUMEROS_POR_PAGINA);
 
-            // --- 2. Llenar la cuadrícula ---
-            for (let i = 0; i < totalNumeros; i++) {
-                if (mapaOcupados.has(i)) {
-                    const nombre = mapaOcupados.get(i);
-                    tableroHTML += `<div class="tablero-casilla ocupado" data-title="Comprado por: ${nombre}">${i}</div>`;
-                } else {
-                    tableroHTML += `<div class="tablero-casilla disponible">${i}</div>`;
+            // --- Función para renderizar una página específica del tablero ---
+            const renderizarPagina = (pagina) => {
+                gridContainer.innerHTML = '';
+                const inicio = (pagina - 1) * NUMEROS_POR_PAGINA;
+                const fin = inicio + NUMEROS_POR_PAGINA;
+
+                for (let i = inicio; i < fin && i < totalNumerosPosibles; i++) {
+                    const numeroFormateado = String(i).padStart(totalDigitos, '0');
+                    let casillaHTML = '';
+
+                    if (mapaOcupados.has(numeroFormateado)) {
+                        const nombre = mapaOcupados.get(numeroFormateado);
+                        casillaHTML = `<div class="tablero-casilla ocupado" data-title="Comprado por: ${nombre}">${numeroFormateado}</div>`;
+                    } else {
+                        casillaHTML = `<div class="tablero-casilla disponible">${numeroFormateado}</div>`;
+                    }
+                    gridContainer.innerHTML += casillaHTML;
+                }
+            };
+
+            // --- Crear y gestionar la paginación ---
+            if (totalPaginas > 1) {
+                for (let i = 1; i <= totalPaginas; i++) {
+                    const inicioRango = (i - 1) * NUMEROS_POR_PAGINA;
+                    const finRango = Math.min(i * NUMEROS_POR_PAGINA - 1, totalNumerosPosibles - 1);
+                    const boton = document.createElement('button');
+                    boton.className = 'tablero-pagina-btn';
+                    boton.textContent = `${String(inicioRango).padStart(totalDigitos, '0')} - ${String(finRango).padStart(totalDigitos, '0')}`;
+                    boton.dataset.pagina = i;
+                    if (i === 1) boton.classList.add('active');
+                    
+                    boton.addEventListener('click', () => {
+                        paginationContainer.querySelector('.active').classList.remove('active');
+                        boton.classList.add('active');
+                        renderizarPagina(i);
+                    });
+                    paginationContainer.appendChild(boton);
                 }
             }
-
-            tableroHTML += `</div></div>`; // Cierre de grid y container
-            contenedorTombola.innerHTML = tableroHTML;
+            
+            // Renderizar la primera página por defecto
+            renderizarPagina(1);
 
         } catch(error) {
             contenedorTombola.innerHTML = `<p class="error-message">Error al cargar el tablero: ${error.message}</p>`;
@@ -955,16 +1006,10 @@ function initializeRafflePage() {
                             <div class="prize-info-container">
                                 <h2 class="prize-title">${tituloMostrado}</h2>
                                 <div class="mini-package-selector">${miniPaquetesHTML}</div>
-                                <div class="progress-info-wrapper ${urgenciaClass}">
-                                    <div class="boletos-restantes-container">
-                                        <span class="boletos-restantes-numero">${boletosRestantes}</span>
-                                        <span class="boletos-restantes-texto">Boletos Disponibles</span>
-                                    </div>
-                                    <div class="progress-bar-wrapper">
-                                        <div class="progress-bar-fill" style="width: ${percentageSold.toFixed(2)}%;">
-                                            <span class="progress-bar-percentage-text">${percentageSold.toFixed(1)}% Vendido</span>
-                                        </div>
-                                    </div>
+                                <div class="progress-info-wrapper">
+                                    <div class="boletos-restantes-container"><span class="boletos-restantes-numero">${boletosRestantes}</span><span class="boletos-restantes-texto">Boletos Disponibles</span></div>
+                                    <div class="progress-bar-wrapper ${urgenciaClass}"><div class="progress-bar-fill" style="width: ${percentageRemaining.toFixed(2)}%;"><span class="progress-bar-percentage-text">${percentageRemaining.toFixed(1)}% Disponible</span></div></div>
+                                    <p class="motivational-text-integrated">${motivationalMessage}</p>
                                 </div>
                                 <div class="top-participants-wrapper">
                                     <button type="button" class="top-list-header collapsible-toggle">
