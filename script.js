@@ -581,14 +581,13 @@ function initializeRafflePage() {
     // --- 4. FUNCIONES PRINCIPALES Y DE LÓGICA ---
 
     async function moveToSlide(index) {
-
-        // 1. Verificaciones iniciales
+        // 1. Verificaciones iniciales y configuración básica
         if (!prizeCarouselTrack || index < 0 || index >= sorteosDisponibles.length) return;
         premioActualIndex = index;
         const sorteoActual = sorteosDisponibles[premioActualIndex];
         sorteoFinalizado = false;
 
-        // 2. Definición de variables del DOM (ESTA ES LA CORRECCIÓN CLAVE)
+        // 2. Definición de TODAS las variables del DOM al principio para evitar errores
         const slideWrapper = prizeCarouselTrack.children[index];
         if (!slideWrapper) return;
         
@@ -596,59 +595,46 @@ function initializeRafflePage() {
         const filaInferior = slideWrapper.querySelector('.fila-inferior');
         const contenedorRueda = slideWrapper.querySelector('.contenedor-sorteo');
 
-        // 3. Actualizaciones de la interfaz de usuario (mover carrusel, paquetes, etc.)
+        // 3. Actualizaciones de la interfaz (mover carrusel, paquetes, etc.)
         prizeCarouselTrack.style.transform = `translateX(${-index * 100}%)`;
         
         if (sorteoActual && sorteoActual.status_sorteo === 'programado') {
             const carouselSection = document.getElementById('main-carousel-section');
-            if (carouselSection) {
-                // Y apunta a toda la sección del carrusel, no solo a la navegación
-                carouselSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            if (carouselSection) carouselSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        sorteoFinalizado = false;
-        prizeCarouselTrack.style.transform = `translateX(${-index * 100}%)`;
-        const activeSlide = prizeCarouselTrack.children[index];
-        if (!activeSlide) return;
+        
         document.querySelectorAll('.prize-nav-panel').forEach((p, i) => p.classList.toggle('active', i === index));
-        actualizarTopParticipantes(sorteoActual.id_sorteo, activeSlide);
+        actualizarTopParticipantes(sorteoActual.id_sorteo, slideWrapper);
+
         const paqueteContainer = document.getElementById('paquetes-section');
         if (paqueteContainer) {
             if (sorteoActual.status_sorteo === 'programado') {
-                paqueteContainer.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">Los paquetes de participación se anunciarán pronto. ¡Mantente atento!</p>';
+                paqueteContainer.innerHTML = '<p style="text-align:center; color: var(--clr-dark-text-alt);">Los paquetes se anunciarán pronto.</p>';
             } else {
                 renderizarPaquetesPublicos(sorteoActual.paquetes_json, paqueteContainer, sorteoActual.id_sorteo, sorteoActual.nombre_premio_display);
-
-            }
-        }
-    
-            // --- LÓGICA DE VISIBILIDAD Y ALTURA CORREGIDA ---
-        // 1. Lógica para manejar la visibilidad y altura del slide
-        if (filaInferior && prizeCarouselSlideElement) {
-            const esActivo = sorteoActual.status_sorteo === 'activo';
-            const esTipoTombola = sorteoActual.tipo_sorteo === 'tombola_interactiva';
-
-            if (esActivo && esTipoTombola) {
-                // Es TÓMBOLA: Ocultamos la fila de la rueda y colapsamos la altura del slide.
-                filaInferior.style.display = 'none';
-                prizeCarouselSlideElement.style.minHeight = 'auto';
-            } else if (esActivo) {
-                // Es RUEDA: Mostramos la fila y restauramos la altura por defecto del CSS.
-                filaInferior.style.display = 'block';
-                prizeCarouselSlideElement.style.minHeight = '';
-            } else {
-                // Es PROGRAMADO: Ocultamos la fila por si acaso y colapsamos la altura.
-                filaInferior.style.display = 'none';
-                prizeCarouselSlideElement.style.minHeight = 'auto';
             }
         }
 
-        // 2. Lógica para inicializar la RUEDA solo si es necesario
-        if (sorteoActual.status_sorteo === 'activo' && sorteoActual.tipo_sorteo !== 'tombola_interactiva') {
-            // Este bloque solo se ejecuta para sorteos de tipo RUEDA
-            const contenedorRueda = slideWrapper.querySelector('.contenedor-sorteo');
-            contenedorRueda?.classList.remove('oculto');
+        // 4. Lógica principal para mostrar/ocultar la rueda y ajustar la altura
+        const esActivo = sorteoActual.status_sorteo === 'activo';
+        const esTipoTombola = sorteoActual.tipo_sorteo === 'tombola_interactiva';
+
+        if (esActivo && esTipoTombola) {
+            // --- Caso TÓMBOLA ---
+            if (filaInferior) filaInferior.style.display = 'none';
+            if (prizeCarouselSlideElement) prizeCarouselSlideElement.style.minHeight = 'auto';
             
+            // Reseteamos las variables de la rueda por si acaso
+            participantes = [];
+            wheelCanvas = null;
+            wheelCtx = null;
+        } else if (esActivo && !esTipoTombola) {
+            // --- Caso RUEDA ---
+            if (filaInferior) filaInferior.style.display = 'block';
+            if (prizeCarouselSlideElement) prizeCarouselSlideElement.style.minHeight = ''; // Deja que el CSS decida
+            if (contenedorRueda) contenedorRueda.classList.remove('oculto');
+            
+            // Inicializamos la rueda
             const currentWheelCanvas = slideWrapper.querySelector('.price-wheel-canvas');
             if (currentWheelCanvas) {
                 wheelCanvas = currentWheelCanvas;
@@ -674,13 +660,11 @@ function initializeRafflePage() {
                 }
             }
         } else {
-            // Para sorteos de TÓMBOLA o PROGRAMADOS, nos aseguramos de que la rueda no esté activa.
-            participantes = [];
-            wheelCanvas = null;
-            wheelCtx = null;
+            // --- Caso PROGRAMADO ---
+            if (filaInferior) filaInferior.style.display = 'none';
+            if (prizeCarouselSlideElement) prizeCarouselSlideElement.style.minHeight = 'auto';
         }
-        // --- FIN DE LA CORRECCIÓN DEFINITIVA ---
-    }    
+    }
     async function cargarSorteosVisibles() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/sorteos-visibles`);
