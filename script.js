@@ -893,7 +893,13 @@ function initializeRafflePage() {
                 const metaMessage = '<p style="font-size: 0.9em; color: var(--clr-light-text-alt); margin-top: 5px;">Al llegar al 100% se realizará el sorteo. ¡Mucha suerte!</p>';
 
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
-                
+                let urgenciaClass = '';
+                if (percentageSold >= 95) {
+                    urgenciaClass = 'critico'; // Clase para cuando falte poquísimo
+                } else if (percentageSold >= 80) {
+                    urgenciaClass = 'urgente'; // Clase para cuando ya esté avanzado
+                }
+
                 const progressBarHTML = `
                     <div class="progress-radial-wrapper ${urgenciaClass}">
                         <div class="progress-radial-inner-shadow"></div>
