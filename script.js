@@ -102,27 +102,7 @@ function initializeAffiliateTabs() {
 }
 
 
-// Seleccionamos el contenedor principal del carrusel de premios
-const prizeCarouselTrack = document.getElementById('prizeCarouselTrack');
 
-// Le decimos que escuche por clics
-prizeCarouselTrack.addEventListener('click', function(event) {
-    // Buscamos si el clic ocurrió en nuestro botón desplegable o algo dentro de él
-    const toggleButton = event.target.closest('.collapsible-toggle');
-
-    // Si no se hizo clic en el botón, no hacemos nada
-    if (!toggleButton) {
-        return;
-    }
-
-    // Si se hizo clic en el botón, buscamos su contenedor padre
-    const wrapper = toggleButton.closest('.top-participants-wrapper');
-
-    // Y aquí está la magia: añadimos o quitamos la clase 'is-expanded'
-    if (wrapper) {
-        wrapper.classList.toggle('is-expanded');
-    }
-});
 /**
  * Esta es la función principal que contiene toda la lógica para la página del sorteo.
  */
@@ -150,11 +130,31 @@ function initializeRafflePage() {
     let lastSegmentIndex = -1;
 
     // Elementos del DOM
-    const prizeCarouselTrack = document.getElementById('prizeCarouselTrack');
     const prizeNavContainer = document.getElementById('prizeNavContainer');
     const listaGanadoresDiv = document.getElementById('listaGanadoresAnteriores');
     const loaderGanadores = document.getElementById('loaderGanadores');
 
+
+    // Le decimos que escuche por clics
+    const prizeCarouselTrack = document.getElementById('prizeCarouselTrack');
+    prizeCarouselTrack.addEventListener('click', function(event) {
+        // Buscamos si el clic ocurrió en nuestro botón desplegable o algo dentro de él
+        const toggleButton = event.target.closest('.collapsible-toggle');
+
+        // Si no se hizo clic en el botón, no hacemos nada
+        if (!toggleButton) {
+            return;
+        }
+
+        // Si se hizo clic en el botón, buscamos su contenedor padre
+        const wrapper = toggleButton.closest('.top-participants-wrapper');
+
+        // Y aquí está la magia: añadimos o quitamos la clase 'is-expanded'
+        if (wrapper) {
+            wrapper.classList.toggle('is-expanded');
+        }
+    });
+    
     // Configuración inicial
     clackSound.volume = 0.5;
     winnerSound.volume = 0.7;
