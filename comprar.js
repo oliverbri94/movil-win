@@ -4,6 +4,7 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
     // --- 1. DECLARACIÓN DE VARIABLES Y ELEMENTOS ---
+    const couponCode = params.get('coupon'); // <-- Leemos el cupón del enlace
     const params = new URLSearchParams(window.location.search);
     const sorteoId = params.get('sorteoId');
     
@@ -31,7 +32,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     let sorteoData = null;
     let numerosOcupados = [];
     let misNumerosSeleccionados = [];
+    if (couponCode && couponCode.startsWith('MIGRACION-')) {
+        try {
+            const parts = couponCode.split('-');
+            const quantity = parseInt(parts[1], 10);
+            const userId = parts[2];
 
+            if (quantity > 0 && userId) {
+                // ¡Magia! Sobreescribimos los parámetros del paquete.
+                params.set('paqueteBoletos', quantity);
+                params.set('paqueteNombre', `Migración Manual (${quantity} combinaciones)`);
+                params.set('paquetePrecio', '0.00'); // El precio es CERO
+
+                // Mostramos un mensaje de bienvenida al usuario migrado
+                const resumenDiv = document.getElementById('resumen-pedido');
+                const welcomeMessage = document.createElement('div');
+                welcomeMessage.innerHTML = `
+                    <h3 style="color: var(--clr-primary); text-align: center;">¡Bienvenido de vuelta!</h3>
+                    <p style="text-align: center;">Hemos migrado tu compra anterior. Tienes <strong>${quantity} combinaciones de la suerte</strong> para elegir en este nuevo sorteo. ¡Totalmente gratis!</p>
+                `;
+                welcomeMessage.style.marginBottom = '20px';
+                resumenDiv.parentNode.insertBefore(welcomeMessage, resumenDiv);
+                
+                // Añadimos el cupón a un campo oculto para enviarlo con el formulario
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.id = 'coupon_code';
+                hiddenInput.name = 'coupon_code';
+                hiddenInput.value = couponCode;
+                document.getElementById('form-pedido').appendChild(hiddenInput);
+            }
+        } catch (e) {
+            console.error("Error al procesar el cupón de migración:", e);
+        }
+    }
     // --- 2. FUNCIONES DEL FORMULARIO MULTI-STEP ---
 
     const showStep = (stepIndex) => {

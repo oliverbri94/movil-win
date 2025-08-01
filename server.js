@@ -225,7 +225,7 @@ app.get('/debug-cors', (req, res) => {
 
 // En server.js, reemplaza esta ruta
 app.post('/api/crear-pedido', async (req, res) => {
-    const { sorteoId, sorteoNombre, paquete, nombre, cedula, celular, email, ciudad, affiliateId, numeros_elegidos } = req.body;
+    const { sorteoId, paquete, nombre, cedula, celular, email, ciudad, affiliateId, numeros_elegidos, coupon_code } = req.body;
 
     if (!sorteoId || !paquete || !nombre || !cedula) {
         return res.status(400).json({ error: 'Faltan datos para procesar el pedido.' });
@@ -235,10 +235,11 @@ app.post('/api/crear-pedido', async (req, res) => {
     const numerosElegidosString = numeros_elegidos ? JSON.stringify(numeros_elegidos) : null;
 
     const sql = `
-        INSERT INTO pedidos (id_sorteo_fk, nombre_cliente, cedula_cliente, celular_cliente, email_cliente, paquete_elegido, ciudad_cliente, id_afiliado_fk, numeros_elegidos)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id_pedido;
+        INSERT INTO pedidos (id_sorteo_fk, nombre_cliente, cedula_cliente, celular_cliente, email_cliente, paquete_elegido, ciudad_cliente, id_afiliado_fk, numeros_elegidos, codigo_cupon)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id_pedido;
     `;    
-    const params = [sorteoId, nombre, cedula, celular, email, paquete, ciudad, affiliateId, numerosElegidosString];
+    // Añadimos 'coupon_code' a los parámetros
+    const params = [sorteoId, nombre, cedula, celular, email, paquete, ciudad, affiliateId, numerosElegidosString, coupon_code];
 
     try {
         const result = await new Promise((resolve, reject) => {
