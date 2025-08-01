@@ -3589,6 +3589,12 @@ nav.bg-custom-dark-bg-frame a:hover {
     flex-direction: column;
     align-items: center;
 }
+.picker-column {
+    display: flex;          /* Activamos Flexbox para alinear fácil */
+    flex-direction: column; /* Apilamos los elementos verticalmente */
+    align-items: center;    /* ¡La clave! Centra todo horizontalmente */
+    gap: 15px;              /* Espacio entre la bola y el cuadro (lo baja) */
+}
 
 
 /* Estilos para la lista de números elegidos (manteniendo el diseño de bolas pequeñas) */
@@ -3645,16 +3651,24 @@ nav.bg-custom-dark-bg-frame a:hover {
 /* El campo de texto para ingreso manual, ahora con estilo de bola */
 /* El campo de texto para ingreso manual, ahora con un diseño pulido */
 .manual-input {
-    width: 80px; /* Ancho ajustado */
-    height: auto; /* Altura automática */
-    padding: 10px;
-    font-size: 1.5em; /* Tamaño de fuente normal */
+    width: 70px;          /* Un poco más pequeño y elegante */
+    height: 50px;         /* Altura adecuada */
+    font-size: 1.8em;     /* Hacemos el número grande y legible */
     font-weight: bold;
-    text-align: center;
-    background-color: var(--clr-dark-bg-frame);
-    color: var(--clr-dark-text);
-    border: 2px solid var(--clr-dark-border);
-    border-radius: var(--border-radius-small); /* Bordes ligeramente redondeados */
+    text-align: center;   /* Centramos el número dentro del cuadro */
+    border: 2px solid var(--clr-light-border);
+    border-radius: 8px;   /* Bordes redondeados para un look moderno */
+    background-color: var(--clr-light-bg-frame);
+    color: var(--clr-light-text);
+    padding: 5px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.manual-input:focus {
+    outline: none;
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(var(--clr-primary-rgb), 0.3);
 }
 
 /* Oculta las flechas de los inputs (sin cambios) */
@@ -3663,6 +3677,7 @@ nav.bg-custom-dark-bg-frame a:hover {
   -webkit-appearance: none;
   margin: 0;
 }
+
 
 /* Centrar el selector en pantallas pequeñas */
 @media (max-width: 600px) {

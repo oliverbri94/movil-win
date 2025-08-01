@@ -902,9 +902,9 @@ function initializeRafflePage() {
                 } else if (percentageSold >= 50) {
                     motivationalMessage = '¡Más de la mitad del camino! Tú puedes ser el ganador.';
                 } else {
-                    motivationalMessage = '¡Compra tus boletos y ayúdanos a llegar a la meta!';
+                    motivationalMessage = '¡Compra tus boletos y participa ya!';
                 }
-                const metaMessage = '<p style="font-size: 0.9em; color: var(--clr-light-text-alt); margin-top: 5px;">Al llegar al 100% se realizará el sorteo. ¡Mucha suerte!</p>';
+                const metaMessage = '<p style="font-size: 0.9em; color: var(--clr-light-text-alt); margin-top: 5px;">Al llegar al 100% se realizará el sorteo EN VIVO. ¡Mucha suerte!</p>';
 
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
 
