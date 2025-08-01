@@ -101,6 +101,28 @@ function initializeAffiliateTabs() {
     });
 }
 
+
+// Seleccionamos el contenedor principal del carrusel de premios
+const prizeCarouselTrack = document.getElementById('prizeCarouselTrack');
+
+// Le decimos que escuche por clics
+prizeCarouselTrack.addEventListener('click', function(event) {
+    // Buscamos si el clic ocurrió en nuestro botón desplegable o algo dentro de él
+    const toggleButton = event.target.closest('.collapsible-toggle');
+
+    // Si no se hizo clic en el botón, no hacemos nada
+    if (!toggleButton) {
+        return;
+    }
+
+    // Si se hizo clic en el botón, buscamos su contenedor padre
+    const wrapper = toggleButton.closest('.top-participants-wrapper');
+
+    // Y aquí está la magia: añadimos o quitamos la clase 'is-expanded'
+    if (wrapper) {
+        wrapper.classList.toggle('is-expanded');
+    }
+});
 /**
  * Esta es la función principal que contiene toda la lógica para la página del sorteo.
  */
@@ -294,14 +316,6 @@ function initializeRafflePage() {
         }
     }
             
-    function getMotivationalMessage(percentage) {
-        if (percentage >= 100) return "¡Meta alcanzada! El sorteo será pronto.";
-        if (percentage >= 95) return "¡Estamos a un paso! Tu oportunidad es AHORA.";
-        if (percentage >= 75) return "¡Casi llegamos! Muy pocos boletos para la meta.";
-        if (percentage >= 50) return "¡Impresionante! Superamos la mitad del camino.";
-        if (percentage >= 25) return "¡Excelente progreso! Sigamos así.";
-        return "¡El sorteo ha comenzado! Sé de los primeros.";
-    }
 
     function renderMedia(sorteo) {
         const url = sorteo.imagen_url || 'images/proximo_sorteo.png';
@@ -372,39 +386,6 @@ function initializeRafflePage() {
         });
     }
 
-    function inicializarTamborSocial(sorteo, slideElement) {
-        const anillo = slideElement.querySelector('.tambor-anillo');
-        if (!anillo) return;
-
-        // Limpiamos el tambor anterior
-        anillo.innerHTML = '';
-
-        // Usamos los datos de la lista pública que ya cargamos
-        const listaParticipantes = sorteo.listaPublicaTombola || [];
-
-        // Mostramos solo un número limitado de participantes recientes para no saturar
-        const participantesAMostrar = listaParticipantes.slice(-15); // Máximo 15 bolas
-        const totalBolas = participantesAMostrar.length;
-        if (totalBolas === 0) return;
-
-        participantesAMostrar.forEach((p, i) => {
-            const bola = document.createElement('div');
-            bola.className = 'participante-bola';
-
-            // Obtenemos las iniciales del nombre
-            const iniciales = (p.nombre || '??').trim().split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-            bola.textContent = iniciales;
-
-            // La magia de la trigonometría para posicionar en un círculo 3D
-            const angulo = (360 / totalBolas) * i;
-            const radio = 100; // El radio del anillo en píxeles
-
-            // Aplicamos la rotación y la traslación para formar el anillo
-            bola.style.transform = `rotateY(${angulo}deg) translateZ(${radio}px)`;
-
-            anillo.appendChild(bola);
-        });
-    }
     /**
      * Genera el código HTML para los 2-3 botones de paquetes destacados.
      * @param {Array<object>} paquetes - El array de paquetes de un sorteo.
@@ -897,21 +878,19 @@ function initializeRafflePage() {
                 const circumference = 2 * Math.PI * 62; // Radio de 62 para el nuevo SVG
 
                 // Lógica para el mensaje motivacional
-                let motivationalMessage = "Cada boleto es una nueva oportunidad de ganar.";
-                if (percentageSold >= 100) motivationalMessage = "¡Meta alcanzada! El sorteo será en vivo muy pronto.";
-                else if (percentageSold >= 90) motivationalMessage = "¡QUEDAN LOS ÚLTIMOS BOLETOS!";
-                else if (percentageSold >= 75) motivationalMessage = "¡No te quedes fuera, se acaban rápido!";
+                let motivationalMessage = '';
+                if (percentageSold >= 100) {
+                    motivationalMessage = '🎉 ¡Meta alcanzada! El sorteo se realizará muy pronto. 🎉';
+                } else if (percentageSold >= 80) {
+                    motivationalMessage = '🔥 ¡Ya casi lo logramos! ¡Falta muy poco para el sorteo! 🔥';
+                } else if (percentageSold >= 50) {
+                    motivationalMessage = '¡Más de la mitad del camino! Tú puedes ser el ganador.';
+                } else {
+                    motivationalMessage = '¡Compra tus boletos y ayúdanos a llegar a la meta!';
+                }
 
-                // Lógica para la clase de urgencia (CORRECCIÓN)
-                let urgenciaClass = '';
-                if (percentageSold >= 90) urgenciaClass = 'critico';
-                else if (percentageSold >= 75) urgenciaClass = 'urgente';
-
-                const finalOffset = circumference - (percentageSold / 100) * circumference;
-                let gradientId = 'progressGradientDefault';
-                if (urgenciaClass === 'urgente') gradientId = 'progressGradientUrgent';
-                else if (urgenciaClass === 'critico') gradientId = 'progressGradientCritical';
-
+                // Este mensaje siempre se mostrará, reforzando la idea principal
+                const metaMessage = '<p style="font-size: 0.9em; color: var(--clr-light-text-alt); margin-top: 5px;">Al llegar al 100% se realizará el sorteo. ¡Mucha suerte!</p>';
 
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
                 
@@ -947,6 +926,8 @@ function initializeRafflePage() {
                         <div class="progress-radial-percentage">${percentageSold.toFixed(0)}<span>%</span></div>
                     </div>
                     <p class="motivational-text-integrated">${motivationalMessage}</p>
+                    ${metaMessage} // <-- AÑADIMOS EL NUEVO MENSAJE AQUÍ
+
                 `;
 
                 slideWrapper.innerHTML = `

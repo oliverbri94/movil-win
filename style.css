@@ -44,10 +44,6 @@
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 /* --- AÑADE ESTO A STYLE.CSS --- */
-body {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
 /* --- Estilos Base Tema Oscuro --- */
 body {
     font-family: var(--font-main);
@@ -2507,7 +2503,7 @@ nav.bg-custom-dark-bg-frame a:hover {
 }
 
 .ticker-item strong {
-    color: var(--clr-white); /* El número en blanco para máximo contraste */
+    color: var(--clr-light-text-alt); /* El número en blanco para máximo contraste */
     font-weight: 700;
     font-size: 1.2em;
     margin-left: 4px;
