@@ -894,10 +894,16 @@ function initializeRafflePage() {
 
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
                 let urgenciaClass = '';
+                let gradientId = 'progressGradientDefault'; // <-- AÑADE ESTA LÍNEA (VALOR POR DEFECTO)
+
                 if (percentageSold >= 95) {
                     urgenciaClass = 'critico'; // Clase para cuando falte poquísimo
+                    gradientId = 'progressGradientCritical'; // <-- AÑADE ESTA LÍNEA
+
                 } else if (percentageSold >= 80) {
                     urgenciaClass = 'urgente'; // Clase para cuando ya esté avanzado
+                    gradientId = 'progressGradientUrgent'; // <-- AÑADE ESTA LÍNEA
+
                 }
 
                 const progressBarHTML = `
