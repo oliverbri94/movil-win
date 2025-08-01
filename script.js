@@ -894,12 +894,24 @@ function initializeRafflePage() {
                 const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
                 const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
                 const percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
-                const circumference = 2 * Math.PI * 62; 
+                const circumference = 2 * Math.PI * 62; // Radio de 62 para el nuevo SVG
+
+                // Lógica para el mensaje motivacional
+                let motivationalMessage = "Cada boleto es una nueva oportunidad de ganar.";
+                if (percentageSold >= 100) motivationalMessage = "¡Meta alcanzada! El sorteo será en vivo muy pronto.";
+                else if (percentageSold >= 90) motivationalMessage = "¡QUEDAN LOS ÚLTIMOS BOLETOS!";
+                else if (percentageSold >= 75) motivationalMessage = "¡No te quedes fuera, se acaban rápido!";
+
+                // Lógica para la clase de urgencia (CORRECCIÓN)
+                let urgenciaClass = '';
+                if (percentageSold >= 90) urgenciaClass = 'critico';
+                else if (percentageSold >= 75) urgenciaClass = 'urgente';
+
                 const finalOffset = circumference - (percentageSold / 100) * circumference;
-                
                 let gradientId = 'progressGradientDefault';
                 if (urgenciaClass === 'urgente') gradientId = 'progressGradientUrgent';
                 else if (urgenciaClass === 'critico') gradientId = 'progressGradientCritical';
+
 
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
                 
