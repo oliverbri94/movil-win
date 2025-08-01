@@ -186,14 +186,11 @@ body {
     position: relative;
     width: 100%;
     overflow: hidden;
-    min-height: 80vh; /* Altura mínima del 80% de la pantalla */
 }
 
 /* 2. Hacemos que todas las capas internas hereden esa altura */
-.prize-carousel-track,
-.slide-wrapper {
-    height: 100%;
-}
+
+
 .prize-carousel-track {
     display: flex;
     transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
@@ -208,7 +205,6 @@ body {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%; /* Ocupa toda la altura del slide-wrapper */
     padding: 20px;
     gap: 30px;
 }
