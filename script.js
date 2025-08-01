@@ -979,7 +979,8 @@ function initializeRafflePage() {
                                 </div>
                             </div>
                         </div>
-                        <div class="fila-inferior">
+                       <!-- para eliminar espacio en la parte inferior, se puede comentar esta sección
+                       <div class="fila-inferior">
                             <div class="contenedor-sorteo content-section">
                                 <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
                                 <div class="price-is-right-wheel-frame">
@@ -988,6 +989,7 @@ function initializeRafflePage() {
                                 </div>
                             </div>
                         </div>
+                        -->
                     </div>
                 `;
             }

@@ -51,7 +51,7 @@ body {
 /* --- Estilos Base Tema Oscuro --- */
 body {
     font-family: var(--font-main);
-    background: var(--clr-light-bg); /* Fondo claro y sólido */
+    background: radial-gradient(circle at top center, var(--clr-light-bg-alt), var(--clr-light-bg) 90%);
     color: var(--clr-light-text); /* Texto oscuro */
     display: flex;
     flex-direction: column;
@@ -3021,10 +3021,11 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 /* Contenedor principal de la sección */
 .top-participants-wrapper {
-    background-color: var(--clr-dark-bg);
+    background-color: var(--clr-light-bg); /* Fondo más claro para contraste */
     border-radius: var(--border-radius-medium);
     border: 1px solid var(--clr-light-border);
-    overflow: hidden; /* Clave para el efecto */
+    overflow: hidden; 
+    margin-top: 20px;
 }
 
 /* Encabezado que ahora es un botón */
@@ -3059,14 +3060,16 @@ nav.bg-custom-dark-bg-frame a:hover {
     font-weight: 500;
     color: var(--clr-light-text-alt);
 }
+
 .top-list-header .header-action i {
     transition: transform 0.3s ease;
 }
 
+
 /* Contenedor del contenido plegable */
 .collapsible-list-content {
     padding: 0 5px 5px 5px;
-    max-height: 58px; /* Altura para mostrar solo el primer elemento (ajusta si es necesario) */
+    max-height: 58px; /* Altura para mostrar solo el primer elemento */
     overflow: hidden;
     transition: max-height 0.5s ease-in-out;
 }
@@ -4152,4 +4155,19 @@ nav.bg-custom-dark-bg-frame a:hover {
 /* Animación de pulso para el estado crítico */
 @keyframes pulse-red-glow {
   50% { --glow-color: rgba(var(--clr-red-rgb), 1); }
+}
+
+/* Pega este código al final de style.css */
+
+/* Estilo para la nueva etiqueta de "boletos gratis" o "ahorro" */
+.etiqueta-ahorro {
+    background-color: var(--clr-accent);
+    color: var(--clr-white);
+    font-size: 0.85em;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 50px; /* Bordes redondeados para que parezca una píldora */
+    margin-top: -10px; /* Un poco de margen negativo para acercarlo al precio */
+    margin-bottom: 15px;
+    display: inline-block; /* Para que ocupe solo el ancho de su contenido */
 }
