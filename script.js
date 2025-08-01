@@ -889,34 +889,43 @@ function initializeRafflePage() {
                     </div>
                 `;
             } else {
-                const mediaParaRenderizar = sorteo;
-                const tituloMostrado = sorteo.nombre_premio_display;
-                const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
-                const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
-                const percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
-                const circumference = 2 * Math.PI * 54; // 2 * PI * radio (el radio es la mitad del tamaño del círculo, menos el grosor del borde)
-
-                let motivationalMessage = "Cada boleto es una nueva oportunidad de ganar.";
-                if (percentageSold >= 100) motivationalMessage = "¡Meta alcanzada! El sorteo será en vivo muy pronto.";
-                else if (percentageSold >= 90) motivationalMessage = "¡QUEDAN LOS ÚLTIMOS BOLETOS!";
-                else if (percentageSold >= 75) motivationalMessage = "¡No te quedes fuera, se acaban rápido!";
-
-                let urgenciaClass = '';
-                if (percentageSold >= 90) urgenciaClass = 'critico';
-                else if (percentageSold >= 75) urgenciaClass = 'urgente';
+                const finalOffset = circumference - (percentageSold / 100) * circumference;
+                let gradientId = 'progressGradientDefault';
+                if (urgenciaClass === 'urgente') gradientId = 'progressGradientUrgent';
+                else if (urgenciaClass === 'critico') gradientId = 'progressGradientCritical';
 
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
                 
                 const progressBarHTML = `
                     <div class="progress-radial-wrapper ${urgenciaClass}">
-                        <svg class="progress-radial-svg" width="120" height="120" viewBox="0 0 120 120">
-                            <circle class="progress-radial-bg-circle" cx="60" cy="60" r="54" fill="transparent" stroke="var(--clr-light-border)" stroke-width="6"/>
-                            <circle class="progress-radial-fg-circle" cx="60" cy="60" r="54" fill="transparent" stroke="var(--clr-primary)" stroke-width="6"
+                        <div class="progress-radial-inner-shadow"></div>
+                        <svg class="progress-radial-svg" width="140" height="140" viewBox="0 0 140 140">
+                            <defs>
+                                <linearGradient id="progressGradientDefault" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#30d158" />
+                                    <stop offset="100%" stop-color="var(--clr-primary)" />
+                                </linearGradient>
+                                <linearGradient id="progressGradientUrgent" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#FFC837" />
+                                    <stop offset="100%" stop-color="var(--clr-accent)" />
+                                </linearGradient>
+                                <linearGradient id="progressGradientCritical" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#FF8C94" />
+                                    <stop offset="100%" stop-color="var(--clr-red)" />
+                                </linearGradient>
+                                <filter id="glow">
+                                    <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="var(--glow-color)" />
+                                </filter>
+                            </defs>
+                            <circle class="progress-radial-bg-circle" cx="70" cy="70" r="62" fill="transparent" stroke-width="12"/>
+                            <circle class="progress-radial-fg-circle" cx="70" cy="70" r="62" fill="transparent" stroke="url(#${gradientId})" stroke-width="12"
                                     stroke-dasharray="${circumference}"
-                                    stroke-dashoffset="${circumference - (percentageSold / 100) * circumference}"
-                                    transform="rotate(-90 60 60)" />
+                                    stroke-dashoffset="${circumference}" 
+                                    data-final-offset="${finalOffset}"
+                                    stroke-linecap="round"
+                                    transform="rotate(-90 70 70)" />
                         </svg>
-                        <div class="progress-radial-percentage">${percentageSold.toFixed(0)}%</div>
+                        <div class="progress-radial-percentage">${percentageSold.toFixed(0)}<span>%</span></div>
                     </div>
                     <p class="motivational-text-integrated">${motivationalMessage}</p>
                 `;
@@ -978,6 +987,14 @@ function initializeRafflePage() {
                 cont.appendChild(btn);
             });
         }
+            // --- Pega esto al final de la función generarSlidesDelCarrusel ---
+        // Dispara la animación de las barras de progreso recién creadas
+        document.querySelectorAll('.prize-carousel-slide[data-sorteo-id="' + sorteo.id_sorteo + '"] .progress-radial-fg-circle').forEach(circle => {
+            setTimeout(() => {
+                const finalOffset = circle.getAttribute('data-final-offset');
+                circle.style.strokeDashoffset = finalOffset;
+            }, 100); // Un pequeño retardo para asegurar que la transición se aplique
+        });
     }
     async function actualizarTopParticipantes(sorteoId, slideElement) {
         const listElement = slideElement.querySelector('.top-participants-list');
