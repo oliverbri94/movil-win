@@ -609,17 +609,30 @@ function initializeRafflePage() {
             }
         }
     
-        // --- LÓGICA DE VISIBILIDAD Y ALTURA CORREGIDA ---
+            // --- LÓGICA DE VISIBILIDAD Y ALTURA CORREGIDA ---
+        // 1. Lógica para manejar la visibilidad y altura del slide
         if (filaInferior && prizeCarouselSlideElement) {
-            const esTipoTombola = sorteoActual.status_sorteo === 'activo' && sorteoActual.tipo_sorteo === 'tombola_interactiva';
-            
-            // Si es tómbola, oculta la fila inferior y contrae la altura. Si no, la muestra y restaura la altura.
-            filaInferior.style.display = esTipoTombola ? 'none' : 'block';
-            prizeCarouselSlideElement.style.minHeight = esTipoTombola ? 'auto' : ''; // Vacío para que use el CSS
+            const esActivo = sorteoActual.status_sorteo === 'activo';
+            const esTipoTombola = sorteoActual.tipo_sorteo === 'tombola_interactiva';
+
+            if (esActivo && esTipoTombola) {
+                // Es TÓMBOLA: Ocultamos la fila de la rueda y colapsamos la altura del slide.
+                filaInferior.style.display = 'none';
+                prizeCarouselSlideElement.style.minHeight = 'auto';
+            } else if (esActivo) {
+                // Es RUEDA: Mostramos la fila y restauramos la altura por defecto del CSS.
+                filaInferior.style.display = 'block';
+                prizeCarouselSlideElement.style.minHeight = '';
+            } else {
+                // Es PROGRAMADO: Ocultamos la fila por si acaso y colapsamos la altura.
+                filaInferior.style.display = 'none';
+                prizeCarouselSlideElement.style.minHeight = 'auto';
+            }
         }
 
-        // El resto de la lógica para inicializar la rueda...
+        // 2. Lógica para inicializar la RUEDA solo si es necesario
         if (sorteoActual.status_sorteo === 'activo' && sorteoActual.tipo_sorteo !== 'tombola_interactiva') {
+            // Este bloque solo se ejecuta para sorteos de tipo RUEDA
             const contenedorRueda = slideWrapper.querySelector('.contenedor-sorteo');
             contenedorRueda?.classList.remove('oculto');
             
@@ -642,17 +655,19 @@ function initializeRafflePage() {
                     addWheelEventListeners(wheelCanvas);
                     drawFrontWheel(participantes);
                 } catch (err) {
-                    console.error("Error al cargar participantes:", err);
+                    console.error("Error al cargar participantes para la rueda:", err);
                     participantes = [];
                     drawFrontWheel(participantes);
                 }
             }
         } else {
+            // Para sorteos de TÓMBOLA o PROGRAMADOS, nos aseguramos de que la rueda no esté activa.
             participantes = [];
             wheelCanvas = null;
             wheelCtx = null;
         }
-    }
+        // --- FIN DE LA CORRECCIÓN DEFINITIVA ---
+    }    
     async function cargarSorteosVisibles() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/sorteos-visibles`);
