@@ -4335,67 +4335,55 @@ nav.bg-custom-dark-bg-frame a:hover {
 }
 
 
-/* ============================================= */
-/* == ESTILOS PARA LA TÓMBOLA ANIMADA 3D == */
-/* ============================================= */
-.contenedor-tombola {
+/* ================================================= */
+/* == ESTILOS PARA EL ACUARIO DE LA SUERTE (2D) == */
+/* ================================================= */
+
+.acuario-suerte-container {
+    position: relative;
+    width: 100%;
+    height: 450px; /* Altura fija para el área de animación */
+    background: var(--clr-dark-bg);
+    border-radius: var(--border-radius-medium);
+    overflow: hidden; /* Clave para que las bolas aparezcan y desaparezcan */
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 400px; /* Espacio para la animación */
-    padding: 20px;
-    background: radial-gradient(circle, var(--clr-dark-bg) 50%, var(--clr-dark-bg-alt) 100%);
 }
 
-.tombola-animada-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 30px;
-}
-
-.tombola-animada-container {
+/* El gráfico de la tómbola (hecho con CSS) */
+.tombola-grafico-2d {
+    width: 220px;
+    height: 220px;
+    border: 8px solid rgba(179, 160, 125, 0.5); /* Borde de madera semi-transparente */
+    border-radius: 45px 45px 80px 80px; /* Forma de tómbola de cristal */
     position: relative;
-    width: 250px;
-    height: 250px;
-    perspective: 1500px; /* Profundidad 3D */
+    z-index: 1;
 }
+/* Patas de la tómbola */
+.tombola-grafico-2d::before, .tombola-grafico-2d::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    width: 15px;
+    height: 40px;
+    background-color: rgba(179, 160, 125, 0.5);
+}
+.tombola-grafico-2d::before { left: 40px; transform: rotate(-15deg); }
+.tombola-grafico-2d::after { right: 40px; transform: rotate(15deg); }
 
-/* El cilindro que gira */
-.tombola-cilindro {
+
+.acuario-orbes {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    animation: rotar-lento 45s linear infinite;
-    transform: rotateX(-15deg) rotateY(0deg); /* Vista isométrica */
 }
 
-/* Las caras del cilindro (crean el efecto 3D) */
-.tombola-cara {
+.bola-flotante {
     position: absolute;
-    width: 250px;
-    height: 250px;
-    background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSJ0cmFuc3BhcmVudCIvPjxjaXJjbGUgY3g9IjUiIGN5PSI1IiByPSIzIiBmaWxsPSJyZ2JhKDAsMCwwLDAuMDUpIi8+PC9zdmc+'); /* Textura sutil */
-    border-left: 3px solid #b3a07d;
-    border-right: 3px solid #b3a07d;
-    /* Posicionamos cada cara alrededor de un círculo */
-}
-
-/* Las tapas del cilindro */
-.tombola-tapa {
-    position: absolute;
-    width: 150px;
-    height: 150px;
-    background: radial-gradient(circle, #d4c3a2, #b3a07d);
-    border-radius: 50%;
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.4);
-}
-.tombola-tapa.frontal { transform: translateZ(125px); }
-.tombola-tapa.trasera { transform: rotateY(180deg) translateZ(125px); }
-
-/* Las bolas flotantes de participantes */
-.participante-bola-flotante {
-    position: absolute;
+    bottom: -100px; /* Empieza fuera de la pantalla, abajo */
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -4405,52 +4393,45 @@ nav.bg-custom-dark-bg-frame a:hover {
     font-family: 'Anton', sans-serif;
     color: #4a3f35;
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    animation: flotar 8s ease-in-out infinite;
+    /* La animación que las hace flotar hacia arriba */
+    animation: flotarHaciaArriba linear infinite;
 }
-.participante-bola-flotante:hover {
-    transform: scale(1.2);
-    box-shadow: 0 0 20px var(--clr-primary);
-    z-index: 10;
+.bola-flotante:hover {
+    animation-play-state: paused; /* Pausa la animación al pasar el cursor */
+    box-shadow: 0 0 25px var(--clr-primary);
 }
-.participante-bola-flotante::before { /* Tooltip */
+
+/* Tooltip (igual que antes) */
+.bola-flotante::before {
     content: attr(data-title);
     position: absolute;
     bottom: 110%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #222;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 5px;
-    font-size: 0.8rem;
-    font-family: 'Poppins', sans-serif;
-    white-space: pre; /* Permite saltos de línea con \A */
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease;
+    /* ... (resto de estilos del tooltip no cambian) ... */
+    background-color: #222; color: white; padding: 8px 12px; border-radius: 5px; font-size: 0.8rem; font-family: 'Poppins', sans-serif; white-space: pre; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; z-index: 100; transform: translateX(-50%); left: 50%;
 }
-.participante-bola-flotante:hover::before {
-    opacity: 1;
-    visibility: visible;
-}
+.bola-flotante:hover::before { opacity: 1; visibility: visible; }
 
-.tombola-cta {
-    max-width: 200px;
+.acuario-cta {
+    position: absolute;
+    bottom: 20px;
     text-align: center;
-}
-.tombola-cta h4 {
-    color: var(--clr-dark-text);
-    font-size: 1.5em;
-    line-height: 1.3;
+    color: var(--clr-dark-text-alt);
+    font-weight: 500;
+    z-index: 2;
 }
 
-@keyframes rotar-lento {
-    from { transform: rotateX(-15deg) rotateY(0deg); }
-    to { transform: rotateX(-15deg) rotateY(360deg); }
-}
 
-@keyframes flotar {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
+/* La animación clave de flotación */
+@keyframes flotarHaciaArriba {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    99% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-600px); /* Distancia que recorren hacia arriba */
+        opacity: 0;
+    }
 }

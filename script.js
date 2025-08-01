@@ -142,41 +142,13 @@ function initializeRafflePage() {
 // En script.js, añade esta nueva función de ayuda
 
     // REEMPLAZA la función anterior con esta
-    async function renderizarTombolaAnimada(sorteo, slideElement) {
-        const contenedorTombola = slideElement.querySelector('.contenedor-tombola');
-        if (!contenedorTombola) return;
+    async function renderizarAcuarioDeLaSuerte(sorteo, slideElement) {
+        const contenedorAcuario = slideElement.querySelector('.acuario-suerte-container');
+        const orbesContainer = slideElement.querySelector('.acuario-orbes');
+        if (!contenedorAcuario || !orbesContainer) return;
 
-        contenedorTombola.classList.remove('oculto');
+        orbesContainer.innerHTML = ''; // Limpiamos las bolas anteriores
 
-        // --- 1. Construir la estructura base de la Tómbola 3D ---
-        let tombolaHTML = `
-            <div class="tombola-animada-wrapper">
-                <div class="tombola-animada-container">
-                    <div class="tombola-cilindro">
-                        <div class="tombola-tapa frontal"></div>
-                        <div class="tombola-tapa trasera"></div>
-                    </div>
-                    <div class="participante-orbita"></div>
-                </div>
-                <div class="tombola-cta">
-                    <h4>¡Tu número puede ser el siguiente en girar!</h4>
-                </div>
-            </div>
-        `;
-        contenedorTombola.innerHTML = tombolaHTML;
-
-        // Añadir las 20 caras del cilindro con JS para no saturar el HTML
-        const cilindro = contenedorTombola.querySelector('.tombola-cilindro');
-        const numCaras = 20;
-        for (let i = 0; i < numCaras; i++) {
-            const cara = document.createElement('div');
-            cara.className = 'tombola-cara';
-            const angulo = (360 / numCaras) * i;
-            cara.style.transform = `rotateY(${angulo}deg) translateZ(125px)`;
-            cilindro.appendChild(cara);
-        }
-
-        // --- 2. Cargar y procesar los datos de los participantes ---
         try {
             const response = await fetch(`${API_BASE_URL}/api/public-list/tombola/${sorteo.id_sorteo}`);
             const result = await response.json();
@@ -191,42 +163,36 @@ function initializeRafflePage() {
                 participantesAgrupados.get(nombre).push(...p.numeros);
             });
 
-            const orbitaContainer = contenedorTombola.querySelector('.participante-orbita');
-            if (!orbitaContainer) return;
-
-            // --- 3. Crear y posicionar las bolas flotantes ---
             participantesAgrupados.forEach((numeros, nombre) => {
                 const totalBoletos = numeros.length;
                 if (totalBoletos === 0) return;
 
                 const bola = document.createElement('div');
-                bola.className = 'participante-bola-flotante';
-
-                // El tamaño de la bola es proporcional a los boletos comprados
-                const tamano = Math.min(30 + totalBoletos * 5, 100); // Tamaño base 30px, +5px por boleto, máx 100px
+                bola.className = 'bola-flotante';
+                
+                // 1. Tamaño proporcional a los boletos
+                const tamano = Math.min(40 + totalBoletos * 6, 120);
                 bola.style.width = `${tamano}px`;
                 bola.style.height = `${tamano}px`;
-                bola.style.fontSize = `${Math.min(1 + totalBoletos * 0.1, 2.5)}em`;
-
-                // Posición aleatoria alrededor de la tómbola
-                const anguloOrbita = Math.random() * 360;
-                const distanciaOrbita = 150 + Math.random() * 50;
-                bola.style.top = `calc(50% + ${Math.sin(anguloOrbita * Math.PI / 180) * distanciaOrbita}px - ${tamano/2}px)`;
-                bola.style.left = `calc(50% + ${Math.cos(anguloOrbita * Math.PI / 180) * distanciaOrbita}px - ${tamano/2}px)`;
-                bola.style.animationDelay = `${Math.random() * 8}s`; // Animación de flotar desfasada
-
+                bola.style.fontSize = `${Math.min(1.2 + totalBoletos * 0.1, 3)}em`;
+                
+                // 2. Posición horizontal y animación aleatorias
+                bola.style.left = `${Math.random() * 90}%`; // Posición X aleatoria
+                bola.style.animationDuration = `${10 + Math.random() * 10}s`; // Duración aleatoria (entre 10 y 20s)
+                bola.style.animationDelay = `${Math.random() * 10}s`; // Retardo aleatorio para que no empiecen todas a la vez
+                
                 const iniciales = nombre.trim().split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
                 bola.textContent = iniciales;
-
-                // Tooltip con el detalle de los números
-                const numerosTexto = numeros.map(combo => `[${combo.join('-')}]`).join('\\A'); // '\A' crea un salto de línea en el tooltip
+                
+                // 3. Tooltip con el detalle de los números
+                const numerosTexto = numeros.map(combo => `[${combo.join('-')}]`).join('\\A'); // '\A' crea un salto de línea en CSS
                 bola.dataset.title = `${nombre}\\A${totalBoletos} combinaciones:\\A${numerosTexto}`;
 
-                orbitaContainer.appendChild(bola);
+                orbesContainer.appendChild(bola);
             });
 
         } catch(error) {
-            console.error("Error al renderizar la tómbola animada:", error);
+            console.error("Error al renderizar el acuario de la suerte:", error);
         }
     }
     /**
@@ -704,7 +670,7 @@ function initializeRafflePage() {
             if (sorteoActual.tipo_sorteo === 'tombola_interactiva') {
                 contenedorRueda?.classList.add('oculto');
                 contenedorTombola?.classList.remove('oculto');
-                renderizarTombolaAnimada(sorteoActual, activeSlide);
+                renderizarAcuarioDeLaSuerte(sorteoActual, activeSlide);
                 inicializarTamborSocial(sorteoActual, activeSlide); 
                 participantes = []; // Reseteamos por si acaso
             } else {
@@ -1045,7 +1011,15 @@ function initializeRafflePage() {
                         </div>
                         
                         <div class="contenedor-tombola oculto content-section">
+                            <div class="acuario-suerte-container">
+                                <div class="tombola-grafico-2d"></div>
+                                <div class="acuario-orbes">
+                                    </div>
+                                <div class="acuario-cta">
+                                    <h4>¡Tu suerte está en juego!</h4>
+                                </div>
                             </div>
+                        </div>
                     </div>
                 `;
             }
