@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Lógica del Temporizador ---
     const timerDiv = document.getElementById('countdown-timer');
     if (timerDiv) {
-        let tiempoRestante = 15 * 60; // 15 minutos en segundos
+        let tiempoRestante = 30 * 60; // 15 minutos en segundos
         const timerInterval = setInterval(() => {
             const minutos = Math.floor(tiempoRestante / 60);
             const segundos = tiempoRestante % 60;

@@ -444,8 +444,48 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    form.addEventListener('submit', handleFormSubmit);
-    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Se construye el paquete de datos para enviar al servidor
+        const payload = {
+            sorteoId: sorteoId,
+            sorteoNombre: sorteoData.nombre_premio_display,
+            paquete: `${params.get('paqueteNombre')} (${params.get('paqueteBoletos')} x $${params.get('paquetePrecio')})`,
+            nombre: document.getElementById('nombre').value,
+            cedula: document.getElementById('cedula').value,
+            ciudad: document.getElementById('ciudad').value,
+            celular: document.getElementById('celular').value,
+            email: document.getElementById('email').value,
+            affiliateId: sessionStorage.getItem('affiliateRef') || null,
+            numeros_elegidos: sorteoData.tipo_sorteo === 'tombola_interactiva' ? misNumerosSeleccionados : null
+        };
+
+        try {
+            statusDiv.textContent = 'Procesando tu pedido...';
+            statusDiv.className = 'status-container';
+            const response = await fetch(`${API_BASE_URL}/api/crear-pedido`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || 'Error en el servidor.');
+            
+            if (typeof fbq === 'function') {
+                fbq('track', 'Lead');
+            }
+            
+            // ¡CORRECCIÓN! Se define la variable ANTES de usarla
+            const numerosQuery = encodeURIComponent(JSON.stringify(misNumerosSeleccionados));
+            window.location.href = `gracias.html?pedidoId=${result.pedidoId}&numeros=${numerosQuery}`;
+
+        } catch (error) {
+            statusDiv.textContent = `Error: ${error.message}`;
+            statusDiv.className = 'status-container error';
+        }
+    });
     listaNumerosElegidos.addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-eliminar-numero')) {
             const indexToRemove = parseInt(e.target.dataset.index, 10);
