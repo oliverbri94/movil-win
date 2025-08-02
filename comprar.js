@@ -1,5 +1,5 @@
 // =================================================================
-// == ARCHIVO COMPRAR.JS - VERSIÓN FINAL Y CORREGIDA (MULTI-STEP) ==
+// == ARCHIVO COMPRAR.JS - VERSIÓN FINAL (DISEÑO RESTAURADO) ==
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Variables de estado
     let currentStep = 0;
-    // let numerosElegidos = []; // ELIMINADO: Ya no necesitamos esta variable
     let sorteoData = null;
     let numerosOcupados = [];
     let misNumerosSeleccionados = [];
@@ -89,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateProgressBar(stepIndex);
     };
 
-    // CORREGIDO: Esta función ahora usa 'misNumerosSeleccionados'
+    // CORREGIDO: Esta función ahora usa 'misNumerosSeleccionados' y lee de los inputs
     const anadirNumeroSeleccionado = () => {
         const selectorWrapper = document.querySelector('.selector-wrapper');
         if (!selectorWrapper) return;
@@ -103,44 +102,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             const valorNumerico = parseInt(valor, 10);
             const maxPermitido = parseInt(input.dataset.max, 10);
             
-            // Usamos padStart para asegurar los dígitos correctos antes de añadir
-            const valorFormateado = String(valorNumerico).padStart(parseInt(input.dataset.digitos, 10), '0');
-
-            if (valor === '' || isNaN(valorNumerico) || valorNumerico > maxPermitido || valor.length !== input.dataset.digitos) {
+            if (valor === '' || isNaN(valorNumerico) || valorNumerico > maxPermitido) {
                 esValido = false;
             } else {
-                combinacion.push(valorFormateado);
+                combinacion.push(valor);
             }
         });
 
         if (!esValido) {
-            showStatusMessage('status-combinacion', 'Por favor, asegúrate de que todas las casillas tengan un número válido y con el número correcto de dígitos.', true);
+            showStatusMessage('status-combinacion', 'Por favor, asegúrate de que todas las casillas tengan un número válido y dentro del rango.', true);
             return;
         }
 
         const cantidadRequerida = parseInt(params.get('paqueteBoletos') || '1', 10);
-        // CORREGIDO: Comprobamos contra el array correcto
         if (misNumerosSeleccionados.length >= cantidadRequerida) {
-            showStatusMessage('status-combinacion', `Ya has elegido el máximo de ${cantidadRequerida} combinaciones para tu paquete.`, true);
+            showStatusMessage('status-combinacion', `Ya has elegido el máximo de ${cantidadRequerida} combinaciones.`, true);
             return;
         }
 
         const combinacionString = JSON.stringify(combinacion);
-        // CORREGIDO: Comprobamos duplicados contra el array correcto
         if (misNumerosSeleccionados.some(c => JSON.stringify(c) === combinacionString)) {
-            showStatusMessage('status-combinacion', 'Ya has elegido esta combinación de números. Por favor, elige una diferente.', true);
+            showStatusMessage('status-combinacion', 'Ya has elegido esta combinación. Elige una diferente.', true);
             return;
         }
 
-        // CORREGIDO: Añadimos al array correcto
         misNumerosSeleccionados.push(combinacion);
-        // CORREGIDO: Llamamos a la función de renderizado correcta
         actualizarListaMisNumeros(); 
-        
-        // Limpiamos los inputs para la siguiente selección
-        inputs.forEach(input => input.value = '');
-
-        showStatusMessage('status-combinacion', `¡Combinación [${combinacion.join('-')}] añadida con éxito!`, false);
+        showStatusMessage('status-combinacion', `¡Combinación [${combinacion.join('-')}] añadida!`, false);
     };
 
     const updateProgressBar = (stepIndex) => {
@@ -154,12 +142,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const validateStep = (stepIndex) => {
         if (stepIndex === 0) {
             const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
-            if (misNumerosSeleccionados.length !== paqueteBoletos) {
-                alert(`Debes elegir exactamente ${paqueteBoletos} combinación(es) para completar tu paquete.`);
+            if (sorteoData.tipo_sorteo === 'tombola_interactiva' && misNumerosSeleccionados.length !== paqueteBoletos) {
+                alert(`Debes elegir exactamente ${paqueteBoletos} combinación(es) para tu paquete.`);
                 return false;
             }
         }
-        if (stepIndex === 1 || stepIndex === 2) { // Validación para pasos 2 y 3
+        if (stepIndex === 1 || stepIndex === 2) {
             const inputs = steps[stepIndex].querySelectorAll('input[required]');
             let allValid = true;
             inputs.forEach(input => {
@@ -184,7 +172,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const paqueteNombre = params.get('paqueteNombre') || "Boleto Individual";
 
         let numerosHTML = misNumerosSeleccionados.map(combo => {
-            // Aseguramos que combo no sea null antes de mapear
             const bolas = combo ? combo.map(n => `<div class="bola-small">${n}</div>`).join('') : '';
             return `<div class="numero-elegido-item">${bolas}</div>`;
         }).join('');
@@ -238,13 +225,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (sorteoData.tipo_sorteo === 'tombola_interactiva') {
                 renderizarSelectoresDeBolas();
-                actualizarListaMisNumeros(); // Llamada inicial para mostrar los slots vacíos
+                actualizarListaMisNumeros();
             } else {
                 selectorContainer.style.display = 'none';
                 misNumerosContainer.style.display = 'block';
                 const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
                 for(let i = 0; i < paqueteBoletos; i++) {
-                    misNumerosSeleccionados.push(null); // Usamos null para indicar que es un boleto de ruleta
+                    misNumerosSeleccionados.push(null);
                 }
                 actualizarListaMisNumeros();
             }
@@ -264,6 +251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('resumen-total-pagar').textContent = `$${paquetePrecio}`;
     };
 
+    // RESTAURADO: Hemos vuelto a la función original que crea las bolas y los inputs
     const renderizarSelectoresDeBolas = () => {
         const headerHTML = `
             <div class="form-section-header">
@@ -271,45 +259,84 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <h4>Elige tu combinación de la suerte</h4>
             </div>`;
         selectorContainer.innerHTML = headerHTML;
+        selectorContainer.classList.remove('oculto');
+        misNumerosContainer.style.display = 'block';
+
         const configBolas = sorteoData.configuracion_tombola;
         if (!configBolas || configBolas.length === 0) return;
 
         const selectorWrapper = document.createElement('div');
         selectorWrapper.className = 'selector-wrapper';
-        
+        selectorContainer.appendChild(selectorWrapper);
+
         configBolas.forEach((bola, index) => {
+            const pickerContainer = document.createElement('div');
+            pickerContainer.className = 'picker-column';
+
+            const pickerHTML = `
+                <div class="number-picker" id="picker-${index}">
+                    <div class="picker-wheel" id="wheel-${index}">
+                        ${Array.from({ length: bola.max + 1 }, (_, i) => 
+                            `<div class="picker-item">${String(i).padStart(bola.digitos, '0')}</div>`
+                        ).join('')}
+                    </div>
+                </div>`;
+            pickerContainer.innerHTML = pickerHTML;
+            
             const input = document.createElement('input');
-            input.type = 'text'; // Usar text para controlar mejor el formato
+            input.type = 'number';
             input.className = 'manual-input';
             input.id = `input-${index}`;
-            input.placeholder = '0'.repeat(bola.digitos);
+            input.placeholder = String(0).padStart(bola.digitos, '0');
             input.dataset.max = bola.max;
             input.dataset.digitos = bola.digitos;
-            input.maxLength = bola.digitos; // Limitar longitud
-            input.pattern = `\\d{${bola.digitos}}`; // Patrón para validación
 
-            // Evento para formatear y validar al escribir
+            pickerContainer.appendChild(input);
+            selectorWrapper.appendChild(pickerContainer);
+        });
+
+        // RESTAURADO: Lógica de sincronización entre la bola y el input
+        configBolas.forEach((bola, index) => {
+            const picker = document.getElementById(`picker-${index}`);
+            const input = document.getElementById(`input-${index}`);
+            
+            if (!picker || !input) return; 
+
+            const itemHeight = picker.querySelector('.picker-item')?.offsetHeight || 100;
+            const pickerCenter = picker.offsetHeight / 2;
+            let scrollTimeout;
+
+            picker.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    const scrollCenter = picker.scrollTop + pickerCenter;
+                    const selectedIndex = Math.round(scrollCenter / itemHeight) -1;
+                    
+                    if (selectedIndex >= 0 && selectedIndex <= bola.max) {
+                        input.value = String(selectedIndex).padStart(bola.digitos, '0');
+                    }
+                }, 100);
+            });
+
             input.addEventListener('input', (e) => {
-                // Solo permitir números
-                e.target.value = e.target.value.replace(/[^0-9]/g, '');
                 const valorActual = parseInt(e.target.value, 10);
                 const maxPermitido = parseInt(e.target.dataset.max, 10);
 
                 if (valorActual > maxPermitido) {
-                    e.target.value = e.target.value.slice(0, -1);
+                    alert(`El número no puede ser mayor que ${maxPermitido}.`);
+                    e.target.value = '';
+                    return;
+                }
+                
+                if (e.target.value.length >= bola.digitos && !isNaN(valorActual)) {
+                    const targetScrollTop = (valorActual + 1) * itemHeight - pickerCenter;
+                    picker.scrollTo({
+                        top: targetScrollTop,
+                        behavior: 'smooth'
+                    });
                 }
             });
-             // Evento para formatear con ceros al salir del campo
-            input.addEventListener('blur', (e) => {
-                if (e.target.value) {
-                    e.target.value = e.target.value.padStart(bola.digitos, '0');
-                }
-            });
-
-            selectorWrapper.appendChild(input);
         });
-        
-        selectorContainer.appendChild(selectorWrapper);
 
         const addButton = document.createElement('button');
         addButton.type = 'button';
@@ -338,7 +365,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const numerosRestantes = paqueteBoletos - misNumerosSeleccionados.length;
 
         if (numerosRestantes <= 0) {
-            showStatusMessage('status-combinacion', '¡Ya has completado tu paquete de combinaciones!', true);
+            showStatusMessage('status-combinacion', '¡Ya has completado tu paquete!', true);
             return;
         }
         
@@ -360,7 +387,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 intentos++;
                 intentosGlobales++;
                 if (intentos > MAX_INTENTOS_POR_NUMERO || intentosGlobales > 2000) {
-                    alert('No se pudieron encontrar suficientes combinaciones aleatorias disponibles. ¡El sorteo está casi lleno! Elige los números restantes manualmente.');
+                    alert('No se pudieron encontrar suficientes combinaciones aleatorias. ¡El sorteo está casi lleno!');
                     actualizarListaMisNumeros();
                     return;
                 }
@@ -427,7 +454,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         button.addEventListener('click', () => {
             if (validateStep(currentStep)) {
                 currentStep++;
-                if (currentStep === 3) { // Al llegar al paso de Confirmar
+                if (currentStep === 3) {
                     populateConfirmationStep();
                 }
                 showStep(currentStep);
@@ -442,7 +469,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // UNIFICADO: Única lógica de envío del formulario
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
