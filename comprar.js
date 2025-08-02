@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 selectorContainer.style.display = 'none';
                 misNumerosContainer.style.display = 'block';
-                const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
+                const paqueteBoletos = parseInt(new URLSearchParams(window.location.search).get('paqueteBoletos') || '1', 10);
                 for(let i = 0; i < paqueteBoletos; i++) {
                     misNumerosSeleccionados.push(null);
                 }
@@ -247,8 +247,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const actualizarResumen = () => {
-        const paqueteNombre = params.get('paqueteNombre') || "Boleto Individual";
-        const paquetePrecio = parseFloat(params.get('paquetePrecio') || '0').toFixed(2);
+        const currentParams = new URLSearchParams(window.location.search);
+
+        const paqueteNombre = currentParams.get('paqueteNombre') || "Boleto Individual";
+        const paquetePrecio = parseFloat(currentParams.get('paquetePrecio') || '0').toFixed(2);
         document.getElementById('resumen-sorteo-nombre').textContent = sorteoData.nombre_premio_display;
         document.getElementById('resumen-paquete-nombre').textContent = paqueteNombre;
         document.getElementById('resumen-total-pagar').textContent = `$${paquetePrecio}`;
@@ -543,4 +545,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- 5. EJECUCIÓN INICIAL ---
     showStep(currentStep);
     cargarDatosIniciales();
+
+    const btnAnadirOtro = document.getElementById('btn-anadir-otro');
+    if (btnAnadirOtro) {
+        btnAnadirOtro.addEventListener('click', () => {
+            // 1. Validar que tengamos el precio del boleto individual
+            if (!sorteoData || !sorteoData.precio_boleto) {
+                alert('No se pudo determinar el precio de un número individual. Por favor, vuelve al inicio y elige otro paquete.');
+                return;
+            }
+
+            // 2. Obtener los valores actuales de los parámetros de la URL
+            const currentParams = new URLSearchParams(window.location.search);
+            let boletosActuales = parseInt(currentParams.get('paqueteBoletos') || '0', 10);
+            let precioActual = parseFloat(currentParams.get('paquetePrecio') || '0.00');
+            const precioBoletoIndividual = parseFloat(sorteoData.precio_boleto);
+
+            // 3. Calcular los nuevos valores
+            const nuevosBoletos = boletosActuales + 1;
+            const nuevoPrecio = precioActual + precioBoletoIndividual;
+            const nuevoNombrePaquete = `Paquete Personalizado (${nuevosBoletos} números)`;
+
+            // 4. Actualizar los parámetros en la URL (sin recargar la página)
+            currentParams.set('paqueteBoletos', nuevosBoletos);
+            currentParams.set('paquetePrecio', nuevoPrecio.toFixed(2));
+            currentParams.set('paqueteNombre', nuevoNombrePaquete);
+            const nuevaUrl = `${window.location.pathname}?${currentParams.toString()}`;
+            history.pushState({ path: nuevaUrl }, '', nuevaUrl);
+
+            // 5. Actualizar la Interfaz de Usuario llamando a las funciones que ya modificamos
+            actualizarResumen();
+            actualizarListaMisNumeros();
+
+            showStatusMessage('status-combinacion', '¡Se añadió un espacio para un número más!', false);
+        });
+    } 
 });
