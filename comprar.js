@@ -47,6 +47,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("Error al procesar el cupón de migración:", e);
         }
     }
+
+
+    // --- LÓGICA PARA PRE-LLENAR EL FORMULARIO ---
+    try {
+        const nombreParam = params.get('nombre');
+        const cedulaParam = params.get('cedula');
+        const ciudadParam = params.get('ciudad');
+        const celularParam = params.get('celular');
+        // --- ¡NUEVO! Leemos el parámetro del email ---
+        const emailParam = params.get('email');
+
+        if (nombreParam) {
+            document.getElementById('nombre').value = nombreParam;
+        }
+        if (cedulaParam) {
+            document.getElementById('cedula').value = cedulaParam;
+        }
+        if (ciudadParam) {
+            document.getElementById('ciudad').value = ciudadParam;
+        }
+        if (celularParam) {
+            document.getElementById('celular').value = celularParam;
+        }
+        // --- ¡NUEVO! Rellenamos el campo del email ---
+        if (emailParam) {
+            document.getElementById('email').value = emailParam;
+        }
+    } catch (e) {
+        console.error("Error al pre-llenar el formulario:", e);
+    }
+    // --- FIN DE LA LÓGICA PARA PRE-LLENAR ---
     // Elementos del formulario
     const form = document.getElementById('form-pedido');
     const steps = document.querySelectorAll('.form-step');
