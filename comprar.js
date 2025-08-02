@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const valorNumerico = parseInt(valor, 10);
             const maxPermitido = parseInt(input.dataset.max, 10);
             
-            if (valor === '' || isNaN(valorNumerico) || valorNumerico > maxPermitido) {
+            if (valor === '' || isNaN(valorNumerico) || valorNumerico > maxPermitido || valorNumerico < 1) {
                 esValido = false;
             } else {
                 combinacion.push(valor);
@@ -276,9 +276,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const pickerHTML = `
                 <div class="number-picker" id="picker-${index}">
                     <div class="picker-wheel" id="wheel-${index}">
-                        ${Array.from({ length: bola.max + 1 }, (_, i) => 
-                            `<div class="picker-item">${String(i).padStart(bola.digitos, '0')}</div>`
-                        ).join('')}
+                        ${Array.from({ length: maxNum }, (_, i) => {
+                            const numero = i + 1; // El número a mostrar empieza en 1
+                            return `<div class="picker-item">${String(numero).padStart(bola.digitos, '0')}</div>`
+                        }).join('')}
                     </div>
                 </div>`;
             pickerContainer.innerHTML = pickerHTML;
@@ -312,8 +313,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const scrollCenter = picker.scrollTop + pickerCenter;
                     const selectedIndex = Math.round(scrollCenter / itemHeight) -1;
                     
-                    if (selectedIndex >= 0 && selectedIndex <= bola.max) {
-                        input.value = String(selectedIndex).padStart(bola.digitos, '0');
+                    const numeroSeleccionado = selectedIndex + 1;
+                    if (numeroSeleccionado >= 1 && numeroSeleccionado <= maxNum) {
+                        input.value = String(numeroSeleccionado).padStart(bola.digitos, '0');
                     }
                 }, 100);
             });
@@ -329,7 +331,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 
                 if (e.target.value.length >= bola.digitos && !isNaN(valorActual)) {
-                    const targetScrollTop = (valorActual + 1) * itemHeight - pickerCenter;
+                    const targetScrollTop = (valorActual - 1 + 1) * itemHeight - pickerCenter;
                     picker.scrollTo({
                         top: targetScrollTop,
                         behavior: 'smooth'
@@ -380,7 +382,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             do {
                 comboAleatorio = configBolas.map(bola => {
-                    const num = Math.floor(Math.random() * (bola.max + 1));
+                    const num = Math.floor(Math.random() * maxNum) + 1;
                     return String(num).padStart(bola.digitos, '0');
                 });
                 comboString = JSON.stringify(comboAleatorio);
