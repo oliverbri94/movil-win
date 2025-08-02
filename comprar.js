@@ -10,10 +10,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Variables de estado
     let currentStep = 0;
-    let numerosElegidos = [];
+    // let numerosElegidos = []; // ELIMINADO: Ya no necesitamos esta variable
     let sorteoData = null;
     let numerosOcupados = [];
     let misNumerosSeleccionados = [];
+
     if (couponCode && couponCode.startsWith('MIGRACION-')) {
         try {
             const parts = couponCode.split('-');
@@ -21,12 +22,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const userId = parts[2];
 
             if (quantity > 0 && userId) {
-                // ¡Magia! Sobreescribimos los parámetros del paquete.
                 params.set('paqueteBoletos', quantity);
                 params.set('paqueteNombre', `Migración Manual (${quantity} combinaciones)`);
-                params.set('paquetePrecio', '0.00'); // El precio es CERO
+                params.set('paquetePrecio', '0.00');
 
-                // Mostramos un mensaje de bienvenida al usuario migrado
                 const resumenDiv = document.getElementById('resumen-pedido');
                 const welcomeMessage = document.createElement('div');
                 welcomeMessage.innerHTML = `
@@ -36,7 +35,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 welcomeMessage.style.marginBottom = '20px';
                 resumenDiv.parentNode.insertBefore(welcomeMessage, resumenDiv);
                 
-                // Añadimos el cupón a un campo oculto para enviarlo con el formulario
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
                 hiddenInput.id = 'coupon_code';
@@ -49,47 +47,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-
-    // --- LÓGICA PARA PRE-LLENAR EL FORMULARIO ---
     try {
         const nombreParam = params.get('nombre');
         const cedulaParam = params.get('cedula');
         const ciudadParam = params.get('ciudad');
         const celularParam = params.get('celular');
-        // --- ¡NUEVO! Leemos el parámetro del email ---
         const emailParam = params.get('email');
 
-        if (nombreParam) {
-            document.getElementById('nombre').value = nombreParam;
-        }
-        if (cedulaParam) {
-            document.getElementById('cedula').value = cedulaParam;
-        }
-        if (ciudadParam) {
-            document.getElementById('ciudad').value = ciudadParam;
-        }
-        if (celularParam) {
-            document.getElementById('celular').value = celularParam;
-        }
-        // --- ¡NUEVO! Rellenamos el campo del email ---
-        if (emailParam) {
-            document.getElementById('email').value = emailParam;
-        }
+        if (nombreParam) document.getElementById('nombre').value = nombreParam;
+        if (cedulaParam) document.getElementById('cedula').value = cedulaParam;
+        if (ciudadParam) document.getElementById('ciudad').value = ciudadParam;
+        if (celularParam) document.getElementById('celular').value = celularParam;
+        if (emailParam) document.getElementById('email').value = emailParam;
     } catch (e) {
         console.error("Error al pre-llenar el formulario:", e);
     }
-    // --- FIN DE LA LÓGICA PARA PRE-LLENAR ---
-    // Elementos del formulario
+
     const form = document.getElementById('form-pedido');
     const steps = document.querySelectorAll('.form-step');
     const nextButtons = document.querySelectorAll('.btn-next');
     const prevButtons = document.querySelectorAll('.btn-prev');
     
-    // Elementos de la barra de progreso
     const progressSteps = document.querySelectorAll('.progress-steps .step');
     const progressBarLine = document.querySelector('.progress-bar-line');
 
-    // Elementos de contenido dinámico
     const resumenDiv = document.getElementById('resumen-pedido');
     const selectorContainer = document.getElementById('selector-numeros-container');
     const misNumerosContainer = document.getElementById('mis-numeros-container');
@@ -108,6 +89,60 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateProgressBar(stepIndex);
     };
 
+    // CORREGIDO: Esta función ahora usa 'misNumerosSeleccionados'
+    const anadirNumeroSeleccionado = () => {
+        const selectorWrapper = document.querySelector('.selector-wrapper');
+        if (!selectorWrapper) return;
+
+        const inputs = selectorWrapper.querySelectorAll('.manual-input');
+        const combinacion = [];
+        let esValido = true;
+
+        inputs.forEach(input => {
+            const valor = input.value;
+            const valorNumerico = parseInt(valor, 10);
+            const maxPermitido = parseInt(input.dataset.max, 10);
+            
+            // Usamos padStart para asegurar los dígitos correctos antes de añadir
+            const valorFormateado = String(valorNumerico).padStart(parseInt(input.dataset.digitos, 10), '0');
+
+            if (valor === '' || isNaN(valorNumerico) || valorNumerico > maxPermitido || valor.length !== input.dataset.digitos) {
+                esValido = false;
+            } else {
+                combinacion.push(valorFormateado);
+            }
+        });
+
+        if (!esValido) {
+            showStatusMessage('status-combinacion', 'Por favor, asegúrate de que todas las casillas tengan un número válido y con el número correcto de dígitos.', true);
+            return;
+        }
+
+        const cantidadRequerida = parseInt(params.get('paqueteBoletos') || '1', 10);
+        // CORREGIDO: Comprobamos contra el array correcto
+        if (misNumerosSeleccionados.length >= cantidadRequerida) {
+            showStatusMessage('status-combinacion', `Ya has elegido el máximo de ${cantidadRequerida} combinaciones para tu paquete.`, true);
+            return;
+        }
+
+        const combinacionString = JSON.stringify(combinacion);
+        // CORREGIDO: Comprobamos duplicados contra el array correcto
+        if (misNumerosSeleccionados.some(c => JSON.stringify(c) === combinacionString)) {
+            showStatusMessage('status-combinacion', 'Ya has elegido esta combinación de números. Por favor, elige una diferente.', true);
+            return;
+        }
+
+        // CORREGIDO: Añadimos al array correcto
+        misNumerosSeleccionados.push(combinacion);
+        // CORREGIDO: Llamamos a la función de renderizado correcta
+        actualizarListaMisNumeros(); 
+        
+        // Limpiamos los inputs para la siguiente selección
+        inputs.forEach(input => input.value = '');
+
+        showStatusMessage('status-combinacion', `¡Combinación [${combinacion.join('-')}] añadida con éxito!`, false);
+    };
+
     const updateProgressBar = (stepIndex) => {
         progressSteps.forEach((step, index) => {
             step.classList.toggle('active', index <= stepIndex);
@@ -117,20 +152,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const validateStep = (stepIndex) => {
-        // Validación del Paso 1: Selección de números
         if (stepIndex === 0) {
             const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
-            if (sorteoData.tipo_sorteo === 'tombola_interactiva' && misNumerosSeleccionados.length !== paqueteBoletos) {
-                alert(`Debes elegir exactamente ${paqueteBoletos} combinación(es) para tu paquete.`);
-                return false;
-            }
-            if (misNumerosSeleccionados.length === 0) {
-                alert('Debes añadir al menos una combinación de números o un boleto.');
+            if (misNumerosSeleccionados.length !== paqueteBoletos) {
+                alert(`Debes elegir exactamente ${paqueteBoletos} combinación(es) para completar tu paquete.`);
                 return false;
             }
         }
-        // Validación del Paso 2: Datos del usuario
-        if (stepIndex === 1) {
+        if (stepIndex === 1 || stepIndex === 2) { // Validación para pasos 2 y 3
             const inputs = steps[stepIndex].querySelectorAll('input[required]');
             let allValid = true;
             inputs.forEach(input => {
@@ -139,7 +168,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     allValid = false;
                 } else {
                     input.parentElement.classList.remove('invalid');
-                    input.parentElement.classList.add('valid');
                 }
             });
             if (!allValid) {
@@ -156,7 +184,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const paqueteNombre = params.get('paqueteNombre') || "Boleto Individual";
 
         let numerosHTML = misNumerosSeleccionados.map(combo => {
-            const bolas = combo.map(n => `<div class="bola-small">${n}</div>`).join('');
+            // Aseguramos que combo no sea null antes de mapear
+            const bolas = combo ? combo.map(n => `<div class="bola-small">${n}</div>`).join('') : '';
             return `<div class="numero-elegido-item">${bolas}</div>`;
         }).join('');
 
@@ -172,8 +201,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p><strong>Paquete:</strong> ${paqueteNombre}</p>
             </div>
             <div class="resumen-seccion">
-                <h4><i class="fas fa-ticket-alt"></i> Tus Números</h4>
-                ${numerosHTML}
+                <h4><i class="fas fa-ticket-alt"></i> Tus Números/Boletos</h4>
+                <div class="numeros-finales-container">${numerosHTML}</div>
             </div>
             <div class="resumen-seccion">
                 <h4><i class="fas fa-user"></i> Tus Datos</h4>
@@ -194,11 +223,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             const sorteoRes = await fetch(`${API_BASE_URL}/api/sorteo-details/${sorteoId}`);
+            if (!sorteoRes.ok) throw new Error('No se pudo conectar al servidor.');
             const sorteoResult = await sorteoRes.json();
             if (!sorteoResult.success) throw new Error(sorteoResult.error);
             sorteoData = sorteoResult.sorteo;
 
             const numerosRes = await fetch(`${API_BASE_URL}/api/numeros-ocupados/${sorteoId}`);
+            if (!numerosRes.ok) throw new Error('No se pudo cargar la lista de números.');
             const numerosResult = await numerosRes.json();
             if (!numerosResult.success) throw new Error(numerosResult.error);
             numerosOcupados = numerosResult.numerosOcupados.map(n => JSON.stringify(n));
@@ -207,15 +238,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (sorteoData.tipo_sorteo === 'tombola_interactiva') {
                 renderizarSelectoresDeBolas();
+                actualizarListaMisNumeros(); // Llamada inicial para mostrar los slots vacíos
             } else {
+                selectorContainer.style.display = 'none';
+                misNumerosContainer.style.display = 'block';
                 const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
                 for(let i = 0; i < paqueteBoletos; i++) {
-                    misNumerosSeleccionados.push(null);
+                    misNumerosSeleccionados.push(null); // Usamos null para indicar que es un boleto de ruleta
                 }
                 actualizarListaMisNumeros();
             }
 
         } catch (error) {
+            console.error(error);
             resumenDiv.innerHTML = `<p class="error-message">Error al cargar datos del sorteo: ${error.message}</p>`;
             form.style.display = 'none';
         }
@@ -223,14 +258,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const actualizarResumen = () => {
         const paqueteNombre = params.get('paqueteNombre') || "Boleto Individual";
-        const paquetePrecio = params.get('paquetePrecio') || "Variable";
-        resumenDiv.innerHTML = `
-            <p><strong>Sorteo:</strong> ${sorteoData.nombre_premio_display}</p>
-            <p><strong>Estás comprando:</strong> ${paqueteNombre}</p>
-            <p><strong>Total a Pagar:</strong> $${paquetePrecio}</p>
-        `;
+        const paquetePrecio = parseFloat(params.get('paquetePrecio') || '0').toFixed(2);
+        document.getElementById('resumen-sorteo-nombre').textContent = sorteoData.nombre_premio_display;
+        document.getElementById('resumen-paquete-nombre').textContent = paqueteNombre;
+        document.getElementById('resumen-total-pagar').textContent = `$${paquetePrecio}`;
     };
-
 
     const renderizarSelectoresDeBolas = () => {
         const headerHTML = `
@@ -239,236 +271,126 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <h4>Elige tu combinación de la suerte</h4>
             </div>`;
         selectorContainer.innerHTML = headerHTML;
-        selectorContainer.classList.remove('oculto');
-        misNumerosContainer.style.display = 'block';
-
         const configBolas = sorteoData.configuracion_tombola;
         if (!configBolas || configBolas.length === 0) return;
 
         const selectorWrapper = document.createElement('div');
         selectorWrapper.className = 'selector-wrapper';
-        selectorContainer.appendChild(selectorWrapper);
-
+        
         configBolas.forEach((bola, index) => {
-            const pickerContainer = document.createElement('div');
-            pickerContainer.className = 'picker-column';
-
-            const pickerHTML = `
-                <div class="number-picker" id="picker-${index}">
-                    <div class="picker-wheel" id="wheel-${index}">
-                        ${Array.from({ length: bola.max + 1 }, (_, i) => 
-                            `<div class="picker-item">${String(i).padStart(bola.digitos, '0')}</div>`
-                        ).join('')}
-                    </div>
-                </div>`;
-            pickerContainer.innerHTML = pickerHTML;
-            
             const input = document.createElement('input');
-            input.type = 'number';
+            input.type = 'text'; // Usar text para controlar mejor el formato
             input.className = 'manual-input';
             input.id = `input-${index}`;
-            input.placeholder = String(0).padStart(bola.digitos, '0');
+            input.placeholder = '0'.repeat(bola.digitos);
             input.dataset.max = bola.max;
             input.dataset.digitos = bola.digitos;
+            input.maxLength = bola.digitos; // Limitar longitud
+            input.pattern = `\\d{${bola.digitos}}`; // Patrón para validación
 
-            pickerContainer.appendChild(input);
-            selectorWrapper.appendChild(pickerContainer);
-        });
-
-        configBolas.forEach((bola, index) => {
-            const picker = document.getElementById(`picker-${index}`);
-            const input = document.getElementById(`input-${index}`);
-            
-            if (!picker || !input) return; 
-
-            const itemHeight = 100; // Altura fija del .picker-item
-            const pickerCenter = picker.offsetHeight / 2;
-            let scrollTimeout;
-
-            // Evento: Scroll en la RUEDA -> Actualiza el INPUT
-            picker.addEventListener('scroll', () => {
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(() => {
-                    // CORRECCIÓN DEFINITIVA: Calcula el índice basado en el centro del picker
-                    const scrollCenter = picker.scrollTop + pickerCenter;
-                    const selectedIndex = Math.round(scrollCenter / itemHeight) - 1;
-                    
-                    if (selectedIndex >= 0 && selectedIndex <= bola.max) {
-                        input.value = String(selectedIndex).padStart(bola.digitos, '0');
-                    }
-                }, 100);
-            });
-
-            // Evento: Escribir en el INPUT -> Actualiza la RUEDA
+            // Evento para formatear y validar al escribir
             input.addEventListener('input', (e) => {
+                // Solo permitir números
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
                 const valorActual = parseInt(e.target.value, 10);
                 const maxPermitido = parseInt(e.target.dataset.max, 10);
 
                 if (valorActual > maxPermitido) {
-                    alert(`El número no puede ser mayor que ${maxPermitido}.`);
-                    e.target.value = '';
-                    return;
-                }
-                
-                if (e.target.value.length >= bola.digitos && !isNaN(valorActual)) {
-                    // CORRECCIÓN DEFINITIVA: Calcula la posición para centrar el item
-                    const targetScrollTop = (valorActual + 1) * itemHeight - pickerCenter;
-                    picker.scrollTo({
-                        top: targetScrollTop,
-                        behavior: 'smooth'
-                    });
+                    e.target.value = e.target.value.slice(0, -1);
                 }
             });
-        });
+             // Evento para formatear con ceros al salir del campo
+            input.addEventListener('blur', (e) => {
+                if (e.target.value) {
+                    e.target.value = e.target.value.padStart(bola.digitos, '0');
+                }
+            });
 
-        // 3. FINALMENTE, añadimos los botones de acción
+            selectorWrapper.appendChild(input);
+        });
+        
+        selectorContainer.appendChild(selectorWrapper);
+
         const addButton = document.createElement('button');
         addButton.type = 'button';
-        addButton.id = 'btn-add-number';
         addButton.className = 'admin-button';
         addButton.innerHTML = '<i class="fas fa-plus"></i> Añadir Combinación';
+        addButton.addEventListener('click', anadirNumeroSeleccionado);
         
         const randomButton = document.createElement('button');
         randomButton.type = 'button';
-        randomButton.id = 'btn-random';
         randomButton.className = 'admin-button-secondary'; 
-        randomButton.innerHTML = '<i class="fas fa-random"></i> Llenar con Números Aleatorios';
+        randomButton.innerHTML = '<i class="fas fa-random"></i> Llenar Aleatoriamente';
         randomButton.style.marginTop = '10px';
+        randomButton.addEventListener('click', anadirNumerosAleatorios);
         
         const statusCombinacion = document.createElement('div');
         statusCombinacion.id = 'status-combinacion';
         statusCombinacion.className = 'status-container oculto';
 
-        // Añadimos los botones al contenedor principal
         selectorContainer.appendChild(randomButton);
         selectorContainer.appendChild(addButton);
         selectorContainer.appendChild(statusCombinacion);
-
-        // Asignamos los eventos a los botones
-        randomButton.addEventListener('click', anadirNumerosAleatorios);
-        addButton.addEventListener('click', anadirNumeroSeleccionado);
-    };
-    const getSeleccionActual = () => {
-        const seleccion = [];
-        document.querySelectorAll('.number-picker').forEach((picker) => {
-            const scrollTop = picker.scrollTop;
-            const itemHeight = picker.querySelector('.picker-item')?.offsetHeight;
-            if (itemHeight && itemHeight > 0) {
-                const selectedIndex = Math.floor(scrollTop / itemHeight);
-                seleccion.push(selectedIndex);
-            } else {
-                seleccion.push(0);
-            }
-        });
-        return seleccion;
     };
 
-
-    const anadirNumeroSeleccionado = () => {
-        const selectorWrapper = document.querySelector('.selector-wrapper');
-        if (!selectorWrapper) return;
-
-        const inputs = selectorWrapper.querySelectorAll('.manual-input');
-        const combinacion = [];
-        let esValido = true;
-
-        // --- LÓGICA DE VALIDACIÓN CORREGIDA ---
-        inputs.forEach(input => {
-            const valor = input.value;
-            const valorNumerico = parseInt(valor, 10);
-            const maxPermitido = parseInt(input.dataset.max, 10);
-
-            // La nueva validación se asegura de que:
-            // 1. El campo no esté vacío.
-            // 2. El valor sea un número válido.
-            // 3. El número no sea mayor al máximo permitido.
-            if (valor === '' || isNaN(valorNumerico) || valorNumerico > maxPermitido) {
-                esValido = false;
-            } else {
-                // Si es válido, lo añadimos a nuestra combinación
-                combinacion.push(valor);
-            }
-        });
-
-        if (!esValido) {
-            showStatusMessage('status-combinacion', 'Por favor, asegúrate de que todas las casillas tengan un número válido y dentro del rango permitido.', true);
-            return;
-        }
-        // --- FIN DE LA CORRECCIÓN ---
-
-
-        // El resto de la función para añadir el número no cambia
-        const cantidadRequerida = sorteoData.paquete_boletos;
-        if (numerosElegidos.length >= cantidadRequerida) {
-            showStatusMessage('status-combinacion', `Ya has elegido el máximo de ${cantidadRequerida} combinaciones para tu paquete.`, true);
-            return;
-        }
-
-        const combinacionString = JSON.stringify(combinacion);
-        if (numerosElegidos.some(c => JSON.stringify(c) === combinacionString)) {
-            showStatusMessage('status-combinacion', 'Ya has elegido esta combinación de números. Por favor, elige una diferente.', true);
-            return;
-        }
-
-        numerosElegidos.push(combinacion);
-        renderizarNumerosElegidos();
-        showStatusMessage('status-combinacion', `¡Combinación [${combinacion.join('-')}] añadida con éxito!`, false);
-    };
     const anadirNumerosAleatorios = () => {
         const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
         const numerosRestantes = paqueteBoletos - misNumerosSeleccionados.length;
 
         if (numerosRestantes <= 0) {
-            alert('¡Ya has completado tu paquete de boletos!');
+            showStatusMessage('status-combinacion', '¡Ya has completado tu paquete de combinaciones!', true);
             return;
         }
-
+        
         const configBolas = sorteoData.configuracion_tombola;
-        const statusDiv = document.getElementById('status-combinacion');
         let numerosAnadidos = 0;
+        let intentosGlobales = 0;
 
         for (let i = 0; i < numerosRestantes; i++) {
-            let comboAleatorio;
-            let comboString;
+            let comboAleatorio, comboString;
             let intentos = 0;
-            const MAX_INTENTOS = 500; // Límite para evitar bucles infinitos
+            const MAX_INTENTOS_POR_NUMERO = 500;
 
             do {
-                comboAleatorio = configBolas.map(bola => Math.floor(Math.random() * (bola.max + 1)));
+                comboAleatorio = configBolas.map(bola => {
+                    const num = Math.floor(Math.random() * (bola.max + 1));
+                    return String(num).padStart(bola.digitos, '0');
+                });
                 comboString = JSON.stringify(comboAleatorio);
                 intentos++;
-                if (intentos > MAX_INTENTOS) {
-                    alert('No se pudieron encontrar combinaciones aleatorias disponibles. ¡El sorteo está casi lleno! Elige los números restantes manualmente.');
-                    return; // Sale de la función si no encuentra números
+                intentosGlobales++;
+                if (intentos > MAX_INTENTOS_POR_NUMERO || intentosGlobales > 2000) {
+                    alert('No se pudieron encontrar suficientes combinaciones aleatorias disponibles. ¡El sorteo está casi lleno! Elige los números restantes manualmente.');
+                    actualizarListaMisNumeros();
+                    return;
                 }
             } while (numerosOcupados.includes(comboString) || misNumerosSeleccionados.map(n => JSON.stringify(n)).includes(comboString));
-
+            
             misNumerosSeleccionados.push(comboAleatorio);
             numerosAnadidos++;
         }
 
         actualizarListaMisNumeros();
-        statusDiv.textContent = `¡Se añadieron ${numerosAnadidos} combinaciones aleatorias!`;
-        statusDiv.className = 'status-container success';
-        setTimeout(() => statusDiv.classList.add('oculto'), 3000);
+        showStatusMessage('status-combinacion', `¡Se añadieron ${numerosAnadidos} combinaciones aleatorias!`, false);
     };
+    
     function actualizarListaMisNumeros() {
-        const listaNumerosElegidos = document.getElementById('lista-numeros-elegidos');
         const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
         listaNumerosElegidos.innerHTML = '';
         contadorNumerosSpan.textContent = `${misNumerosSeleccionados.length}/${paqueteBoletos}`;
 
-        // Dibuja los números ya seleccionados
+        if(misNumerosSeleccionados.length === 0 && sorteoData.tipo_sorteo === 'tombola_interactiva') {
+            listaNumerosElegidos.innerHTML = `<li class="empty-list">Aún no has elegido números.</li>`;
+        }
+
         misNumerosSeleccionados.forEach((numeros, index) => {
             const li = document.createElement('li');
             li.className = 'numero-elegido-item';
 
             let contenido = '';
             if (numeros === null) {
-                // Para sorteos de ruleta
                 contenido = `<div class="bola-small-slot filled">Boleto #${index + 1}</div>`;
             } else {
-                // Para sorteos de tómbola
                 const bolasHTML = numeros.map(n => `<div class="bola-small">${n}</div>`).join('');
                 contenido = `
                     <div class="bolas-container">${bolasHTML}</div>
@@ -479,65 +401,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             listaNumerosElegidos.appendChild(li);
         });
 
-        // Dibuja los slots vacíos restantes
         const slotsRestantes = paqueteBoletos - misNumerosSeleccionados.length;
-        for (let i = 0; i < slotsRestantes; i++) {
-            const li = document.createElement('li');
-            li.className = 'numero-elegido-item';
-            li.innerHTML = '<div class="bola-small-slot"><i class="fas fa-plus"></i></div>';
-            listaNumerosElegidos.appendChild(li);
+        if (sorteoData && sorteoData.tipo_sorteo === 'tombola_interactiva') {
+            for (let i = 0; i < slotsRestantes; i++) {
+                const li = document.createElement('li');
+                li.className = 'numero-elegido-item';
+                li.innerHTML = '<div class="bola-small-slot"><i class="fas fa-plus"></i></div>';
+                listaNumerosElegidos.appendChild(li);
+            }
         }
     }
-    // Validación en tiempo real para el paso de datos
-    const step2Inputs = document.querySelectorAll('#step-2 input[required], #step-3 input[required]');
-    step2Inputs.forEach(input => {
-        input.addEventListener('input', () => {
-            if (input.value.trim() !== "") {
-                input.parentElement.classList.add('valid');
-                input.parentElement.classList.remove('invalid');
-            } else {
-                input.parentElement.classList.add('invalid');
-                input.parentElement.classList.remove('valid');
-            }
-        });
-    });
-    const handleFormSubmit = async (e) => {
-        e.preventDefault();
-        
-        const payload = {
-            sorteoId: sorteoId,
-            sorteoNombre: sorteoData.nombre_premio_display,
-            paquete: `${params.get('paqueteNombre')} (${params.get('paqueteBoletos')} x $${params.get('paquetePrecio')})`,
-            nombre: document.getElementById('nombre').value,
-            cedula: document.getElementById('cedula').value,
-            ciudad: document.getElementById('ciudad').value,
-            celular: document.getElementById('celular').value,
-            email: document.getElementById('email').value,
-            affiliateId: sessionStorage.getItem('affiliateRef') || null,
-            numeros_elegidos: sorteoData.tipo_sorteo === 'tombola_interactiva' ? misNumerosSeleccionados : null
-        };
 
-        try {
-            statusDiv.textContent = 'Procesando tu pedido...';
-            statusDiv.className = 'status-container';
-            const response = await fetch(`${API_BASE_URL}/api/crear-pedido`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.error || 'Error en el servidor.');
-            
-            if (typeof fbq === 'function') {
-                fbq('track', 'Lead');
-            }
-            
-            window.location.href = `gracias.html?pedidoId=${result.pedidoId}&numeros=${numerosQuery}`;
-
-        } catch (error) {
-            statusDiv.textContent = `Error: ${error.message}`;
-            statusDiv.className = 'status-container error';
+    const showStatusMessage = (elementId, message, isError = false) => {
+        const statusEl = document.getElementById(elementId);
+        if (statusEl) {
+            statusEl.textContent = message;
+            statusEl.className = `status-container ${isError ? 'error' : 'success'}`;
+            setTimeout(() => statusEl.classList.add('oculto'), 4000);
         }
     };
 
@@ -547,7 +427,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         button.addEventListener('click', () => {
             if (validateStep(currentStep)) {
                 currentStep++;
-                if (currentStep === 3) {
+                if (currentStep === 3) { // Al llegar al paso de Confirmar
                     populateConfirmationStep();
                 }
                 showStep(currentStep);
@@ -562,26 +442,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    // UNIFICADO: Única lógica de envío del formulario
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Se construye el paquete de datos para enviar al servidor
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        statusDiv.textContent = 'Procesando tu pedido...';
+        statusDiv.className = 'status-container';
+
         const payload = {
             sorteoId: sorteoId,
             sorteoNombre: sorteoData.nombre_premio_display,
-            paquete: `${params.get('paqueteNombre')} (${params.get('paqueteBoletos')} x $${params.get('paquetePrecio')})`,
+            paquete: params.get('paqueteNombre'),
+            precio_paquete: parseFloat(params.get('paquetePrecio')),
+            cantidad_boletos: parseInt(params.get('paqueteBoletos')),
             nombre: document.getElementById('nombre').value,
             cedula: document.getElementById('cedula').value,
             ciudad: document.getElementById('ciudad').value,
             celular: document.getElementById('celular').value,
             email: document.getElementById('email').value,
+            coupon: couponCode || null,
             affiliateId: sessionStorage.getItem('affiliateRef') || null,
             numeros_elegidos: sorteoData.tipo_sorteo === 'tombola_interactiva' ? misNumerosSeleccionados : null
         };
 
         try {
-            statusDiv.textContent = 'Procesando tu pedido...';
-            statusDiv.className = 'status-container';
             const response = await fetch(`${API_BASE_URL}/api/crear-pedido`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -592,18 +478,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.ok) throw new Error(result.error || 'Error en el servidor.');
             
             if (typeof fbq === 'function') {
-                fbq('track', 'Lead');
+                fbq('track', 'Lead', {
+                    content_name: sorteoData.nombre_premio_display,
+                    value: parseFloat(params.get('paquetePrecio')),
+                    currency: 'USD'
+                });
             }
             
-            // ¡CORRECCIÓN! Se define la variable ANTES de usarla
             const numerosQuery = encodeURIComponent(JSON.stringify(misNumerosSeleccionados));
             window.location.href = `gracias.html?pedidoId=${result.pedidoId}&numeros=${numerosQuery}`;
 
         } catch (error) {
             statusDiv.textContent = `Error: ${error.message}`;
             statusDiv.className = 'status-container error';
+            submitButton.disabled = false;
         }
     });
+
     listaNumerosElegidos.addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-eliminar-numero')) {
             const indexToRemove = parseInt(e.target.dataset.index, 10);
