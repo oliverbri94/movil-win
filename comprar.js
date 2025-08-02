@@ -230,7 +230,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     };
 
-// EN COMPRAR.JS - REEMPLAZA LA FUNCIÓN COMPLETA
 
     const renderizarSelectoresDeBolas = () => {
         const headerHTML = `
@@ -247,8 +246,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const selectorWrapper = document.createElement('div');
         selectorWrapper.className = 'selector-wrapper';
+        selectorContainer.appendChild(selectorWrapper);
 
-        // 1. PRIMERO, creamos y añadimos todos los elementos HTML a la página
         configBolas.forEach((bola, index) => {
             const pickerContainer = document.createElement('div');
             pickerContainer.className = 'picker-column';
@@ -275,27 +274,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             selectorWrapper.appendChild(pickerContainer);
         });
 
-        selectorContainer.appendChild(selectorWrapper);
-
-        // 2. AHORA, con los elementos ya en la página, les asignamos los eventos
         configBolas.forEach((bola, index) => {
             const picker = document.getElementById(`picker-${index}`);
             const input = document.getElementById(`input-${index}`);
             
-            // Verificamos que ambos elementos existan antes de continuar
             if (!picker || !input) return; 
 
-            const itemHeight = picker.querySelector('.picker-item').offsetHeight;
+            const itemHeight = 100; // Altura fija del .picker-item
+            const pickerCenter = picker.offsetHeight / 2;
             let scrollTimeout;
 
             // Evento: Scroll en la RUEDA -> Actualiza el INPUT
             picker.addEventListener('scroll', () => {
                 clearTimeout(scrollTimeout);
                 scrollTimeout = setTimeout(() => {
-                    // CORRECCIÓN: Usamos Math.round en lugar de floor para mayor precisión al "aterrizar" en un número.
-                    const selectedIndex = Math.round(picker.scrollTop / itemHeight);
-                    input.value = String(selectedIndex).padStart(bola.digitos, '0');
-                }, 150);
+                    // CORRECCIÓN DEFINITIVA: Calcula el índice basado en el centro del picker
+                    const scrollCenter = picker.scrollTop + pickerCenter;
+                    const selectedIndex = Math.round(scrollCenter / itemHeight) - 1;
+                    
+                    if (selectedIndex >= 0 && selectedIndex <= bola.max) {
+                        input.value = String(selectedIndex).padStart(bola.digitos, '0');
+                    }
+                }, 100);
             });
 
             // Evento: Escribir en el INPUT -> Actualiza la RUEDA
@@ -309,11 +309,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
                 
-                // La corrección clave está aquí
                 if (e.target.value.length >= bola.digitos && !isNaN(valorActual)) {
+                    // CORRECCIÓN DEFINITIVA: Calcula la posición para centrar el item
+                    const targetScrollTop = (valorActual + 1) * itemHeight - pickerCenter;
                     picker.scrollTo({
-                        // El cálculo de la posición es el mismo, no necesita ajuste si el índice es 0-based
-                        top: valorActual * itemHeight,
+                        top: targetScrollTop,
                         behavior: 'smooth'
                     });
                 }
