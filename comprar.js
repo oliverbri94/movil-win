@@ -302,6 +302,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const input = document.getElementById(`input-${index}`);
             
             if (!picker || !input) return; 
+            const maxNum = parseInt(bola.max, 10); 
+
 
             const itemHeight = picker.querySelector('.picker-item')?.offsetHeight || 100;
             const pickerCenter = picker.offsetHeight / 2;
@@ -331,7 +333,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 
                 if (e.target.value.length >= bola.digitos && !isNaN(valorActual)) {
-                    const targetScrollTop = (valorActual - 1 + 1) * itemHeight - pickerCenter;
+                    const targetScrollTop = (valorActual * itemHeight) - pickerCenter;
+
                     picker.scrollTo({
                         top: targetScrollTop,
                         behavior: 'smooth'
@@ -382,6 +385,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             do {
                 comboAleatorio = configBolas.map(bola => {
+                    const maxNum = parseInt(bola.max, 10); 
+
                     const num = Math.floor(Math.random() * maxNum) + 1;
                     return String(num).padStart(bola.digitos, '0');
                 });
