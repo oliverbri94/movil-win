@@ -1058,7 +1058,7 @@ function initializeRafflePage() {
                         <div class="participant-details">
                             <span class="participant-name">${formattedName}</span>
                         </div>
-                        <div class="ticket-count">${p.total_participaciones} Btos.</div>
+                        <div class="ticket-count">${p.total_participaciones} Nros.</div>
                     `;
                     listElement.appendChild(li);
                 });
