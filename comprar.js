@@ -248,6 +248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectorWrapper = document.createElement('div');
         selectorWrapper.className = 'selector-wrapper';
 
+        // 1. PRIMERO, creamos y añadimos todos los elementos HTML a la página
         configBolas.forEach((bola, index) => {
             const pickerContainer = document.createElement('div');
             pickerContainer.className = 'picker-column';
@@ -272,36 +273,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             pickerContainer.appendChild(input);
             selectorWrapper.appendChild(pickerContainer);
+        });
 
-            // --- SINCRONIZACIÓN EN DOS VÍAS ---
+        selectorContainer.appendChild(selectorWrapper);
 
+        // 2. AHORA, con los elementos ya en la página, les asignamos los eventos
+        configBolas.forEach((bola, index) => {
             const picker = document.getElementById(`picker-${index}`);
+            const input = document.getElementById(`input-${index}`);
+            
+            // Verificamos que ambos elementos existan antes de continuar
+            if (!picker || !input) return; 
+
             const itemHeight = picker.querySelector('.picker-item').offsetHeight;
             let scrollTimeout;
 
-            // 1. Cuando se hace SCROLL en la RUEDA -> Actualiza el INPUT
+            // Evento: Scroll en la RUEDA -> Actualiza el INPUT
             picker.addEventListener('scroll', () => {
                 clearTimeout(scrollTimeout);
                 scrollTimeout = setTimeout(() => {
                     const selectedIndex = Math.round(picker.scrollTop / itemHeight);
-                    const numeroFormateado = String(selectedIndex).padStart(bola.digitos, '0');
-                    input.value = numeroFormateado;
-                }, 150); // Un pequeño retardo para no sobrecargar
+                    input.value = String(selectedIndex).padStart(bola.digitos, '0');
+                }, 150);
             });
 
-            // 2. Cuando se ESCRIBE en el INPUT -> Actualiza la RUEDA
+            // Evento: Escribir en el INPUT -> Actualiza la RUEDA
             input.addEventListener('input', (e) => {
                 const valorActual = parseInt(e.target.value, 10);
                 const maxPermitido = parseInt(e.target.dataset.max, 10);
 
-                // Validamos que el número no sea mayor al permitido
                 if (valorActual > maxPermitido) {
                     alert(`El número no puede ser mayor que ${maxPermitido}.`);
                     e.target.value = '';
                     return;
                 }
                 
-                // Si el campo tiene el número correcto de dígitos, movemos la rueda
                 if (e.target.value.length >= bola.digitos && !isNaN(valorActual)) {
                     picker.scrollTo({
                         top: valorActual * itemHeight,
@@ -311,15 +317,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         });
 
-        selectorContainer.appendChild(selectorWrapper);
-        
-        // (El resto de la función para crear los botones no cambia)
+        // 3. FINALMENTE, añadimos los botones de acción
         const addButton = document.createElement('button');
         addButton.type = 'button';
         addButton.id = 'btn-add-number';
         addButton.className = 'admin-button';
         addButton.innerHTML = '<i class="fas fa-plus"></i> Añadir Combinación';
-        selectorContainer.appendChild(addButton);
         
         const randomButton = document.createElement('button');
         randomButton.type = 'button';
@@ -327,14 +330,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         randomButton.className = 'admin-button-secondary'; 
         randomButton.innerHTML = '<i class="fas fa-random"></i> Llenar con Números Aleatorios';
         randomButton.style.marginTop = '10px';
-        selectorContainer.insertBefore(randomButton, addButton);
-
-        randomButton.addEventListener('click', anadirNumerosAleatorios);
+        
         const statusCombinacion = document.createElement('div');
         statusCombinacion.id = 'status-combinacion';
         statusCombinacion.className = 'status-container oculto';
+
+        // Añadimos los botones al contenedor principal
+        selectorContainer.appendChild(randomButton);
+        selectorContainer.appendChild(addButton);
         selectorContainer.appendChild(statusCombinacion);
 
+        // Asignamos los eventos a los botones
+        randomButton.addEventListener('click', anadirNumerosAleatorios);
         addButton.addEventListener('click', anadirNumeroSeleccionado);
     };
     const getSeleccionActual = () => {
