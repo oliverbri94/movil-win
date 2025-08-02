@@ -909,6 +909,7 @@ function initializeRafflePage() {
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
 
                 const progressBarHTML = `
+                    ${metaMessage}
                     <div class="progress-radial-wrapper ${urgenciaClass}">
                         <div class="progress-radial-inner-shadow"></div>
                         <svg class="progress-radial-svg" width="140" height="140" viewBox="0 0 140 140">
@@ -929,7 +930,6 @@ function initializeRafflePage() {
                         <div class="progress-radial-percentage">${percentageSold.toFixed(0)}<span>%</span></div>
                     </div>
                     <p class="motivational-text-integrated">${motivationalMessage}</p>
-                    ${metaMessage}
                 `;
 
                 slideWrapper.innerHTML = `
