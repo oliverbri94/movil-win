@@ -3576,8 +3576,6 @@ nav.bg-custom-dark-bg-frame a:hover {
     height: 50px; /* Altura de la zona de selección */
     transform: translateY(-50%);
     background-color: rgba(0, 0, 0, 0.1);
-    border-top: 2px solid var(--clr-primary);
-    border-bottom: 2px solid var(--clr-primary);
     pointer-events: none; /* Evita que interfiera con el scroll */
     z-index: 1;
 }

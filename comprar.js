@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Variables de estado
     let currentStep = 0;
+    let numerosElegidos = [];
     let sorteoData = null;
     let numerosOcupados = [];
     let misNumerosSeleccionados = [];
