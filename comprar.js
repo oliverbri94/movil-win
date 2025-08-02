@@ -264,7 +264,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             input.type = 'number';
             input.className = 'manual-input';
             input.placeholder = String(0).padStart(bola.digitos, '0');
-            input.maxLength = bola.digitos;
+
+            // ¡NUEVO! Guardamos el número máximo permitido en el propio input
+            input.dataset.max = bola.max;
+
+            // ¡NUEVO! Añadimos el evento de validación
+            input.addEventListener('input', (e) => {
+                const valorActual = parseInt(e.target.value, 10);
+                const maxPermitido = parseInt(e.target.dataset.max, 10);
+
+                if (valorActual > maxPermitido) {
+                    alert(`El número no puede ser mayor que ${maxPermitido}.`);
+                    e.target.value = ''; // Limpiamos el campo
+                }
+            });
+
             pickerContainer.appendChild(input);
 
             selectorWrapper.appendChild(pickerContainer);
