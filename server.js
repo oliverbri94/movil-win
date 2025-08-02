@@ -748,7 +748,7 @@ app.post('/api/admin/confirmar-pedido', requireAdminLogin, async (req, res) => {
                         <p>Te deseamos muchísima suerte. Recuerda seguirnos en nuestras redes para estar al tanto de todo.</p>
                         <p style="text-align: center; font-size: 0.9em; color: #777; margin-top: 30px;">Atentamente,<br>El equipo de MOVIL WIN</p>
                         <div class="social-links-footer">
-                            <a href="https://wa.me/593959687438" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
+                            <a href="https://wa.me/593964135891" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
                             <a href="https://www.facebook.com/profile.php?id=61576682273505" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
                             <a href="https://www.instagram.com/movilwin" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
                         </div>
