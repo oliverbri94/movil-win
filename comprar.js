@@ -113,14 +113,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             showStatusMessage('status-combinacion', 'Por favor, asegúrate de que todas las casillas tengan un número válido y dentro del rango.', true);
             return;
         }
-
+        const combinacionString = JSON.stringify(combinacion);
+        if (numerosOcupados.includes(combinacionString)) {
+            showStatusMessage('status-combinacion', '¡Esa combinación ya fue elegida! Por favor, elige otra.', true);
+            return;
+        }
         const cantidadRequerida = parseInt(params.get('paqueteBoletos') || '1', 10);
         if (misNumerosSeleccionados.length >= cantidadRequerida) {
             showStatusMessage('status-combinacion', `Ya has elegido el máximo de ${cantidadRequerida} combinaciones.`, true);
             return;
         }
 
-        const combinacionString = JSON.stringify(combinacion);
         if (misNumerosSeleccionados.some(c => JSON.stringify(c) === combinacionString)) {
             showStatusMessage('status-combinacion', 'Ya has elegido esta combinación. Elige una diferente.', true);
             return;
