@@ -292,6 +292,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             picker.addEventListener('scroll', () => {
                 clearTimeout(scrollTimeout);
                 scrollTimeout = setTimeout(() => {
+                    // CORRECCIÓN: Usamos Math.round en lugar de floor para mayor precisión al "aterrizar" en un número.
                     const selectedIndex = Math.round(picker.scrollTop / itemHeight);
                     input.value = String(selectedIndex).padStart(bola.digitos, '0');
                 }, 150);
@@ -308,8 +309,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
                 
+                // La corrección clave está aquí
                 if (e.target.value.length >= bola.digitos && !isNaN(valorActual)) {
                     picker.scrollTo({
+                        // El cálculo de la posición es el mismo, no necesita ajuste si el índice es 0-based
                         top: valorActual * itemHeight,
                         behavior: 'smooth'
                     });
