@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             input.type = 'number';
             input.className = 'manual-input';
             input.id = `input-${index}`;
-            input.placeholder = String(0).padStart(bola.digitos, '0');
+            input.placeholder = String(1).padStart(bola.digitos, '0');
             input.dataset.max = bola.max;
             input.dataset.digitos = bola.digitos;
 
