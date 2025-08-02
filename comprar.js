@@ -272,6 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         configBolas.forEach((bola, index) => {
             const pickerContainer = document.createElement('div');
             pickerContainer.className = 'picker-column';
+            const maxNum = parseInt(bola.max, 10);
 
             const pickerHTML = `
                 <div class="number-picker" id="picker-${index}">
