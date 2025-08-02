@@ -230,6 +230,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     };
 
+// EN COMPRAR.JS - REEMPLAZA LA FUNCIÓN COMPLETA
+
     const renderizarSelectoresDeBolas = () => {
         const headerHTML = `
             <div class="form-section-header">
@@ -251,7 +253,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             pickerContainer.className = 'picker-column';
 
             const pickerHTML = `
-                <div class="number-picker">
+                <div class="number-picker" id="picker-${index}">
                     <div class="picker-wheel" id="wheel-${index}">
                         ${Array.from({ length: bola.max + 1 }, (_, i) => 
                             `<div class="picker-item">${String(i).padStart(bola.digitos, '0')}</div>`
@@ -263,29 +265,55 @@ document.addEventListener('DOMContentLoaded', async () => {
             const input = document.createElement('input');
             input.type = 'number';
             input.className = 'manual-input';
+            input.id = `input-${index}`;
             input.placeholder = String(0).padStart(bola.digitos, '0');
-
-            // ¡NUEVO! Guardamos el número máximo permitido en el propio input
             input.dataset.max = bola.max;
+            input.dataset.digitos = bola.digitos;
 
-            // ¡NUEVO! Añadimos el evento de validación
+            pickerContainer.appendChild(input);
+            selectorWrapper.appendChild(pickerContainer);
+
+            // --- SINCRONIZACIÓN EN DOS VÍAS ---
+
+            const picker = document.getElementById(`picker-${index}`);
+            const itemHeight = picker.querySelector('.picker-item').offsetHeight;
+            let scrollTimeout;
+
+            // 1. Cuando se hace SCROLL en la RUEDA -> Actualiza el INPUT
+            picker.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    const selectedIndex = Math.round(picker.scrollTop / itemHeight);
+                    const numeroFormateado = String(selectedIndex).padStart(bola.digitos, '0');
+                    input.value = numeroFormateado;
+                }, 150); // Un pequeño retardo para no sobrecargar
+            });
+
+            // 2. Cuando se ESCRIBE en el INPUT -> Actualiza la RUEDA
             input.addEventListener('input', (e) => {
                 const valorActual = parseInt(e.target.value, 10);
                 const maxPermitido = parseInt(e.target.dataset.max, 10);
 
+                // Validamos que el número no sea mayor al permitido
                 if (valorActual > maxPermitido) {
                     alert(`El número no puede ser mayor que ${maxPermitido}.`);
-                    e.target.value = ''; // Limpiamos el campo
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Si el campo tiene el número correcto de dígitos, movemos la rueda
+                if (e.target.value.length >= bola.digitos && !isNaN(valorActual)) {
+                    picker.scrollTo({
+                        top: valorActual * itemHeight,
+                        behavior: 'smooth'
+                    });
                 }
             });
-
-            pickerContainer.appendChild(input);
-
-            selectorWrapper.appendChild(pickerContainer);
         });
 
         selectorContainer.appendChild(selectorWrapper);
         
+        // (El resto de la función para crear los botones no cambia)
         const addButton = document.createElement('button');
         addButton.type = 'button';
         addButton.id = 'btn-add-number';
@@ -296,15 +324,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const randomButton = document.createElement('button');
         randomButton.type = 'button';
         randomButton.id = 'btn-random';
-        // Usamos el estilo de botón secundario
         randomButton.className = 'admin-button-secondary'; 
         randomButton.innerHTML = '<i class="fas fa-random"></i> Llenar con Números Aleatorios';
-        randomButton.style.marginTop = '10px'; // Un poco de espacio
-
-        // Insertamos el botón aleatorio ANTES del botón de añadir normal
+        randomButton.style.marginTop = '10px';
         selectorContainer.insertBefore(randomButton, addButton);
 
-        // Le damos vida al botón
         randomButton.addEventListener('click', anadirNumerosAleatorios);
         const statusCombinacion = document.createElement('div');
         statusCombinacion.id = 'status-combinacion';
@@ -313,7 +337,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         addButton.addEventListener('click', anadirNumeroSeleccionado);
     };
-
     const getSeleccionActual = () => {
         const seleccion = [];
         document.querySelectorAll('.number-picker').forEach((picker) => {

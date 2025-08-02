@@ -910,6 +910,7 @@ function initializeRafflePage() {
 
                 const progressBarHTML = `
                     ${metaMessage}
+                    <p class="motivational-text-integrated">${motivationalMessage}</p>
                     <div class="progress-radial-wrapper ${urgenciaClass}">
                         <div class="progress-radial-inner-shadow"></div>
                         <svg class="progress-radial-svg" width="140" height="140" viewBox="0 0 140 140">
@@ -929,7 +930,6 @@ function initializeRafflePage() {
                         </svg>
                         <div class="progress-radial-percentage">${percentageSold.toFixed(0)}<span>%</span></div>
                     </div>
-                    <p class="motivational-text-integrated">${motivationalMessage}</p>
                 `;
 
                 slideWrapper.innerHTML = `
