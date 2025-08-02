@@ -362,52 +362,56 @@ document.addEventListener('DOMContentLoaded', async () => {
         return seleccion;
     };
 
+
     const anadirNumeroSeleccionado = () => {
-        const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
-        if (misNumerosSeleccionados.length >= paqueteBoletos) {
-            alert(`Ya has elegido los ${paqueteBoletos} números de tu paquete.`);
-            return;
-        }
+        const selectorWrapper = document.querySelector('.selector-wrapper');
+        if (!selectorWrapper) return;
 
-        const manualInputs = document.querySelectorAll('.manual-input');
-        const hayInputManual = Array.from(manualInputs).some(input => input.value !== '');
-        let seleccionFinal = [];
+        const inputs = selectorWrapper.querySelectorAll('.manual-input');
+        const combinacion = [];
+        let esValido = true;
 
-        if (hayInputManual) {
-            let esValido = true;
-            manualInputs.forEach(input => {
-                const valor = parseInt(input.value, 10);
-                if (isNaN(valor) || input.value.length !== input.maxLength) {
-                    esValido = false;
-                }
-                seleccionFinal.push(valor);
-            });
-            if (!esValido) {
-                alert('Por favor, introduce un número válido en cada casilla con el número correcto de dígitos.');
-                return;
+        // --- LÓGICA DE VALIDACIÓN CORREGIDA ---
+        inputs.forEach(input => {
+            const valor = input.value;
+            const valorNumerico = parseInt(valor, 10);
+            const maxPermitido = parseInt(input.dataset.max, 10);
+
+            // La nueva validación se asegura de que:
+            // 1. El campo no esté vacío.
+            // 2. El valor sea un número válido.
+            // 3. El número no sea mayor al máximo permitido.
+            if (valor === '' || isNaN(valorNumerico) || valorNumerico > maxPermitido) {
+                esValido = false;
+            } else {
+                // Si es válido, lo añadimos a nuestra combinación
+                combinacion.push(valor);
             }
-        } else {
-            seleccionFinal = getSeleccionActual();
-        }
+        });
 
-        const seleccionString = JSON.stringify(seleccionFinal);
-        const statusDiv = document.getElementById('status-combinacion');
-
-        if (numerosOcupados.includes(seleccionString)) {
-            statusDiv.textContent = 'Esta combinación ya está ocupada. Prueba otra.';
-            statusDiv.className = 'status-container error';
+        if (!esValido) {
+            showStatusMessage('status-combinacion', 'Por favor, asegúrate de que todas las casillas tengan un número válido y dentro del rango permitido.', true);
             return;
         }
-        if (misNumerosSeleccionados.map(n => JSON.stringify(n)).includes(seleccionString)) {
-            statusDiv.textContent = 'Ya has añadido esta combinación a tu lista.';
-            statusDiv.className = 'status-container error';
+        // --- FIN DE LA CORRECCIÓN ---
+
+
+        // El resto de la función para añadir el número no cambia
+        const cantidadRequerida = sorteoData.paquete_boletos;
+        if (numerosElegidos.length >= cantidadRequerida) {
+            showStatusMessage('status-combinacion', `Ya has elegido el máximo de ${cantidadRequerida} combinaciones para tu paquete.`, true);
             return;
         }
 
-        statusDiv.className = 'status-container oculto';
-        misNumerosSeleccionados.push(seleccionFinal);
-        actualizarListaMisNumeros();
-        manualInputs.forEach(input => input.value = '');
+        const combinacionString = JSON.stringify(combinacion);
+        if (numerosElegidos.some(c => JSON.stringify(c) === combinacionString)) {
+            showStatusMessage('status-combinacion', 'Ya has elegido esta combinación de números. Por favor, elige una diferente.', true);
+            return;
+        }
+
+        numerosElegidos.push(combinacion);
+        renderizarNumerosElegidos();
+        showStatusMessage('status-combinacion', `¡Combinación [${combinacion.join('-')}] añadida con éxito!`, false);
     };
     const anadirNumerosAleatorios = () => {
         const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
