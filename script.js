@@ -940,7 +940,6 @@ function initializeRafflePage() {
 
             }
             // --- FIN DEL CÓDIGO CORREGIDO ---
-            updateTombolaWithBalls(percentageSold, urgenciaClass, slideWrapper);
 
             prizeCarouselTrack.appendChild(slideWrapper);
 
