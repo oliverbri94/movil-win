@@ -955,12 +955,12 @@ function initializeRafflePage() {
                     </div>
                 `;
             }
-            setTimeout(() => {
+            setTimeout((porcentaje) => {
                 const liquidToAnimate = slideWrapper.querySelector('.tombola-liquid');
                 if (liquidToAnimate) {
-                    liquidToAnimate.style.height = `${percentageSold.toFixed(0)}%`;
+                    liquidToAnimate.style.height = `${porcentaje.toFixed(0)}%`;
                 }
-            }, 100); // 100 milisegundos es suficiente
+            }, 100, percentageSold); // <-- La clave es pasar 'percentageSold' como argumento aquí
             prizeCarouselTrack.appendChild(slideWrapper);
 
             // --- INICIO DEL CÓDIGO CORRECTO PARA LA ANIMACIÓN ---
