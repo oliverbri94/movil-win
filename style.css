@@ -4212,13 +4212,13 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 /* Estados de la tómbola con TUS colores */
 .progress-tombola.normal .tombola-liquid {
-    background: linear-gradient(180deg, var(--clr-primary), var(--clr-accent));
+    background: linear-gradient(180deg, var(--clr-primary), var(--clr-accent)) !important;
 }
 .progress-tombola.urgente .tombola-liquid {
-    background: linear-gradient(180deg, var(--clr-accent), var(--clr-secondary));
+    background: linear-gradient(180deg, var(--clr-accent), var(--clr-secondary)) !important;
 }
 .progress-tombola.critico .tombola-liquid {
-    background: linear-gradient(180deg, var(--clr-secondary), #d63031);
+    background: linear-gradient(180deg, var(--clr-secondary), #d63031) !important;
     animation: critical-bubble 1.5s infinite;
 }
 
