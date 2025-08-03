@@ -413,14 +413,14 @@ body {
 }
 /* --- ESTILOS PARA ESCRITORIO (PANTALLAS GRANDES) --- */
 @media (min-width: 992px) {
-    /* En escritorio, creamos 3 columnas para mostrar los pasos en horizontal */
     .pasos-container-nuevo {
-        grid-template-columns: 1fr 1fr 1fr;
+        /* Ahora creamos 2 columnas para que los 4 pasos se vean mejor */
+        grid-template-columns: 1fr 1fr; 
     }
 
-    /* La flecha conectora */
-    .paso-nuevo:not(:last-child)::after {
-        content: '\f061'; /* Código del icono de flecha de Font Awesome */
+    /* Ajustamos las flechas conectoras */
+    .paso-nuevo:not(:nth-child(2n))::after { /* Se aplica a los impares (1 y 3) */
+        content: '\f061';
         font-family: 'Font Awesome 6 Free';
         font-weight: 900;
         font-size: 2em;
@@ -4208,9 +4208,12 @@ nav.bg-custom-dark-bg-frame a:hover {
 .tombola-base { bottom: -15px; left: 50%; transform: translateX(-50%); width: 90px; height: 15px; background: linear-gradient(145deg, #e3e8ee, #c3cfe2); border-radius: 50px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
 
 /* Estados de la tómbola con TUS colores */
-.progress-tombola.normal .ball { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--clr-primary) 40%, var(--clr-accent) 100%); }
-.progress-tombola.urgente .ball { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--clr-accent) 40%, var(--clr-secondary) 100%); }
-.progress-tombola.critico .ball { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--clr-secondary) 40%, #d63031 100%); animation: ball-drop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards, critical-ball-pulse 1.5s infinite; }
+.progress-tombola.normal .ball { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--clr-primary) 40%, var(--clr-accent) 100%);
+box-shadow: 0 0 20px rgba(var(--clr-primary-rgb), 0.2); }
+.progress-tombola.urgente .ball { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--clr-accent) 40%, var(--clr-secondary) 100%);
+box-shadow: 0 0 25px rgba(var(--clr-accent-rgb), 0.3); }
+.progress-tombola.critico .ball { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--clr-secondary) 40%, #d63031 100%); animation: ball-drop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards, critical-ball-pulse 1.5s infinite;
+box-shadow: 0 0 30px rgba(var(--clr-secondary-rgb), 0.4); }
 
 /* Animaciones */
 @keyframes ball-drop { 0% { opacity: 0; transform: translateY(-20px) scale(0.5); } 50% { opacity: 0.7; transform: translateY(0) scale(1.1); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
