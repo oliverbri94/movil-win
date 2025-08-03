@@ -571,24 +571,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 3. BUSCAR EL MEJOR UPGRADE POSIBLE BASADO EN EL NUEVO PRECIO
             const paquetesOrdenados = [...todosLosPaquetes].sort((a, b) => parseFloat(b.precio) - parseFloat(a.precio));
-            const paqueteUpgrade = paquetesOrdenados.find(p => nuevoPrecioCalculado >= parseFloat(p.precio));
+            const paquetePotencial = paquetesOrdenados.find(p => nuevoPrecioCalculado >= parseFloat(p.precio));
 
             let nuevosBoletos, nuevoPrecio, nuevoNombrePaquete;
 
-            if (paqueteUpgrade) {
-                // ¡UPGRADE! Asignamos los valores del paquete superior
-                nuevosBoletos = paqueteUpgrade.boletos;
-                nuevoPrecio = parseFloat(paqueteUpgrade.precio);
-                nuevoNombrePaquete = paqueteUpgrade.nombre;
+            // ¡ESTA ES LA LÍNEA CLAVE DE LA CORRECCIÓN!
+            // Verificamos si el paquete encontrado es realmente un "upgrade" (mejor precio o más boletos)
+            const esRealmenteUnUpgrade = paquetePotencial && (parseFloat(paquetePotencial.precio) > precioActual || (parseFloat(paquetePotencial.precio) === precioActual && paquetePotencial.cantidad_boletos > boletosActuales));
+
+            if (esRealmenteUnUpgrade) {
+                // ¡UPGRADE! Asignamos los valores del paquete superior que se alcanzó
+                nuevosBoletos = paquetePotencial.boletos;
+                nuevoPrecio = parseFloat(paquetePotencial.precio);
+                nuevoNombrePaquete = paquetePotencial.nombre;
                 showStatusMessage('status-combinacion', `¡Felicidades! Se actualizó a ${nuevoNombrePaquete}`, false);
             } else {
-                // No hay upgrade, solo se suma un boleto más
+                // No hay upgrade, solo se suma un boleto más con el precio calculado
                 nuevosBoletos = boletosActuales + 1;
                 nuevoPrecio = nuevoPrecioCalculado;
                 nuevoNombrePaquete = `Paquete Personalizado (${nuevosBoletos} números)`;
             }
 
-            // 4. Actualizar la URL y la interfaz
+            // 4. Actualizar la URL y la interfaz (esta parte no cambia)
             currentParams.set('paqueteBoletos', nuevosBoletos);
             currentParams.set('paquetePrecio', nuevoPrecio.toFixed(2));
             currentParams.set('paqueteNombre', nuevoNombrePaquete);
@@ -599,4 +603,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             actualizarListaMisNumeros();
         });
     }
-});
+}); 
