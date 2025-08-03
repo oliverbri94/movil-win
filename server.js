@@ -305,7 +305,8 @@ app.get('/api/sorteos-visibles', async (req, res) => {
 app.get('/api/sorteo-details/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const sql = `SELECT id_sorteo, nombre_premio_display, tipo_sorteo, configuracion_tombola FROM sorteos_config WHERE id_sorteo = $1`;
+        const sql = `SELECT id_sorteo, nombre_premio_display, tipo_sorteo, configuracion_tombola, paquetes_json FROM sorteos_config WHERE id_sorteo = $1`;
+
         const sorteo = await new Promise((resolve, reject) => {
             db.get(sql, [id], (err, row) => err ? reject(err) : resolve(row));
         });
@@ -316,6 +317,11 @@ app.get('/api/sorteo-details/:id', async (req, res) => {
 
         if (sorteo.configuracion_tombola) {
             sorteo.configuracion_tombola = JSON.parse(sorteo.configuracion_tombola);
+        }
+        if (sorteo.paquetes_json) {
+            sorteo.paquetes_json = JSON.parse(sorteo.paquetes_json);
+        } else {
+            sorteo.paquetes_json = [];
         }
         res.json({ success: true, sorteo });
     } catch (error) {
