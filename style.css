@@ -4159,7 +4159,12 @@ nav.bg-custom-dark-bg-frame a:hover {
     left: -50%;
     width: 200%;
     height: 30px;
-    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 75%, transparent 100%);
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.15) 25%,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0.15) 75%,
+        transparent 100%);
     animation: gentle-wave 4s ease-in-out infinite;
 }
 
@@ -4231,7 +4236,7 @@ nav.bg-custom-dark-bg-frame a:hover {
 }
 @keyframes critical-bubble {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
+    50% { transform: scale(1.03); } /* Un poco más grande que antes */
 }
 
 /* Pega este código al final de style.css */

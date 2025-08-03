@@ -922,14 +922,10 @@ function initializeRafflePage() {
                                     <div class="mini-package-selector">${miniPaquetesHTML}</div>
 
                                     <div class="progress-info-wrapper">
-                                        <div class="boletos-restantes-container" style="margin-bottom: 25px;">
-                                            <span class="boletos-restantes-numero">${goal - currentCount}</span>
-                                            <span class="boletos-restantes-texto">Boletos Restantes</span>
-                                        </div>
                                         <p class="motivational-text-integrated">${motivationalMessage}</p>
                                         <div id="tombola-sorteo-${sorteo.id_sorteo}" class="progress-tombola ${urgenciaClass || 'normal'}" data-progress="${percentageSold.toFixed(0)}">
                                             <div class="tombola-container">
-                                                <div class="tombola-liquid" style="height: ${percentageSold.toFixed(0)}%;"></div>
+                                                <div class="tombola-liquid" style="height: 0%;"></div>
                                                 <div class="tombola-glass-shine"></div>
                                             </div>
                                             <div class="tombola-label">
@@ -959,6 +955,12 @@ function initializeRafflePage() {
                     </div>
                 `;
             }
+            setTimeout(() => {
+                const liquidToAnimate = slideWrapper.querySelector('.tombola-liquid');
+                if (liquidToAnimate) {
+                    liquidToAnimate.style.height = `${percentageSold.toFixed(0)}%`;
+                }
+            }, 100); // 100 milisegundos es suficiente
             prizeCarouselTrack.appendChild(slideWrapper);
 
             // --- INICIO DEL CÓDIGO CORRECTO PARA LA ANIMACIÓN ---
