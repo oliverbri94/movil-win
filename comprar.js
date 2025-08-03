@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (couponCode && couponCode.startsWith('MIGRACION-')) {
         try {
-            actualizarListaMisNumeros();
             const parts = couponCode.split('-');
             const quantity = parseInt(parts[1], 10);
             const userId = parts[2];
@@ -556,6 +555,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- 5. EJECUCIÓN INICIAL ---
     showStep(currentStep);
+    // Si es un caso de migración, actualiza la lista ahora que todo está cargado
+    if (couponCode && couponCode.startsWith('MIGRACION-')) {
+        actualizarListaMisNumeros();
+    }
+
     cargarDatosIniciales();
 
     // --- Lógica para Añadir un Número Extra con UPGRADE ---
