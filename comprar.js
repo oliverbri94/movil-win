@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let sorteoData = null;
     let numerosOcupados = [];
     let misNumerosSeleccionados = [];
+    let todosLosPaquetes = []; 
+
 
     if (couponCode && couponCode.startsWith('MIGRACION-')) {
         try {
@@ -224,6 +226,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!numerosResult.success) throw new Error(numerosResult.error);
             numerosOcupados = numerosResult.numerosOcupados.map(n => JSON.stringify(n));
 
+            try {
+                const paquetesRes = await fetch(`${API_BASE_URL}/api/sorteo-packages/${sorteoId}`);
+                if (!paquetesRes.ok) throw new Error('No se pudieron cargar los paquetes de premios.');
+                const paquetesResult = await paquetesRes.json();
+                if (paquetesResult.success) {
+                    todosLosPaquetes = paquetesResult.packages;
+                }
+            } catch (e) {
+                console.error("No se pudieron cargar los paquetes, se usará cálculo manual:", e);
+                // Si falla, la lógica de añadir boletos seguirá funcionando con el cálculo promedio.
+            }
             actualizarResumen();
             
             if (sorteoData.tipo_sorteo === 'tombola_interactiva') {
@@ -352,7 +365,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const addButton = document.createElement('button');
         addButton.type = 'button';
         addButton.className = 'admin-button';
-        addButton.innerHTML = '<i class="fas fa-plus"></i> Añadir Combinación';
+        addButton.innerHTML = '<i class="fas fa-plus"></i> Comprar Combinación';
         addButton.addEventListener('click', anadirNumeroSeleccionado);
         
         const randomButton = document.createElement('button');
@@ -546,38 +559,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     showStep(currentStep);
     cargarDatosIniciales();
 
+// --- Lógica para Añadir un Número Extra con UPGRADE ---
     const btnAnadirOtro = document.getElementById('btn-anadir-otro');
     if (btnAnadirOtro) {
         btnAnadirOtro.addEventListener('click', () => {
-            // 1. Validar que tengamos el precio del boleto individual
-            if (!sorteoData || !sorteoData.precio_boleto) {
-                alert('No se pudo determinar el precio de un número individual. Por favor, vuelve al inicio y elige otro paquete.');
-                return;
-            }
-
-            // 2. Obtener los valores actuales de los parámetros de la URL
             const currentParams = new URLSearchParams(window.location.search);
             let boletosActuales = parseInt(currentParams.get('paqueteBoletos') || '0', 10);
-            let precioActual = parseFloat(currentParams.get('paquetePrecio') || '0.00');
-            const precioBoletoIndividual = parseFloat(sorteoData.precio_boleto);
 
-            // 3. Calcular los nuevos valores
+            // 1. Encontrar el precio del boleto individual desde el paquete más barato
+            const paqueteIndividual = todosLosPaquetes.reduce((prev, curr) => {
+                return prev.cantidad_boletos < curr.cantidad_boletos ? prev : curr;
+            });
+
+            if (!paqueteIndividual) {
+                alert('No se pudo determinar el precio base. Por favor, vuelve al inicio.');
+                return;
+            }
+            const precioBoletoIndividual = parseFloat(paqueteIndividual.precio_final);
+
+            // 2. Calcular la nueva cantidad de boletos
             const nuevosBoletos = boletosActuales + 1;
-            const nuevoPrecio = precioActual + precioBoletoIndividual;
-            const nuevoNombrePaquete = `Paquete Personalizado (${nuevosBoletos} números)`;
+            let nuevoPrecio;
+            let nuevoNombrePaquete;
 
-            // 4. Actualizar los parámetros en la URL (sin recargar la página)
+            // 3. Revisar si la nueva cantidad coincide con un paquete existente (UPGRADE)
+            const paqueteUpgrade = todosLosPaquetes.find(p => p.cantidad_boletos === nuevosBoletos);
+
+            if (paqueteUpgrade) {
+                // ¡Upgrade! Aplicamos el precio y nombre del paquete encontrado
+                nuevoPrecio = parseFloat(paqueteUpgrade.precio_final);
+                nuevoNombrePaquete = paqueteUpgrade.nombre;
+                showStatusMessage('status-combinacion', `¡Felicidades! Se actualizó a ${nuevoNombrePaquete}`, false);
+            } else {
+                // No hay upgrade, solo sumamos el precio del boleto individual
+                let precioActual = parseFloat(currentParams.get('paquetePrecio') || '0.00');
+                nuevoPrecio = precioActual + precioBoletoIndividual;
+                nuevoNombrePaquete = `Paquete Personalizado (${nuevosBoletos} números)`;
+            }
+
+            // 4. Actualizar la URL y la interfaz
             currentParams.set('paqueteBoletos', nuevosBoletos);
             currentParams.set('paquetePrecio', nuevoPrecio.toFixed(2));
             currentParams.set('paqueteNombre', nuevoNombrePaquete);
             const nuevaUrl = `${window.location.pathname}?${currentParams.toString()}`;
             history.pushState({ path: nuevaUrl }, '', nuevaUrl);
 
-            // 5. Actualizar la Interfaz de Usuario llamando a las funciones que ya modificamos
             actualizarResumen();
             actualizarListaMisNumeros();
-
-            showStatusMessage('status-combinacion', '¡Se añadió un espacio para un número más!', false);
         });
-    } 
+    }
 });
