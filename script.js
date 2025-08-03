@@ -948,10 +948,24 @@ function initializeRafflePage() {
             const circleToAnimate = slideWrapper.querySelector('.progress-radial-fg-circle');
             if (circleToAnimate) {
                 setTimeout(() => {
-                    const finalOffset = circleToAnimate.getAttribute('data-final-offset');
-                    circleToAnimate.style.strokeDashoffset = finalOffset;
-                }, 100); // Pequeño retardo para que la transición CSS se aplique correctamente.
+                    sorteosDisponibles.forEach((sorteo, index) => {
+                        if (sorteo.status_sorteo !== 'programado') {
+                            const slide = prizeCarouselTrack.children[index];
+                            if (slide) {
+                                const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
+                                const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
+                                const percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
+
+                                const liquidToAnimate = slide.querySelector('.tombola-liquid');
+                                if (liquidToAnimate) {
+                                    liquidToAnimate.style.height = `${percentageSold.toFixed(0)}%`;
+                                }
+                            }
+                        }
+                    });
+                }, 100); // Pequeño retardo para activar la transición CSS
             }
+                // --- FIN DEL CÓDIGO CORREGIDO ---
             // --- FIN DEL CÓDIGO CORRECTO ---
         }
         
