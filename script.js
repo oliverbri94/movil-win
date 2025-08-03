@@ -872,40 +872,20 @@ function initializeRafflePage() {
             } else {
                 const mediaParaRenderizar = sorteo;
                 const tituloMostrado = sorteo.nombre_premio_display;
-
-                // 1. Calculamos el progreso
                 const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
                 const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
                 const percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
 
-                // 2. Definimos las variables para la animación del CÍRCULO
-                const circumference = 2 * Math.PI * 62;
-                const finalOffset = circumference * (1 - (percentageSold / 100)); // <-- ¡LA VARIABLE QUE FALTABA!
+                let urgenciaClass = 'normal';
+                if (percentageSold >= 95) urgenciaClass = 'critico';
+                else if (percentageSold >= 80) urgenciaClass = 'urgente';
 
-                // 3. Definimos las clases y IDs para los colores y efectos
-                let urgenciaClass = '';
-                let gradientId = 'progressGradientDefault';
-                if (percentageSold >= 95) {
-                    urgenciaClass = 'critico';
-                    gradientId = 'progressGradientCritical';
-                } else if (percentageSold >= 80) {
-                    urgenciaClass = 'urgente';
-                    gradientId = 'progressGradientUrgent';
-                }
+                let motivationalMessage = '¡Compra tus números y participa ya!';
+                if (percentageSold >= 100) motivationalMessage = '🎉 ¡Meta alcanzada! El sorteo se realizará muy pronto. 🎉';
+                else if (percentageSold >= 80) motivationalMessage = '🔥 ¡Ya casi lo logramos! ¡Falta muy poco para el sorteo! 🔥';
+                else if (percentageSold >= 50) motivationalMessage = '¡Más de la mitad del camino! Tú puedes ser el ganador.';
 
-                // 4. Definimos los mensajes de texto
-                let motivationalMessage = '';
-                if (percentageSold >= 100) {
-                    motivationalMessage = '🎉 ¡Meta alcanzada! El sorteo se realizará muy pronto. 🎉';
-                } else if (percentageSold >= 80) {
-                    motivationalMessage = '🔥 ¡Ya casi lo logramos! ¡Falta muy poco para el sorteo! 🔥';
-                } else if (percentageSold >= 50) {
-                    motivationalMessage = '¡Más de la mitad del camino! Tú puedes ser el ganador.';
-                } else {
-                    motivationalMessage = '¡Compra tus números y participa ya!';
-                }
                 const metaMessage = '<p style="font-size: 0.9em; color: var(--clr-light-text-alt); margin-top: 5px;">Al llegar al 100% se realizará el sorteo EN VIVO. ¡Mucha suerte!</p>';
-
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
 
                 slideWrapper.innerHTML = `
@@ -923,7 +903,7 @@ function initializeRafflePage() {
 
                                     <div class="progress-info-wrapper">
                                         <p class="motivational-text-integrated">${motivationalMessage}</p>
-                                        <div id="tombola-sorteo-${sorteo.id_sorteo}" class="progress-tombola ${urgenciaClass || 'normal'}" data-progress="${percentageSold.toFixed(0)}">
+                                        <div id="tombola-sorteo-${sorteo.id_sorteo}" class="progress-tombola ${urgenciaClass}" data-progress="${percentageSold.toFixed(0)}">
                                             <div class="tombola-container">
                                                 <div class="tombola-balls">
                                                     <div class="balls-container"></div>
@@ -956,6 +936,8 @@ function initializeRafflePage() {
                         </div>
                     </div>
                 `;
+                updateTombolaWithBalls(percentageSold, urgenciaClass, slideWrapper);
+
             }
             // --- FIN DEL CÓDIGO CORREGIDO ---
             updateTombolaWithBalls(percentageSold, urgenciaClass, slideWrapper);
