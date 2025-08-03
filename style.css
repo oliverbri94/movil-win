@@ -4184,10 +4184,25 @@ nav.bg-custom-dark-bg-frame a:hover {
     position: absolute;
 }
 .tombola-glass-shine { top: 15%; left: 25%; width: 30%; height: 40%; background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%); border-radius: 50%; transform: rotate(-20deg); pointer-events: none; }
-.tombola-label { top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; }
+.tombola-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+
+    /* --- NUEVOS ESTILOS --- */
+    background: rgba(255, 255, 255, 0.8); /* Fondo blanco semitransparente */
+    backdrop-filter: blur(5px); /* Efecto cristal para difuminar las bolas de atrás */
+    -webkit-backdrop-filter: blur(5px);
+    padding: 5px 15px; /* Espaciado interno */
+    border-radius: 50px; /* Bordes redondeados */
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Borde sutil */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra suave */
+}
 .tombola-number { font-size: 2.2em; font-weight: 700; color: var(--clr-light-text); margin: 0; line-height: 1; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
 .tombola-percent { font-size: 0.6em; font-weight: 500; color: var(--clr-light-text-alt); margin-left: 3px; }
-.tombola-base { bottom: -15px; left: 50%; transform: translateX(-50%); width: 120px; height: 15px; background: linear-gradient(145deg, #e3e8ee, #c3cfe2); border-radius: 50px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
+.tombola-base { bottom: -15px; left: 50%; transform: translateX(-50%); width: 90px; height: 15px; background: linear-gradient(145deg, #e3e8ee, #c3cfe2); border-radius: 50px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
 
 /* Estados de la tómbola con TUS colores */
 .progress-tombola.normal .ball { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--clr-primary) 40%, var(--clr-accent) 100%); }
