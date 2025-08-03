@@ -150,11 +150,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const validateStep = (stepIndex) => {
-        const isMigration = (couponCode && couponCode.startsWith('MIGRACION-'));
-        if (stepIndex === 0 && !isMigration) { // <-- MODIFICA ESTA LÍNEA
-            const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
-            if (sorteoData.tipo_sorteo === 'tombola_interactiva' && misNumerosSeleccionados.length !== paqueteBoletos) {
-                alert(`Debes elegir exactamente ${paqueteBoletos} combinación(es) para tu paquete.`);
+        if (stepIndex === 0) { 
+            const paqueteBoletos = parseInt(new URLSearchParams(window.location.search).get('paqueteBoletos') || '1', 10);
+            // La validación ahora chequea si hay algún slot "vacío" o si no se ha alcanzado el total
+            const isMigration = (couponCode && couponCode.startsWith('MIGRACION-'));
+            const allSlotsFilled = misNumerosSeleccionados.length === paqueteBoletos && !misNumerosSeleccionados.some(n => n[0].startsWith('MIGRADO-'));
+
+            if (sorteoData.tipo_sorteo === 'tombola_interactiva' && !isMigration && !allSlotsFilled) {
+                alert(`Debes elegir las ${paqueteBoletos} combinación(es) para continuar.`);
                 return false;
             }
         }
