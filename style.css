@@ -4102,8 +4102,8 @@ nav.bg-custom-dark-bg-frame a:hover {
 /* =============================================== */
 .progress-tombola {
     position: relative;
-    width: 200px;
-    height: 200px;
+    width: 150px;
+    height: 150px;
     margin: 0 auto;
     background: linear-gradient(145deg, #ffffff, #f0f2f5);
     border-radius: 50%;

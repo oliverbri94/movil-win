@@ -150,7 +150,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const validateStep = (stepIndex) => {
-        if (stepIndex === 0) {
+        const isMigration = (couponCode && couponCode.startsWith('MIGRACION-'));
+        if (stepIndex === 0 && !isMigration) { // <-- MODIFICA ESTA LÍNEA
             const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
             if (sorteoData.tipo_sorteo === 'tombola_interactiva' && misNumerosSeleccionados.length !== paqueteBoletos) {
                 alert(`Debes elegir exactamente ${paqueteBoletos} combinación(es) para tu paquete.`);
