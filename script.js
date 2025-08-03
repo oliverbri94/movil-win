@@ -927,7 +927,7 @@ function initializeRafflePage() {
                                             <span class="boletos-restantes-texto">Boletos Restantes</span>
                                         </div>
                                         <p class="motivational-text-integrated">${motivationalMessage}</p>
-                                        <div id="tombola-sorteo-${sorteo.id_sorteo}" class="progress-tombola ${urgenciaClass}" data-progress="${percentageSold.toFixed(0)}">
+                                        <div id="tombola-sorteo-${sorteo.id_sorteo}" class="progress-tombola ${urgenciaClass || 'normal'}" data-progress="${percentageSold.toFixed(0)}">
                                             <div class="tombola-container">
                                                 <div class="tombola-liquid" style="height: ${percentageSold.toFixed(0)}%;"></div>
                                                 <div class="tombola-glass-shine"></div>
