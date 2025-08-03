@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     
     function actualizarListaMisNumeros() {
-        const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
+        const paqueteBoletos = parseInt(new URLSearchParams(window.location.search).get('paqueteBoletos') || '1', 10);
         listaNumerosElegidos.innerHTML = '';
         contadorNumerosSpan.textContent = `${misNumerosSeleccionados.length}/${paqueteBoletos}`;
 
