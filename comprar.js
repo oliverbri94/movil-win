@@ -41,6 +41,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 hiddenInput.name = 'coupon_code';
                 hiddenInput.value = couponCode;
                 document.getElementById('form-pedido').appendChild(hiddenInput);
+                for(let i = 0; i < quantity; i++) {
+                    // Usamos un valor único para saber que es un slot de migración
+                    misNumerosSeleccionados.push([`MIGRADO-${i+1}`]); 
+                }
             }
         } catch (e) {
             console.error("Error al procesar el cupón de migración:", e);
@@ -415,58 +419,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         showStatusMessage('status-combinacion', `¡Se añadieron ${numerosAnadidos} combinaciones aleatorias!`, false);
     };
     
-    // REEMPLAZA LA FUNCIÓN COMPLETA
     function actualizarListaMisNumeros() {
-        const currentParams = new URLSearchParams(window.location.search);
-        const paqueteBoletos = parseInt(currentParams.get('paqueteBoletos') || '1', 10);
-        const isMigration = (currentParams.get('coupon') || '').startsWith('MIGRACION-');
-
+        const paqueteBoletos = parseInt(new URLSearchParams(window.location.search).get('paqueteBoletos') || '1', 10);
         listaNumerosElegidos.innerHTML = '';
         contadorNumerosSpan.textContent = `${misNumerosSeleccionados.length}/${paqueteBoletos}`;
 
-        if (isMigration) {
-            // Lógica especial para migración: Muestra los slots como llenos
-            for (let i = 0; i < paqueteBoletos; i++) {
+        if(misNumerosSeleccionados.length === 0 && sorteoData.tipo_sorteo === 'tombola_interactiva') {
+            listaNumerosElegidos.innerHTML = `<li class="empty-list">Aún no has elegido números.</li>`;
+        }
+
+        misNumerosSeleccionados.forEach((numeros, index) => {
+            const li = document.createElement('li');
+            li.className = 'numero-elegido-item';
+
+            let contenido = '';
+            if (numeros === null) {
+                contenido = `<div class="bola-small-slot filled">Boleto #${index + 1}</div>`;
+            } else {
+                const bolasHTML = numeros.map(n => `<div class="bola-small">${n}</div>`).join('');
+                contenido = `
+                    <div class="bolas-container">${bolasHTML}</div>
+                    <button type="button" class="btn-eliminar-numero" data-index="${index}">&times;</button>
+                `;
+            }
+            li.innerHTML = contenido;
+            listaNumerosElegidos.appendChild(li);
+        });
+
+        const slotsRestantes = paqueteBoletos - misNumerosSeleccionados.length;
+        if (sorteoData && sorteoData.tipo_sorteo === 'tombola_interactiva') {
+            for (let i = 0; i < slotsRestantes; i++) {
                 const li = document.createElement('li');
                 li.className = 'numero-elegido-item';
-                li.innerHTML = `<div class="bola-small-slot filled">Número #${i + 1}</div>`;
+                li.innerHTML = '<div class="bola-small-slot"><i class="fas fa-plus"></i></div>';
                 listaNumerosElegidos.appendChild(li);
-            }
-            // Llenamos el array interno para que las validaciones funcionen
-            if(misNumerosSeleccionados.length === 0) {
-                for(let i = 0; i < paqueteBoletos; i++) {
-                    misNumerosSeleccionados.push([`MIGRADO-${i+1}`]); 
-                }
-            }
-
-        } else {
-            // Lógica normal que ya tenías
-            if (misNumerosSeleccionados.length === 0 && sorteoData && sorteoData.tipo_sorteo === 'tombola_interactiva') {
-                listaNumerosElegidos.innerHTML = `<li class="empty-list">Aún no has elegido números.</li>`;
-            }
-
-            misNumerosSeleccionados.forEach((numeros, index) => {
-                const li = document.createElement('li');
-                li.className = 'numero-elegido-item';
-                let contenido = '';
-                if (numeros === null) {
-                    contenido = `<div class="bola-small-slot filled">Boleto #${index + 1}</div>`;
-                } else {
-                    const bolasHTML = numeros.map(n => `<div class="bola-small">${n}</div>`).join('');
-                    contenido = `<div class="bolas-container">${bolasHTML}</div><button type="button" class="btn-eliminar-numero" data-index="${index}">&times;</button>`;
-                }
-                li.innerHTML = contenido;
-                listaNumerosElegidos.appendChild(li);
-            });
-
-            const slotsRestantes = paqueteBoletos - misNumerosSeleccionados.length;
-            if (sorteoData && sorteoData.tipo_sorteo === 'tombola_interactiva') {
-                for (let i = 0; i < slotsRestantes; i++) {
-                    const li = document.createElement('li');
-                    li.className = 'numero-elegido-item';
-                    li.innerHTML = '<div class="bola-small-slot"><i class="fas fa-plus"></i></div>';
-                    listaNumerosElegidos.appendChild(li);
-                }
             }
         }
     }
