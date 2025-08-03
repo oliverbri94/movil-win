@@ -603,4 +603,42 @@ document.addEventListener('DOMContentLoaded', async () => {
             actualizarListaMisNumeros();
         });
     }
+    // --- Lógica para Autocompletar Datos del Cliente ---
+    const cedulaInput = document.getElementById('cedula');
+    if (cedulaInput) {
+        let typingTimer; // Temporizador para no hacer la petición en cada tecla
+        const doneTypingInterval = 800; // 0.8 segundos de espera
+
+        const buscarDatosCliente = async () => {
+            const cedula = cedulaInput.value;
+            if (cedula.length !== 10) return; // Solo buscar si la cédula tiene 10 dígitos
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/participante-datos/${cedula}`);
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    // ¡Encontramos al cliente! Rellenamos los campos.
+                    document.getElementById('nombre').value = result.data.nombre || '';
+                    document.getElementById('ciudad').value = result.data.ciudad || '';
+                    document.getElementById('celular').value = result.data.celular || '';
+                    document.getElementById('email').value = result.data.email || '';
+
+                    // Opcional: Notificar al usuario
+                    showStatusMessage('pedido-status', '¡Qué bueno verte de nuevo! Hemos rellenado tus datos.', false);
+                }
+            } catch (error) {
+                console.error('Error al autocompletar datos:', error);
+            }
+        };
+
+        cedulaInput.addEventListener('keyup', () => {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(buscarDatosCliente, doneTypingInterval);
+        });
+
+        cedulaInput.addEventListener('keydown', () => {
+            clearTimeout(typingTimer);
+        });
+    }
 }); 

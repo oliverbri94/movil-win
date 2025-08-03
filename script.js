@@ -908,21 +908,6 @@ function initializeRafflePage() {
 
                 const miniPaquetesHTML = generarHTMLMiniPaquetes(sorteo.paquetes_json, sorteo.id_sorteo, tituloMostrado);
 
-                const progressBarHTML = `
-                    <p class="motivational-text-integrated">${motivationalMessage}</p>
-                    <div id="tombola-sorteo-${sorteo.id_sorteo}" class="progress-tombola ${urgenciaClass}" data-progress="${percentageSold.toFixed(0)}">
-                        <div class="tombola-container">
-                            <div class="tombola-liquid" style="height: ${percentageSold.toFixed(0)}%;"></div>
-                            <div class="tombola-glass-shine"></div>
-                        </div>
-                        <div class="tombola-label">
-                            <div class="tombola-number">${percentageSold.toFixed(0)}<span class="tombola-percent">%</span></div>
-                        </div>
-                        <div class="tombola-base"></div>
-                    </div>
-                    ${metaMessage}
-                `;
-
                 slideWrapper.innerHTML = `
                     <div class="prize-carousel-slide" data-sorteo-id="${sorteo.id_sorteo}">
                         <div class="fila-superior">
@@ -935,7 +920,25 @@ function initializeRafflePage() {
                                 <div class="prize-info-container">
                                     <h2 class="prize-title">${tituloMostrado}</h2>
                                     <div class="mini-package-selector">${miniPaquetesHTML}</div>
-                                    ${progressBarHTML}
+
+                                    <div class="progress-info-wrapper">
+                                        <div class="boletos-restantes-container" style="margin-bottom: 25px;">
+                                            <span class="boletos-restantes-numero">${goal - currentCount}</span>
+                                            <span class="boletos-restantes-texto">Boletos Restantes</span>
+                                        </div>
+                                        <p class="motivational-text-integrated">${motivationalMessage}</p>
+                                        <div id="tombola-sorteo-${sorteo.id_sorteo}" class="progress-tombola ${urgenciaClass}" data-progress="${percentageSold.toFixed(0)}">
+                                            <div class="tombola-container">
+                                                <div class="tombola-liquid" style="height: ${percentageSold.toFixed(0)}%;"></div>
+                                                <div class="tombola-glass-shine"></div>
+                                            </div>
+                                            <div class="tombola-label">
+                                                <div class="tombola-number">${percentageSold.toFixed(0)}<span class="tombola-percent">%</span></div>
+                                            </div>
+                                            <div class="tombola-base"></div>
+                                        </div>
+                                        ${metaMessage}
+                                    </div>
                                     <div class="top-participants-wrapper">
                                         <button type="button" class="top-list-header collapsible-toggle">
                                             <div class="header-title">
@@ -953,17 +956,6 @@ function initializeRafflePage() {
                                 </div>
                             </div>
                         </div>
-                       <!-- para eliminar espacio en la parte inferior, se puede comentar esta sección
-                       <div class="fila-inferior">
-                            <div class="contenedor-sorteo content-section">
-                                <h2 class="titulo-dorado" data-text="GRAN RUEDA MOVIL WIN">GRAN RUEDA MOVIL WIN</h2>
-                                <div class="price-is-right-wheel-frame">
-                                    <div class="wheel-price-is-right-container"><canvas class="price-wheel-canvas"></canvas></div>
-                                    <div class="clacker-container"><div class="clacker-border"></div><div class="clacker-top"></div></div>
-                                </div>
-                            </div>
-                        </div>
-                        -->
                     </div>
                 `;
             }

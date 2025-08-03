@@ -330,6 +330,31 @@ app.get('/api/sorteo-details/:id', async (req, res) => {
     }
 });
 
+// BUSCAR DATOS DE UN PARTICIPANTE POR CÉDULA
+app.get('/api/participante-datos/:cedula', async (req, res) => {
+    try {
+        const { cedula } = req.params;
+        // Validamos que sea una cédula con el formato correcto (10 dígitos)
+        if (!cedula || !/^\d{10}$/.test(cedula)) {
+            return res.status(400).json({ success: false, error: 'Formato de cédula inválido.' });
+        }
+
+        const sql = `SELECT nombre, ciudad, celular, email FROM datos_unicos_participantes WHERE id_documento = $1`;
+        const participante = await new Promise((resolve, reject) => {
+            db.get(sql, [cedula], (err, row) => err ? reject(err) : resolve(row));
+        });
+
+        if (participante) {
+            res.json({ success: true, data: participante });
+        } else {
+            res.json({ success: false, message: 'Cliente no encontrado.' });
+        }
+    } catch (error) {
+        console.error("Error al buscar datos de participante:", error);
+        res.status(500).json({ success: false, error: 'Error interno del servidor.' });
+    }
+});
+
 // NUEVA RUTA: OBTENER NÚMEROS OCUPADOS PARA UN SORTEO DE TÓMBOLA
 app.get('/api/numeros-ocupados/:id', async (req, res) => {
     try {
