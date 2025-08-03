@@ -4097,88 +4097,140 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 /* --- Ajustes para Móviles (Sin cambios) --- */
 @media (max-width: 992px) { /* ... */ }
-/* ====================================================== */
-/* --- REDISEÑO MEJORADO: BARRA DE PROGRESO RADIAL --- */
-/* ====================================================== */
-
-.progress-radial-wrapper {
+/* =============================================== */
+/* ESTILOS PARA TÓMBOLA DE PROGRESO MINIMALISTA */
+/* =============================================== */
+.progress-tombola {
     position: relative;
-    width: 140px; /* Un poco más grande para mayor impacto */
-    height: 140px;
-    margin: 20px auto;
-    /* Variables para el color del brillo (glow) */
-    --glow-color: rgba(44, 182, 125, 0.7);
-}
-
-/* Sombra interior para dar profundidad */
-.progress-radial-inner-shadow {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    background: linear-gradient(145deg, #ffffff, #f0f2f5);
     border-radius: 50%;
-    box-shadow: inset 0 4px 15px rgba(0,0,0,0.2);
-    background-color: var(--clr-light-bg-frame);
+    box-shadow: 
+        10px 10px 20px rgba(0, 0, 0, 0.08),
+        -10px -10px 20px rgba(255, 255, 255, 0.8),
+        inset 0 0 0 8px #f8f9fa;
+    overflow: hidden;
 }
 
-.progress-radial-svg {
-    position: relative;
-    z-index: 2;
+.progress-tombola::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: linear-gradient(45deg, #e3e8ee, #c3cfe2, #a8b8d1);
+    border-radius: 50%;
+    z-index: -1;
 }
 
-.progress-radial-bg-circle {
-    /* Color de fondo del arco */
-    stroke: var(--clr-light-border);
+.tombola-container {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    border-radius: 50%;
+    background: #fafbfc;
+    box-shadow: 
+        inset 8px 8px 16px rgba(0, 0, 0, 0.05),
+        inset -8px -8px 16px rgba(255, 255, 255, 0.9);
+    overflow: hidden;
 }
 
-.progress-radial-fg-circle {
-    /* Animación suave al cargar */
-    transition: stroke-dashoffset 1.2s cubic-bezier(0.25, 1, 0.5, 1);
-    /* Efecto de brillo usando un filtro SVG */
-    filter: url(#glow);
+.tombola-liquid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    border-radius: 0 0 80px 80px; /* Más redondeado para el efecto líquido */
+    transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease;
+    overflow: hidden;
 }
 
-.progress-radial-percentage {
+.tombola-liquid::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: -50%;
+    width: 200%;
+    height: 30px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 75%, transparent 100%);
+    animation: gentle-wave 4s ease-in-out infinite;
+}
+
+.tombola-glass-shine {
+    position: absolute;
+    top: 15%;
+    left: 25%;
+    width: 30%;
+    height: 40%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+    border-radius: 50%;
+    transform: rotate(-20deg);
+    pointer-events: none;
+}
+
+.tombola-label {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: var(--clr-light-text);
-    font-family: 'Poppins', sans-serif;
-    font-size: 2em; /* Texto más grande */
-    font-weight: 700;
-    text-shadow: 1px 1px 2px rgba(255,255,255,0.1);
-    z-index: 3;
-    transition: color 0.4s ease;
+    z-index: 10;
 }
 
-.progress-radial-percentage span {
-    font-size: 0.5em;
+.tombola-number {
+    font-size: 2.2em;
+    font-weight: 700;
+    color: var(--clr-light-text);
+    margin: 0;
+    line-height: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.tombola-percent {
+    font-size: 0.6em;
     font-weight: 500;
     color: var(--clr-light-text-alt);
-    margin-left: 2px;
+    margin-left: 3px;
 }
 
-/* --- Estados de Urgencia --- */
-.progress-radial-wrapper.urgente {
-    --glow-color: rgba(var(--clr-accent-rgb), 0.7);
-}
-.progress-radial-wrapper.urgente .progress-radial-percentage {
-    color: var(--clr-accent);
-}
-
-.progress-radial-wrapper.critico {
-    --glow-color: rgba(var(--clr-red-rgb), 0.8);
-    animation: pulse-red-glow 1.5s infinite;
-}
-.progress-radial-wrapper.critico .progress-radial-percentage {
-    color: var(--clr-red);
+.tombola-base {
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 15px;
+    background: linear-gradient(145deg, #e3e8ee, #c3cfe2);
+    border-radius: 50px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Animación de pulso para el estado crítico */
-@keyframes pulse-red-glow {
-  50% { --glow-color: rgba(var(--clr-red-rgb), 1); }
+/* Estados de la tómbola con TUS colores */
+.progress-tombola.normal .tombola-liquid {
+    background: linear-gradient(180deg, var(--clr-primary), var(--clr-accent));
+}
+.progress-tombola.urgente .tombola-liquid {
+    background: linear-gradient(180deg, var(--clr-accent), var(--clr-secondary));
+}
+.progress-tombola.critico .tombola-liquid {
+    background: linear-gradient(180deg, var(--clr-secondary), #d63031);
+    animation: critical-bubble 1.5s infinite;
+}
+
+/* Animaciones */
+@keyframes gentle-wave {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(10px) rotate(1deg); }
+    75% { transform: translateX(-10px) rotate(-1deg); }
+}
+@keyframes critical-bubble {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
 }
 
 /* Pega este código al final de style.css */
