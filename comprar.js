@@ -108,39 +108,49 @@ document.addEventListener('DOMContentLoaded', async () => {
             const valor = input.value;
             const valorNumerico = parseInt(valor, 10);
             const maxPermitido = parseInt(input.dataset.max, 10);
-            
             if (valor === '' || isNaN(valorNumerico) || valorNumerico > maxPermitido || valorNumerico < 1) {
                 esValido = false;
             } else {
-                combinacion.push(valor);
+                combinacion.push(String(valorNumerico).padStart(input.dataset.digitos, '0'));
             }
         });
 
         if (!esValido) {
-            showStatusMessage('status-combinacion', 'Por favor, asegúrate de que todas las casillas tengan un número válido y dentro del rango.', true);
+            showStatusMessage('status-combinacion', 'Por favor, asegúrate de que todas las casillas tengan un número válido (mayor a 0).', true);
             return;
         }
+
         const combinacionString = JSON.stringify(combinacion);
         if (numerosOcupados.includes(combinacionString)) {
             showStatusMessage('status-combinacion', '¡Esa combinación ya fue elegida! Por favor, elige otra.', true);
             return;
         }
-        const cantidadRequerida = parseInt(params.get('paqueteBoletos') || '1', 10);
-        if (misNumerosSeleccionados.length >= cantidadRequerida) {
-            showStatusMessage('status-combinacion', `Ya has elegido el máximo de ${cantidadRequerida} combinaciones.`, true);
-            return;
-        }
 
         if (misNumerosSeleccionados.some(c => JSON.stringify(c) === combinacionString)) {
-            showStatusMessage('status-combinacion', 'Ya has elegido esta combinación. Elige una diferente.', true);
+            showStatusMessage('status-combinacion', 'Ya has elegido esta combinación en tu lista actual.', true);
             return;
         }
 
-        misNumerosSeleccionados.push(combinacion);
-        actualizarListaMisNumeros(); 
+        // --- LÓGICA CORREGIDA ---
+        // Buscamos el primer slot de migración disponible para reemplazarlo
+        const indexMigrado = misNumerosSeleccionados.findIndex(n => Array.isArray(n) && n[0].startsWith('MIGRADO-'));
+
+        if (indexMigrado !== -1) {
+            // Si encuentra un slot migrado, lo reemplaza
+            misNumerosSeleccionados[indexMigrado] = combinacion;
+        } else {
+            // Si no hay slots migrados (o es un usuario normal), simplemente añade el número si hay espacio
+            const cantidadRequerida = parseInt(new URLSearchParams(window.location.search).get('paqueteBoletos') || '1', 10);
+            if (misNumerosSeleccionados.length >= cantidadRequerida) {
+                showStatusMessage('status-combinacion', `Ya has elegido el máximo de ${cantidadRequerida} combinaciones.`, true);
+                return;
+            }
+            misNumerosSeleccionados.push(combinacion);
+        }
+
+        actualizarListaMisNumeros();
         showStatusMessage('status-combinacion', `¡Combinación [${combinacion.join('-')}] añadida!`, false);
     };
-
     const updateProgressBar = (stepIndex) => {
         progressSteps.forEach((step, index) => {
             step.classList.toggle('active', index <= stepIndex);
@@ -150,17 +160,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const validateStep = (stepIndex) => {
-        if (stepIndex === 0) { 
+        if (stepIndex === 0) {
             const paqueteBoletos = parseInt(new URLSearchParams(window.location.search).get('paqueteBoletos') || '1', 10);
-            // La validación ahora chequea si hay algún slot "vacío" o si no se ha alcanzado el total
-            const isMigration = (couponCode && couponCode.startsWith('MIGRACION-'));
-            const allSlotsFilled = misNumerosSeleccionados.length === paqueteBoletos && !misNumerosSeleccionados.some(n => n[0].startsWith('MIGRADO-'));
 
-            if (sorteoData.tipo_sorteo === 'tombola_interactiva' && !isMigration && !allSlotsFilled) {
+            // Verificamos que se haya llenado la cantidad correcta de boletos
+            if (misNumerosSeleccionados.length < paqueteBoletos) {
                 alert(`Debes elegir las ${paqueteBoletos} combinación(es) para continuar.`);
                 return false;
             }
+
+            // Verificamos que no queden slots de migración sin reemplazar
+            const quedanSlotsMigrados = misNumerosSeleccionados.some(n => Array.isArray(n) && n[0].startsWith('MIGRADO-'));
+            if (quedanSlotsMigrados) {
+                alert(`Aún te quedan combinaciones de tu paquete migrado por elegir.`);
+                return false;
+            }
         }
+
         if (stepIndex === 1 || stepIndex === 2) {
             const inputs = steps[stepIndex].querySelectorAll('input[required]');
             let allValid = true;
@@ -383,48 +399,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const anadirNumerosAleatorios = () => {
-        const paqueteBoletos = parseInt(params.get('paqueteBoletos') || '1', 10);
-        const numerosRestantes = paqueteBoletos - misNumerosSeleccionados.length;
+        // Buscamos cuántos slots de migración quedan por llenar
+        const slotsMigradosIndices = misNumerosSeleccionados.map((n, index) => (Array.isArray(n) && n[0].startsWith('MIGRADO-')) ? index : -1).filter(index => index !== -1);
+        const numerosRestantes = slotsMigradosIndices.length > 0 ? slotsMigradosIndices.length : (parseInt(new URLSearchParams(window.location.search).get('paqueteBoletos') || '1', 10) - misNumerosSeleccionados.length);
 
         if (numerosRestantes <= 0) {
             showStatusMessage('status-combinacion', '¡Ya has completado tu paquete!', true);
             return;
         }
-        
+
         const configBolas = sorteoData.configuracion_tombola;
         let numerosAnadidos = 0;
-        let intentosGlobales = 0;
 
         for (let i = 0; i < numerosRestantes; i++) {
-            let comboAleatorio, comboString;
-            let intentos = 0;
-            const MAX_INTENTOS_POR_NUMERO = 500;
-
+            let comboAleatorio, comboString, intentos = 0;
             do {
                 comboAleatorio = configBolas.map(bola => {
-                    const maxNum = parseInt(bola.max, 10); 
-
+                    const maxNum = parseInt(bola.max, 10);
                     const num = Math.floor(Math.random() * maxNum) + 1;
                     return String(num).padStart(bola.digitos, '0');
                 });
                 comboString = JSON.stringify(comboAleatorio);
                 intentos++;
-                intentosGlobales++;
-                if (intentos > MAX_INTENTOS_POR_NUMERO || intentosGlobales > 2000) {
-                    alert('No se pudieron encontrar suficientes combinaciones aleatorias. ¡El sorteo está casi lleno!');
-                    actualizarListaMisNumeros();
+                if (intentos > 500) {
+                    alert('No se pudieron encontrar suficientes combinaciones aleatorias disponibles.');
                     return;
                 }
-            } while (numerosOcupados.includes(comboString) || misNumerosSeleccionados.map(n => JSON.stringify(n)).includes(comboString));
-            
-            misNumerosSeleccionados.push(comboAleatorio);
+            } while (numerosOcupados.includes(comboString) || misNumerosSeleccionados.some(c => JSON.stringify(c) === comboString));
+
+            if(slotsMigradosIndices.length > 0) {
+                // Si estamos llenando slots de migración, los reemplazamos
+                misNumerosSeleccionados[slotsMigradosIndices[i]] = comboAleatorio;
+            } else {
+                // Si es un usuario normal, los añadimos
+                misNumerosSeleccionados.push(comboAleatorio);
+            }
             numerosAnadidos++;
         }
-
         actualizarListaMisNumeros();
         showStatusMessage('status-combinacion', `¡Se añadieron ${numerosAnadidos} combinaciones aleatorias!`, false);
     };
-    
     function actualizarListaMisNumeros() {
         const paqueteBoletos = parseInt(new URLSearchParams(window.location.search).get('paqueteBoletos') || '1', 10);
         listaNumerosElegidos.innerHTML = '';
