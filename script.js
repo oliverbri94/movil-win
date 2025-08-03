@@ -925,7 +925,9 @@ function initializeRafflePage() {
                                         <p class="motivational-text-integrated">${motivationalMessage}</p>
                                         <div id="tombola-sorteo-${sorteo.id_sorteo}" class="progress-tombola ${urgenciaClass || 'normal'}" data-progress="${percentageSold.toFixed(0)}">
                                             <div class="tombola-container">
-                                                <div class="tombola-liquid" style="height: 0%;"></div>
+                                                <div class="tombola-balls" style="height: 0%;">
+                                                    <div class="balls-container"></div>
+                                                </div>
                                                 <div class="tombola-glass-shine"></div>
                                             </div>
                                             <div class="tombola-label">
@@ -955,12 +957,11 @@ function initializeRafflePage() {
                     </div>
                 `;
             }
-            setTimeout((porcentaje) => {
-                const liquidToAnimate = slideWrapper.querySelector('.tombola-liquid');
-                if (liquidToAnimate) {
-                    liquidToAnimate.style.height = `${porcentaje.toFixed(0)}%`;
-                }
-            }, 100, percentageSold); // <-- La clave es pasar 'percentageSold' como argumento aquí
+            // ANIMACIÓN ACTUALIZADA PARA BOLITAS
+            setTimeout((porcentaje, slideElement) => {
+                updateTombolaWithBalls(porcentaje, urgenciaClass || 'normal', slideElement);
+            }, 100, percentageSold, slideWrapper);
+            
             prizeCarouselTrack.appendChild(slideWrapper);
 
             // --- INICIO DEL CÓDIGO CORRECTO PARA LA ANIMACIÓN ---
@@ -985,6 +986,34 @@ function initializeRafflePage() {
                 btn.addEventListener('click', () => girarRuedaFrontView(true));
                 cont.appendChild(btn);
             });
+        }
+    }
+
+    // FUNCIÓN AUXILIAR PARA ACTUALIZAR LA TÓMBOLA CON BOLITAS
+    function updateTombolaWithBalls(percentage, status = 'normal', slideElement) {
+        const ballsContainer = slideElement.querySelector('.tombola-balls');
+        const ballsWrapper = ballsContainer.querySelector('.balls-container');
+        
+        // Limpiar bolitas existentes
+        if (ballsWrapper) {
+            ballsWrapper.innerHTML = '';
+        }
+        
+        // Calcular número de bolitas basado en el porcentaje
+        const maxBalls = 45; // Reducimos para que se vea mejor en el carrusel
+        const numBalls = Math.floor((percentage / 100) * maxBalls);
+        
+        // Actualizar altura del contenedor
+        ballsContainer.style.height = `${percentage}%`;
+        
+        // Crear y añadir bolitas con animación escalonada
+        for (let i = 0; i < numBalls; i++) {
+            setTimeout(() => {
+                const ball = document.createElement('div');
+                ball.className = 'ball';
+                ball.style.setProperty('--i', i);
+                ballsWrapper.appendChild(ball);
+            }, i * 50); // Delay de 50ms entre cada bolita
         }
     }
         // Añadimos el evento de clic para los paneles de navegación

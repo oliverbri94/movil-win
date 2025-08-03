@@ -4098,7 +4098,7 @@ nav.bg-custom-dark-bg-frame a:hover {
 /* --- Ajustes para Móviles (Sin cambios) --- */
 @media (max-width: 992px) { /* ... */ }
 /* =============================================== */
-/* ESTILOS PARA TÓMBOLA DE PROGRESO MINIMALISTA */
+/* ESTILOS PARA TÓMBOLA DE PROGRESO CON BOLITAS */
 /* =============================================== */
 .progress-tombola {
     position: relative;
@@ -4140,33 +4140,70 @@ nav.bg-custom-dark-bg-frame a:hover {
     overflow: hidden;
 }
 
-.tombola-liquid {
+.tombola-balls {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
     height: 0%;
-    background-color: var(--clr-primary); /* <-- AÑADE ESTA LÍNEA */
-    border-radius: 0 0 80px 80px; /* Más redondeado para el efecto líquido */
-    transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease;
+    background: transparent;
+    border-radius: 0 0 80px 80px;
+    transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-end;
+    justify-content: center;
+    padding: 4px;
+    gap: 2px;
 }
 
-.tombola-liquid::before {
-    content: '';
-    position: absolute;
-    top: -15px;
-    left: -50%;
-    width: 200%;
-    height: 30px;
-    background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.15) 25%,
-        rgba(255, 255, 255, 0.25) 50%,
-        rgba(255, 255, 255, 0.15) 75%,
-        transparent 100%);
-    animation: gentle-wave 4s ease-in-out infinite;
+/* Bolitas individuales */
+.ball {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(255, 255, 255, 0.8), 
+        var(--clr-primary) 40%, 
+        var(--clr-accent) 100%);
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.2),
+        inset -1px -1px 1px rgba(0, 0, 0, 0.1),
+        inset 1px 1px 1px rgba(255, 255, 255, 0.3);
+    animation: ball-drop 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    opacity: 0;
+    animation-fill-mode: forwards;
 }
+
+/* Diferentes tamaños de bolitas para más realismo */
+.ball:nth-child(3n) {
+    width: 6px;
+    height: 6px;
+}
+
+.ball:nth-child(5n) {
+    width: 10px;
+    height: 10px;
+}
+
+.ball:nth-child(7n) {
+    width: 7px;
+    height: 7px;
+}
+
+/* Delays escalonados para efecto de llenado gradual */
+.ball:nth-child(1) { animation-delay: 0.1s; }
+.ball:nth-child(2) { animation-delay: 0.15s; }
+.ball:nth-child(3) { animation-delay: 0.2s; }
+.ball:nth-child(4) { animation-delay: 0.25s; }
+.ball:nth-child(5) { animation-delay: 0.3s; }
+.ball:nth-child(6) { animation-delay: 0.35s; }
+.ball:nth-child(7) { animation-delay: 0.4s; }
+.ball:nth-child(8) { animation-delay: 0.45s; }
+.ball:nth-child(9) { animation-delay: 0.5s; }
+.ball:nth-child(10) { animation-delay: 0.55s; }
+.ball:nth-child(n+11) { animation-delay: 0.6s; }
 
 .tombola-glass-shine {
     position: absolute;
@@ -4217,29 +4254,60 @@ nav.bg-custom-dark-bg-frame a:hover {
 }
 
 /* Estados de la tómbola con TUS colores */
-.progress-tombola.normal .tombola-liquid {
-    background: linear-gradient(180deg, var(--clr-primary), var(--clr-accent)) !important;
+.progress-tombola.normal .ball {
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(255, 255, 255, 0.8), 
+        var(--clr-primary) 40%, 
+        var(--clr-accent) 100%);
 }
-.progress-tombola.urgente .tombola-liquid {
-    background: linear-gradient(180deg, var(--clr-accent), var(--clr-secondary)) !important;
+
+.progress-tombola.urgente .ball {
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(255, 255, 255, 0.8), 
+        var(--clr-accent) 40%, 
+        var(--clr-secondary) 100%);
 }
-.progress-tombola.critico .tombola-liquid {
-    background: linear-gradient(180deg, var(--clr-secondary), #d63031) !important;
-    animation: critical-bubble 1.5s infinite;
+
+.progress-tombola.critico .ball {
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(255, 255, 255, 0.8), 
+        var(--clr-secondary) 40%, 
+        #d63031 100%);
+    animation: ball-drop 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55), 
+               critical-ball-pulse 1.5s infinite;
 }
 
 /* Animaciones */
-@keyframes gentle-wave {
-    0%, 100% { transform: translateX(0) rotate(0deg); }
-    25% { transform: translateX(10px) rotate(1deg); }
-    75% { transform: translateX(-10px) rotate(-1deg); }
-}
-@keyframes critical-bubble {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.03); } /* Un poco más grande que antes */
+@keyframes ball-drop {
+    0% { 
+        opacity: 0; 
+        transform: translateY(-20px) scale(0.5); 
+    }
+    50% { 
+        opacity: 0.7; 
+        transform: translateY(0) scale(1.1); 
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
 }
 
-/* Pega este código al final de style.css */
+@keyframes critical-ball-pulse {
+    0%, 100% { 
+        box-shadow: 
+            0 1px 2px rgba(0, 0, 0, 0.2),
+            inset -1px -1px 1px rgba(0, 0, 0, 0.1),
+            inset 1px 1px 1px rgba(255, 255, 255, 0.3);
+    }
+    50% { 
+        box-shadow: 
+            0 1px 2px rgba(0, 0, 0, 0.2),
+            inset -1px -1px 1px rgba(0, 0, 0, 0.1),
+            inset 1px 1px 1px rgba(255, 255, 255, 0.3),
+            0 0 8px rgba(214, 48, 49, 0.4);
+    }
+}
 
 /* Estilo para la nueva etiqueta de "boletos gratis" o "ahorro" */
 .etiqueta-ahorro {
