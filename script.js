@@ -1004,30 +1004,36 @@ function initializeRafflePage() {
     }
 
     // FUNCIÓN AUXILIAR PARA ACTUALIZAR LA TÓMBOLA CON BOLITAS
+    // REEMPLAZA LA FUNCIÓN COMPLETA
     function updateTombolaWithBalls(percentage, status = 'normal', slideElement) {
+        const tombolaElement = slideElement.querySelector('.progress-tombola');
         const ballsContainer = slideElement.querySelector('.tombola-balls');
-        const ballsWrapper = ballsContainer.querySelector('.balls-container');
-        
-        // Limpiar bolitas existentes
-        if (ballsWrapper) {
-            ballsWrapper.innerHTML = '';
+        const ballsWrapper = slideElement.querySelector('.balls-container');
+
+        if (!tombolaElement || !ballsContainer || !ballsWrapper) {
+            console.error("No se encontraron los elementos de la tómbola de bolitas.");
+            return;
         }
-        
-        // Calcular número de bolitas basado en el porcentaje
-        const maxBalls = 45; // Reducimos para que se vea mejor en el carrusel
+
+        // 1. Limpiar bolitas existentes
+        ballsWrapper.innerHTML = '';
+
+        // 2. Aplicar clase de estado (color)
+        tombolaElement.classList.remove('normal', 'urgente', 'critico');
+        tombolaElement.classList.add(status);
+
+        // 3. Calcular número de bolitas y actualizar altura del contenedor
+        const maxBalls = 120; // Aumentamos la cantidad para que se vea más lleno
         const numBalls = Math.floor((percentage / 100) * maxBalls);
-        
-        // Actualizar altura del contenedor
         ballsContainer.style.height = `${percentage}%`;
-        
-        // Crear y añadir bolitas con animación escalonada
+
+        // 4. Crear y añadir las nuevas bolitas con animación escalonada
         for (let i = 0; i < numBalls; i++) {
-            setTimeout(() => {
-                const ball = document.createElement('div');
-                ball.className = 'ball';
-                ball.style.setProperty('--i', i);
-                ballsWrapper.appendChild(ball);
-            }, i * 50); // Delay de 50ms entre cada bolita
+            const ball = document.createElement('div');
+            ball.className = 'ball';
+            // Aplicamos el delay de la animación directamente en el estilo
+            ball.style.animationDelay = `${i * 0.02}s`; // 20ms de retraso entre cada bolita
+            ballsWrapper.appendChild(ball);
         }
     }
         // Añadimos el evento de clic para los paneles de navegación

@@ -4097,13 +4097,15 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 /* --- Ajustes para Móviles (Sin cambios) --- */
 @media (max-width: 992px) { /* ... */ }
+
+
 /* =============================================== */
-/* ESTILOS PARA TÓMBOLA DE PROGRESO CON BOLITAS */
+/* ESTILOS PARA TÓMBOLA DE PROGRESO CON BOLITAS (CORREGIDO) */
 /* =============================================== */
 .progress-tombola {
     position: relative;
-    width: 150px;
-    height: 150px;
+    width: 200px; /* Un poco más grande para que quepan mejor las bolitas */
+    height: 200px;
     margin: 0 auto;
     background: linear-gradient(145deg, #ffffff, #f0f2f5);
     border-radius: 50%;
@@ -4114,24 +4116,20 @@ nav.bg-custom-dark-bg-frame a:hover {
     overflow: hidden;
 }
 
-.progress-tombola::before {
+.progress-tombola::before, .progress-tombola::after { /* Añadido ::after para borde interior */
     content: '';
     position: absolute;
-    top: -4px;
-    left: -4px;
-    right: -4px;
-    bottom: -4px;
-    background: linear-gradient(45deg, #e3e8ee, #c3cfe2, #a8b8d1);
     border-radius: 50%;
     z-index: -1;
+}
+.progress-tombola::before {
+    inset: -4px; /* Borde exterior */
+    background: linear-gradient(45deg, #e3e8ee, #c3cfe2, #a8b8d1);
 }
 
 .tombola-container {
     position: absolute;
-    top: 12px;
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
+    inset: 12px; /* Espacio interior */
     border-radius: 50%;
     background: #fafbfc;
     box-shadow: 
@@ -4145,24 +4143,28 @@ nav.bg-custom-dark-bg-frame a:hover {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 0%;
-    background: transparent;
-    border-radius: 0 0 80px 80px;
+    height: 0%; /* La altura se controla con JS */
     transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: flex-end;
-    justify-content: center;
-    padding: 4px;
-    gap: 2px;
 }
 
-/* Bolitas individuales */
+.balls-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap-reverse; /* Las bolitas se apilan desde abajo */
+    align-content: flex-start; /* Empiezan a llenar desde abajo */
+    justify-content: center;
+    padding: 5px;
+    gap: 3px;
+}
+
+/* Bolitas individuales (TODAS DEL MISMO TAMAÑO) */
 .ball {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
+    flex-shrink: 0;
     background: radial-gradient(circle at 30% 30%, 
         rgba(255, 255, 255, 0.8), 
         var(--clr-primary) 40%, 
@@ -4171,143 +4173,30 @@ nav.bg-custom-dark-bg-frame a:hover {
         0 1px 2px rgba(0, 0, 0, 0.2),
         inset -1px -1px 1px rgba(0, 0, 0, 0.1),
         inset 1px 1px 1px rgba(255, 255, 255, 0.3);
-    animation: ball-drop 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* CORRECCIÓN DE LA ANIMACIÓN */
     opacity: 0;
-    animation-fill-mode: forwards;
+    animation: ball-drop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
 
-/* Diferentes tamaños de bolitas para más realismo */
-.ball:nth-child(3n) {
-    width: 6px;
-    height: 6px;
-}
-
-.ball:nth-child(5n) {
-    width: 10px;
-    height: 10px;
-}
-
-.ball:nth-child(7n) {
-    width: 7px;
-    height: 7px;
-}
-
-/* Delays escalonados para efecto de llenado gradual */
-.ball:nth-child(1) { animation-delay: 0.1s; }
-.ball:nth-child(2) { animation-delay: 0.15s; }
-.ball:nth-child(3) { animation-delay: 0.2s; }
-.ball:nth-child(4) { animation-delay: 0.25s; }
-.ball:nth-child(5) { animation-delay: 0.3s; }
-.ball:nth-child(6) { animation-delay: 0.35s; }
-.ball:nth-child(7) { animation-delay: 0.4s; }
-.ball:nth-child(8) { animation-delay: 0.45s; }
-.ball:nth-child(9) { animation-delay: 0.5s; }
-.ball:nth-child(10) { animation-delay: 0.55s; }
-.ball:nth-child(n+11) { animation-delay: 0.6s; }
-
-.tombola-glass-shine {
+.tombola-glass-shine, .tombola-label, .tombola-number, .tombola-percent, .tombola-base {
+    /* (Estas clases no necesitan cambios, se dejan como están) */
     position: absolute;
-    top: 15%;
-    left: 25%;
-    width: 30%;
-    height: 40%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
-    border-radius: 50%;
-    transform: rotate(-20deg);
-    pointer-events: none;
 }
-
-.tombola-label {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-}
-
-.tombola-number {
-    font-size: 2.2em;
-    font-weight: 700;
-    color: var(--clr-light-text);
-    margin: 0;
-    line-height: 1;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.tombola-percent {
-    font-size: 0.6em;
-    font-weight: 500;
-    color: var(--clr-light-text-alt);
-    margin-left: 3px;
-}
-
-.tombola-base {
-    position: absolute;
-    bottom: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 120px;
-    height: 15px;
-    background: linear-gradient(145deg, #e3e8ee, #c3cfe2);
-    border-radius: 50px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
+.tombola-glass-shine { top: 15%; left: 25%; width: 30%; height: 40%; background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%); border-radius: 50%; transform: rotate(-20deg); pointer-events: none; }
+.tombola-label { top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; }
+.tombola-number { font-size: 2.2em; font-weight: 700; color: var(--clr-light-text); margin: 0; line-height: 1; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
+.tombola-percent { font-size: 0.6em; font-weight: 500; color: var(--clr-light-text-alt); margin-left: 3px; }
+.tombola-base { bottom: -15px; left: 50%; transform: translateX(-50%); width: 120px; height: 15px; background: linear-gradient(145deg, #e3e8ee, #c3cfe2); border-radius: 50px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
 
 /* Estados de la tómbola con TUS colores */
-.progress-tombola.normal .ball {
-    background: radial-gradient(circle at 30% 30%, 
-        rgba(255, 255, 255, 0.8), 
-        var(--clr-primary) 40%, 
-        var(--clr-accent) 100%);
-}
-
-.progress-tombola.urgente .ball {
-    background: radial-gradient(circle at 30% 30%, 
-        rgba(255, 255, 255, 0.8), 
-        var(--clr-accent) 40%, 
-        var(--clr-secondary) 100%);
-}
-
-.progress-tombola.critico .ball {
-    background: radial-gradient(circle at 30% 30%, 
-        rgba(255, 255, 255, 0.8), 
-        var(--clr-secondary) 40%, 
-        #d63031 100%);
-    animation: ball-drop 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55), 
-               critical-ball-pulse 1.5s infinite;
-}
+.progress-tombola.normal .ball { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--clr-primary) 40%, var(--clr-accent) 100%); }
+.progress-tombola.urgente .ball { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--clr-accent) 40%, var(--clr-secondary) 100%); }
+.progress-tombola.critico .ball { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--clr-secondary) 40%, #d63031 100%); animation: ball-drop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards, critical-ball-pulse 1.5s infinite; }
 
 /* Animaciones */
-@keyframes ball-drop {
-    0% { 
-        opacity: 0; 
-        transform: translateY(-20px) scale(0.5); 
-    }
-    50% { 
-        opacity: 0.7; 
-        transform: translateY(0) scale(1.1); 
-    }
-    100% { 
-        opacity: 1; 
-        transform: translateY(0) scale(1); 
-    }
-}
-
-@keyframes critical-ball-pulse {
-    0%, 100% { 
-        box-shadow: 
-            0 1px 2px rgba(0, 0, 0, 0.2),
-            inset -1px -1px 1px rgba(0, 0, 0, 0.1),
-            inset 1px 1px 1px rgba(255, 255, 255, 0.3);
-    }
-    50% { 
-        box-shadow: 
-            0 1px 2px rgba(0, 0, 0, 0.2),
-            inset -1px -1px 1px rgba(0, 0, 0, 0.1),
-            inset 1px 1px 1px rgba(255, 255, 255, 0.3),
-            0 0 8px rgba(214, 48, 49, 0.4);
-    }
-}
+@keyframes ball-drop { 0% { opacity: 0; transform: translateY(-20px) scale(0.5); } 50% { opacity: 0.7; transform: translateY(0) scale(1.1); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes critical-ball-pulse { 0%, 100% { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset -1px -1px 1px rgba(0, 0, 0, 0.1), inset 1px 1px 1px rgba(255, 255, 255, 0.3); } 50% { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset -1px -1px 1px rgba(0, 0, 0, 0.1), inset 1px 1px 1px rgba(255, 255, 255, 0.3), 0 0 8px rgba(214, 48, 49, 0.4); } }
 
 /* Estilo para la nueva etiqueta de "boletos gratis" o "ahorro" */
 .etiqueta-ahorro {
