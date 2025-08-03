@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (couponCode && couponCode.startsWith('MIGRACION-')) {
         try {
+            actualizarListaMisNumeros();
             const parts = couponCode.split('-');
             const quantity = parseInt(parts[1], 10);
             const userId = parts[2];
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Usamos un valor único para saber que es un slot de migración
                     misNumerosSeleccionados.push([`MIGRADO-${i+1}`]); 
                 }
-                actualizarListaMisNumeros();
+                
 
             }
         } catch (e) {
