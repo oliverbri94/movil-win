@@ -925,7 +925,7 @@ function initializeRafflePage() {
                                         <p class="motivational-text-integrated">${motivationalMessage}</p>
                                         <div id="tombola-sorteo-${sorteo.id_sorteo}" class="progress-tombola ${urgenciaClass || 'normal'}" data-progress="${percentageSold.toFixed(0)}">
                                             <div class="tombola-container">
-                                                <div class="tombola-balls" style="height: 0%;">
+                                                <div class="tombola-balls">
                                                     <div class="balls-container"></div>
                                                 </div>
                                                 <div class="tombola-glass-shine"></div>
@@ -957,25 +957,9 @@ function initializeRafflePage() {
                     </div>
                 `;
             }
-            setTimeout(() => {
-                sorteosDisponibles.forEach((sorteo, index) => {
-                    if (sorteo.status_sorteo !== 'programado') {
-                        const slide = prizeCarouselTrack.children[index];
-                        if (slide) {
-                            const currentCount = parseInt(sorteo.participantes_actuales, 10) || 0;
-                            const goal = parseInt(sorteo.meta_participaciones, 10) || 200;
-                            const percentageSold = goal > 0 ? Math.min((currentCount / goal) * 100, 100) : 0;
-
-                            const liquidToAnimate = slide.querySelector('.tombola-liquid');
-                            if (liquidToAnimate) {
-                                liquidToAnimate.style.height = `${percentageSold.toFixed(0)}%`;
-                            }
-                        }
-                    }
-                });
-            }, 100); // Pequeño retardo para activar la transición CSS
             // --- FIN DEL CÓDIGO CORREGIDO ---
-            
+            updateTombolaWithBalls(percentageSold, urgenciaClass, slideWrapper);
+
             prizeCarouselTrack.appendChild(slideWrapper);
 
             // --- INICIO DEL CÓDIGO CORRECTO PARA LA ANIMACIÓN ---
@@ -1015,29 +999,26 @@ function initializeRafflePage() {
             return;
         }
 
-        // 1. Limpiar bolitas existentes
-        ballsWrapper.innerHTML = '';
-
-        // 2. Aplicar clase de estado (color)
+        ballsWrapper.innerHTML = ''; // Limpiar bolitas existentes
         tombolaElement.classList.remove('normal', 'urgente', 'critico');
         tombolaElement.classList.add(status);
 
-        // 3. Calcular número de bolitas y actualizar altura del contenedor
-        const maxBalls = 120; // Aumentamos la cantidad para que se vea más lleno
+        const maxBalls = 120; // Número de bolitas al 100%
         const numBalls = Math.floor((percentage / 100) * maxBalls);
-        ballsContainer.style.height = `${percentage}%`;
 
-        // 4. Crear y añadir las nuevas bolitas con animación escalonada
+        // La altura del contenedor de bolitas ahora se anima con un retardo
+        setTimeout(() => {
+            ballsContainer.style.height = `${percentage}%`;
+        }, 100);
+
+        // Crear y añadir las nuevas bolitas con animación escalonada
         for (let i = 0; i < numBalls; i++) {
             const ball = document.createElement('div');
             ball.className = 'ball';
-            // Aplicamos el delay de la animación directamente en el estilo
-            ball.style.animationDelay = `${i * 0.02}s`; // 20ms de retraso entre cada bolita
+            ball.style.animationDelay = `${i * 0.02}s`; // Retraso de 20ms entre cada bolita
             ballsWrapper.appendChild(ball);
         }
     }
-        // Añadimos el evento de clic para los paneles de navegación
-
     async function actualizarTopParticipantes(sorteoId, slideElement) {
         const listElement = slideElement.querySelector('.top-participants-list');
         const loader = slideElement.querySelector('.top-participants-wrapper .loader-container');
