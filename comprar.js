@@ -45,6 +45,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Usamos un valor único para saber que es un slot de migración
                     misNumerosSeleccionados.push([`MIGRADO-${i+1}`]); 
                 }
+                actualizarListaMisNumeros();
+
             }
         } catch (e) {
             console.error("Error al procesar el cupón de migración:", e);
@@ -436,7 +438,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (numeros === null) {
                 contenido = `<div class="bola-small-slot filled">Boleto #${index + 1}</div>`;
             } else {
-                const bolasHTML = numeros.map(n => `<div class="bola-small">${n}</div>`).join('');
+            const esNumeroMigrado = (Array.isArray(numeros) && typeof numeros[0] === 'string' && numeros[0].startsWith('MIGRADO-'));
+
+            const bolasHTML = esNumeroMigrado
+                ? `<div class="bola-small-slot filled">Nº Migrado</div>` // Si es de migración, muestra un slot
+                : numeros.map(n => `<div class="bola-small">${n}</div>`).join(''); // Si no, muestra las bolas normales
                 contenido = `
                     <div class="bolas-container">${bolasHTML}</div>
                     <button type="button" class="btn-eliminar-numero" data-index="${index}">&times;</button>
