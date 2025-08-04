@@ -76,14 +76,27 @@
             </div>
 
             <div id="listado-participantes-container" class="oculto">
-                <div class="form-group affiliate-search-bar">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
-                        <label for="searchInput">Buscar en la lista:</label>
-                        <span id="search-results-counter" style="font-size: 0.9em; color: var(--clr-light-text-alt);"></span>
+                <div class="search-controls-grid">
+                    <div class="form-group">
+                        <div class="search-header">
+                            <label for="searchTextoInput">Buscar por Nombre o Cédula:</label>
+                            <span id="search-texto-counter" class="search-counter"></span>
+                        </div>
+                        <div class="search-bar">
+                            <input type="search" id="searchTextoInput" placeholder="Escribe para filtrar...">
+                            <i class="fas fa-user search-icon"></i>
+                        </div>
                     </div>
-                    <input type="search" id="searchInput" placeholder="Escribe nombre, cédula o combinación (ej: 110)...">
-                    <ul id="combinationsList"></ul>
-
+                    <div class="form-group">
+                        <div class="search-header">
+                            <label for="searchCombinacionInput">Buscar por Combinación:</label>
+                            <span id="search-combinacion-counter" class="search-counter"></span>
+                        </div>
+                        <div class="search-bar">
+                            <input type="search" id="searchCombinacionInput" placeholder="Ej: 58 o 116...">
+                            <i class="fas fa-dice search-icon"></i>
+                        </div>
+                    </div>
                 </div>
                 <div class="table-wrapper">
                     <table class="tabla-sorteos public-list-table">

@@ -91,9 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const numerosParaBusqueda = p.numeros.map(combo => combo.join('')).join(' '); 
                     const nombreDisplay = p.nombre ? `${p.nombre.trim().split(' ')[0]} ${p.nombre.trim().split(' ').pop().charAt(0)}.` : 'Participante';
                     const cedulaDisplay = formatConfidentialId(p.id_documento);
-                    const searchData = `${p.nombre || ''} ${p.id_documento || ''} ${numerosParaBusqueda}`.toLowerCase();
-
-                    filasHTML += `<tr data-search="${searchData}">
+                    const searchDataTexto = `${p.nombre || ''} ${p.id_documento || ''}`.toLowerCase();
+                    const searchDataNumeros = p.numeros.map(combo => combo.join('')).join(' ');
+                    filasHTML += `<tr data-search-texto="${searchDataTexto}" data-search-numeros="${searchDataNumeros}">
                                     <td data-label="Combinaciones"><div class="combinacion-bolas-container">${combinacionesHTML}</div></td>
                                     <td data-label="Participante">${nombreDisplay}</td>
                                     <td data-label="Cédula">${cedulaDisplay}</td>
@@ -128,37 +128,45 @@ document.addEventListener('DOMContentLoaded', () => {
             if(loaderEl) loaderEl.style.display = 'none';
         }
     }
+// REEMPLAZA EL EVENT LISTENER ANTERIOR POR ESTE BLOQUE COMPLETO
+const searchTextoInput = document.getElementById('searchTextoInput');
+const searchCombinacionInput = document.getElementById('searchCombinacionInput');
+const searchTextoCounter = document.getElementById('search-texto-counter');
+const searchCombinacionCounter = document.getElementById('search-combinacion-counter');
 
-    searchInput.addEventListener('input', () => {
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        const searchCounter = document.getElementById('search-results-counter');
-        let resultadosEncontrados = 0;
+function aplicarFiltros() {
+    const textoTerm = searchTextoInput.value.toLowerCase().trim();
+    const combinacionTerm = searchCombinacionInput.value.toLowerCase().trim();
+    let resultadosTexto = 0;
+    let resultadosCombinacion = 0;
+    let totalVisible = 0;
 
-        tbody.querySelectorAll('tr').forEach(row => {
-            const searchableText = row.dataset.search || '';
+    tbody.querySelectorAll('tr').forEach(row => {
+        const searchableTexto = row.dataset.searchTexto || '';
+        const searchableNumeros = (row.dataset.searchNumeros || '').split(' ');
 
-            // La nueva lógica:
-            // 1. Separa el texto de búsqueda en "palabras" (nombres, cédulas, números)
-            const searchWords = searchableText.split(' ');
+        const matchTexto = searchableTexto.includes(textoTerm);
+        const matchCombinacion = combinacionTerm === '' || searchableNumeros.some(word => word.startsWith(combinacionTerm));
 
-            // 2. Revisa si ALGUNA de esas palabras EMPIEZA CON el término de búsqueda
-            const isVisible = searchWords.some(word => word.startsWith(searchTerm));
-
-            row.style.display = isVisible ? '' : 'none';
-            if (isVisible) {
-                resultadosEncontrados++;
-            }
-        });
-
-        // La lógica del contador no cambia
-        if (searchTerm === '') {
-            searchCounter.textContent = '';
-        } else if (resultadosEncontrados === 1) {
-            searchCounter.textContent = '1 resultado encontrado';
+        if (matchTexto && matchCombinacion) {
+            row.style.display = '';
+            totalVisible++;
         } else {
-            searchCounter.textContent = `${resultadosEncontrados} resultados encontrados`;
+            row.style.display = 'none';
         }
     });
+
+    // Actualizamos contadores (esto es una lógica simplificada, se puede mejorar)
+    // Por simplicidad, mostraremos el total de filas visibles en ambos contadores
+    if (textoTerm) searchTextoCounter.textContent = `${totalVisible} encontrado(s)`;
+    else searchTextoCounter.textContent = '';
+
+    if (combinacionTerm) searchCombinacionCounter.textContent = `${totalVisible} encontrado(s)`;
+    else searchCombinacionCounter.textContent = '';
+}
+
+searchTextoInput.addEventListener('input', aplicarFiltros);
+searchCombinacionInput.addEventListener('input', aplicarFiltros);
 
     tbody.addEventListener('click', (e) => {
         const shareButton = e.target.closest('.btn-share-ticket');

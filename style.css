@@ -4346,3 +4346,51 @@ box-shadow: 0 0 30px rgba(var(--clr-secondary-rgb), 0.4); }
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
     font-size: 1em;
 }
+
+
+/* ================================================= */
+/* --- ESTILOS PARA LA NUEVA BÚSQUEDA DOBLE --- */
+/* ================================================= */
+.search-controls-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Una columna en móvil */
+    gap: 20px;
+    margin-bottom: 20px;
+    align-items: end;
+}
+
+@media (min-width: 768px) {
+    .search-controls-grid {
+        grid-template-columns: 1fr 1fr; /* Dos columnas en escritorio */
+    }
+}
+
+.search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.search-header label {
+    font-weight: 500;
+    font-size: 0.9em;
+}
+
+.search-counter {
+    font-size: 0.85em;
+    color: var(--clr-light-text-alt);
+}
+
+.search-bar .search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--clr-light-text-alt);
+    transition: color 0.3s ease;
+}
+
+.search-bar input[type="search"]:focus + .search-icon {
+    color: var(--clr-primary);
+}
