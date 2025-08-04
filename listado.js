@@ -1,62 +1,69 @@
-// Espera a que el DOM (tu archivo HTML) esté completamente cargado
 document.addEventListener('DOMContentLoaded', () => {
-    // Referencias a los elementos del DOM
-    const listContainer = document.getElementById('combinationsList');
+    // Referencias a los elementos del DOM según tu nuevo HTML
     const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('listado-tbody'); // <-- ¡CAMBIO CLAVE! Apuntamos al tbody
+    const participantsContainer = document.getElementById('listado-participantes-container');
+    const totalBoletosDisplay = document.getElementById('total-boletos');
 
-    console.log("DOM cargado. Empezando a generar la lista...");
-
-    const fragment = document.createDocumentFragment();
-
-    // Bucle para generar los elementos
-    for (let i = 0; i < 100000; i++) {
-        const combination = i.toString().padStart(5, '0');
-        const listItem = document.createElement('li');
-
-        // Se crea la estructura HTML con clases específicas para cada dato.
-        // Esto hace que la búsqueda sea mucho más fácil y segura.
-        listItem.innerHTML = `
-            <div>
-                <strong>NOMBRE:</strong>
-                <span class="nombre">OLIVER ISMAEL BRICEÑO BARRIGA</span>
-            </div>
-            <div>
-                <strong>CEDULA:</strong>
-                <span class="cedula">1718997925</span>
-            </div>
-            <div>
-                <strong>COMBINACIÓN:</strong>
-                <span class="combinacion">${combination}</span>
-            </div>
-        `;
-        fragment.appendChild(listItem);
+    // Verificación de seguridad
+    if (!tableBody || !searchInput || !participantsContainer) {
+        console.error("Error: No se encontraron uno o más elementos esenciales en el HTML (searchInput, listado-tbody, listado-participantes-container).");
+        return;
     }
 
-    listContainer.appendChild(fragment);
-    console.log("¡Lista generada y añadida a la página!");
+    // --- Lógica para generar las filas de la tabla ---
+    // Simularemos la carga de datos. En un caso real, aquí iría tu fetch a la base de datos.
+    // Hacemos visible el contenedor de participantes (quitamos la clase 'oculto')
+    participantsContainer.classList.remove('oculto');
+    console.log("Mostrando contenedor de participantes. Empezando a generar la tabla...");
 
-    // --- LÓGICA DE BÚSQUEDA MÚLTIPLE CORREGIDA ---
+    const fragment = document.createDocumentFragment();
+    const totalCombinations = 100000; // Total de combinaciones a generar
+
+    for (let i = 0; i < totalCombinations; i++) {
+        const combination = i.toString().padStart(5, '0');
+        const tableRow = document.createElement('tr'); // <-- Creamos una fila <tr> en lugar de <li>
+
+        // Creamos la estructura interna de la fila con celdas <td>
+        // Añadimos clases a cada celda para poder buscarlas fácilmente
+        tableRow.innerHTML = `
+            <td class="combinacion">${combination}</td>
+            <td class="nombre">OLIVER ISMAEL BRICEÑO BARRIGA</td>
+            <td class="cedula">171899...</td>
+            <td></td>
+        `;
+        fragment.appendChild(tableRow);
+    }
+
+    // Añadimos todas las filas al tbody de una sola vez
+    tableBody.appendChild(fragment);
+    console.log("¡Filas de la tabla generadas y añadidas a la página!");
+
+    // Actualizamos el contador total de boletos
+    totalBoletosDisplay.textContent = `Total de boletos: ${totalCombinations}`;
+
+
+    // --- Lógica de Búsqueda para la Tabla ---
     searchInput.addEventListener('keyup', () => {
-        // Obtenemos el término de búsqueda y lo convertimos a mayúsculas para que no distinga entre mayúsculas y minúsculas
-        const searchTerm = searchInput.value.toUpperCase(); 
-        const items = listContainer.getElementsByTagName('li');
+        const searchTerm = searchInput.value.toUpperCase();
+        const rows = tableBody.getElementsByTagName('tr'); // Obtenemos todas las filas <tr>
 
-        for (const item of items) {
-            // Obtenemos el texto de cada campo que queremos buscar
-            const nombre = item.querySelector('.nombre').textContent.toUpperCase();
-            const cedula = item.querySelector('.cedula').textContent;
-            const combinacion = item.querySelector('.combinacion').textContent;
+        for (const row of rows) {
+            // Obtenemos el texto de las celdas específicas por su clase
+            const nombre = row.querySelector('.nombre').textContent.toUpperCase();
+            const cedula = row.querySelector('.cedula').textContent;
+            const combinacion = row.querySelector('.combinacion').textContent;
 
-            // Comprobamos si el término de búsqueda está vacío o si coincide con el inicio de CUALQUIERA de los tres campos
+            // La lógica de búsqueda es la misma: si coincide con cualquiera, se muestra la fila
             if (
-                searchTerm === '' || 
-                nombre.startsWith(searchTerm) || 
-                cedula.startsWith(searchTerm) || 
+                searchTerm === '' ||
+                nombre.startsWith(searchTerm) ||
+                cedula.startsWith(searchTerm) ||
                 combinacion.startsWith(searchTerm)
             ) {
-                item.style.display = ''; // Usamos '' para restaurar el display original (flex, grid, etc.)
+                row.style.display = ''; // Muestra la fila
             } else {
-                item.style.display = 'none';
+                row.style.display = 'none'; // Oculta la fila
             }
         }
     });
