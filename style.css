@@ -1992,49 +1992,6 @@ nav.bg-custom-dark-bg-frame a:hover {
 }
 
 
-/* --- ESTILOS PARA TABLAS RESPONSIVAS --- */
-@media (max-width: 768px) {
-    .tabla-sorteos {
-        border: none;
-    }
-
-    .tabla-sorteos thead {
-        /* Ocultamos los encabezados de la tabla en móvil */
-        display: none;
-    }
-
-    .tabla-sorteos tr {
-        /* Cada fila se convierte en una "tarjeta" */
-        display: block;
-        border: 1px solid var(--clr-light-border);
-        border-radius: var(--border-radius-medium);
-        margin-bottom: 20px;
-        box-shadow: 0 4px 10px var(--clr-dark-shadow);
-    }
-
-    .tabla-sorteos td {
-        /* Las celdas se apilan verticalmente */
-        display: block;
-        text-align: right; /* Alineamos el contenido a la derecha */
-        padding: 12px 15px;
-        border-bottom: 1px solid var(--clr-light-border);
-        position: relative;
-    }
-    
-    .tabla-sorteos td:last-child {
-        border-bottom: none;
-    }
-
-    /* Usamos el pseudo-elemento ::before para mostrar el encabezado de cada celda */
-    .tabla-sorteos td::before {
-        content: attr(data-label); /* Obtenemos el texto del atributo data-label */
-        float: left; /* Lo alineamos a la izquierda */
-        font-weight: 600;
-        color: var(--clr-light-text);
-        text-transform: uppercase;
-        font-size: 0.9em;
-    }
-}
 
 /* ================================================= */
 /* --- CÓDIGO DE CORRECCIÓN PARA PANEL DE ADMIN --- */
@@ -2881,6 +2838,8 @@ nav.bg-custom-dark-bg-frame a:hover {
     border-radius: 25px;
     color: var(--clr-light-text);
     font-size: 1em;
+    box-sizing: border-box; /* IMPORTANTE: El padding no aumenta el ancho total */
+
     transition: all 0.3s ease;
     /* AÑADIDO: Evita que el texto se recorte con "..." */
     text-overflow: ellipsis;
@@ -3187,6 +3146,59 @@ nav.bg-custom-dark-bg-frame a:hover {
     .dashboard-card h3 {
         font-size: 1.1em;
     }
+
+    .tabla-sorteos {
+        border: none;
+    }
+
+    .tabla-sorteos thead {
+        /* Ocultamos los encabezados de la tabla en móvil */
+        display: none;
+    }
+
+    .tabla-sorteos tr {
+        /* Cada fila se convierte en una "tarjeta" */
+        display: block;
+        border: 1px solid var(--clr-light-border);
+        border-radius: var(--border-radius-medium);
+        margin-bottom: 20px;
+        box-shadow: 0 4px 10px var(--clr-dark-shadow);
+    }
+
+    .tabla-sorteos td {
+        /* Las celdas se apilan verticalmente */
+        display: block;
+        text-align: right; /* Alineamos el contenido a la derecha */
+        padding: 12px 15px;
+        border-bottom: 1px solid var(--clr-light-border);
+        position: relative;
+    }
+    
+    .tabla-sorteos td:last-child {
+        border-bottom: none;
+    }
+
+    /* Usamos el pseudo-elemento ::before para mostrar el encabezado de cada celda */
+    .tabla-sorteos td::before {
+        content: attr(data-label); /* Obtenemos el texto del atributo data-label */
+        float: left; /* Lo alineamos a la izquierda */
+        font-weight: 600;
+        color: var(--clr-light-text);
+        text-transform: uppercase;
+        font-size: 0.9em;
+    }
+    /* LA MAGIA SUCEDE AQUÍ: cambiamos el grid de 5 columnas a 1 */
+    #combinationsList {
+        /* Cambiamos de 5 columnas a 1 columna */
+        grid-template-columns: 1fr;
+        gap: 10px; /* Reducimos ligeramente el espacio */
+    }
+
+    #combinationsList li {
+        font-size: 1rem; /* Ajustamos el tamaño del texto para que no se corte */
+        padding: 12px;
+    }
+
 }
 
 
@@ -3371,6 +3383,18 @@ nav.bg-custom-dark-bg-frame a:hover {
     }
     .btn-copy {
         padding: 8px;
+    }
+    #combinationsList {
+        /* En pantallas muy estrechas, podemos aumentar el número de columnas
+        si los elementos son cortos, o mantenerlo en 1 si son largos.
+        Vamos a probar con 2 columnas para un mejor uso del espacio. */
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    #combinationsList li {
+        font-size: 0.9rem;
+        padding: 10px 5px; /* Menos padding horizontal */
     }
 }
 .btn-confirmar-pago { background-color: var(--clr-primary); }
