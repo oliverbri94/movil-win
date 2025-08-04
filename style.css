@@ -1844,6 +1844,8 @@ nav.bg-custom-dark-bg-frame a:hover {
     background-color: rgba(var(--clr-dark-bg-rgb), 0.5); /* Usando una variable que deberías definir en :root */
     transition: all 0.3s ease;
     position: relative;
+    z-index: 1;
+
 }
 
 .mini-package-btn:hover {
@@ -1866,6 +1868,8 @@ nav.bg-custom-dark-bg-frame a:hover {
 .mini-package-btn.popular {
     border-color: var(--clr-primary);
     background-color: rgba(var(--clr-primary-rgb), 0.1);
+    z-index: 2; 
+
 }
 
 .popular-tag {
@@ -2869,14 +2873,17 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 .search-bar input[type="search"] {
     width: 100%;
-    height: 50px; /* Un poco más alto */
-    padding: 12px 20px 12px 50px; /* Más espacio interno y para el ícono */
-    background-color: var(--clr-light-bg-frame); /* Fondo más claro */
-    border: 2px solid var(--clr-light-border); /* Borde más visible */
-    border-radius: 25px; /* Bordes totalmente redondeados */
+    height: 50px;
+    /* CORRECCIÓN: Ajustamos el padding para que el texto no se corte */
+    padding: 12px 20px 12px 45px;
+    background-color: var(--clr-light-bg-frame);
+    border: 2px solid var(--clr-light-border);
+    border-radius: 25px;
     color: var(--clr-light-text);
     font-size: 1em;
     transition: all 0.3s ease;
+    /* AÑADIDO: Evita que el texto se recorte con "..." */
+    text-overflow: ellipsis;
 }
 
 /* Estilo cuando el usuario hace clic en la barra */
@@ -2894,9 +2901,12 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 /* Posicionamos mejor el ícono de la lupa */
 .search-bar .fa-search {
-    left: 20px;
-    font-size: 1.1em;
+    position: absolute;
+    left: 18px; /* <-- La movemos un poco para que se vea bien */
+    top: 50%;
+    transform: translateY(-50%);
     color: var(--clr-light-text-alt);
+    font-size: 1.1em;
     transition: color 0.3s ease;
 }
 

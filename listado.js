@@ -1,7 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = 'https://movil-win-production.up.railway.app';
     const params = new URLSearchParams(window.location.search); // <-- AHORA ESTÁ PRIMERO
-    const sorteoId = new URLSearchParams(window.location.search).get('sorteo');
+    const sorteoId = params.get('sorteo');
+    function formatConfidentialId(id_documento) {
+        if (typeof id_documento === 'string' && id_documento.length === 10) {
+            return `${id_documento.substring(0, 2)}...${id_documento.substring(id_documento.length - 2)}`;
+        }
+        return id_documento || 'ID Oculto';
+    }
     const tipoSorteo = params.get('tipo'); 
 
     const tituloEl = document.getElementById('listado-titulo');
