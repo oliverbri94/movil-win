@@ -4231,3 +4231,31 @@ box-shadow: 0 0 30px rgba(var(--clr-secondary-rgb), 0.4); }
     margin-bottom: 15px;
     display: inline-block; /* Para que ocupe solo el ancho de su contenido */
 }
+
+/* --- ESTILOS PARA BOLITAS EN LISTADO PÚBLICO --- */
+.combinacion-bolas-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Espacio entre diferentes combinaciones */
+}
+
+.combinacion-fila {
+    display: flex;
+    gap: 5px; /* Espacio entre bolitas de una misma combinación */
+    align-items: center;
+}
+
+.bola-small-listado {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    background-color: #e6d8c2;
+    border-radius: 50%;
+    font-weight: bold;
+    color: #4a3f35;
+    border: 2px solid #b3a07d;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    font-size: 1em;
+}

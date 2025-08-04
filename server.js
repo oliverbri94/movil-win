@@ -555,7 +555,7 @@ app.get('/api/listable-raffles', async (req, res) => {
         try {
             // Obtenemos todos los sorteos que no estén en estado 'programado'
             const sql = `
-                SELECT id_sorteo, nombre_premio_display, status_sorteo 
+                SELECT id_sorteo, nombre_premio_display, status_sorteo, tipo_sorteo 
                 FROM sorteos_config 
                 WHERE status_sorteo != 'programado'
                 ORDER BY id_sorteo DESC;

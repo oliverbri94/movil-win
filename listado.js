@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = 'https://movil-win-production.up.railway.app';
     const sorteoId = new URLSearchParams(window.location.search).get('sorteo');
+    const tipoSorteo = params.get('tipo'); 
 
     const tituloEl = document.getElementById('listado-titulo');
     const subtituloEl = document.getElementById('listado-subtitulo');
@@ -13,7 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Si la URL tiene un ID, cargamos la lista de ese sorteo
         seleccionContainer.classList.add('oculto');
         listadoContainer.classList.remove('oculto');
-        cargarListadoDeParticipantes(sorteoId);
+        cargarListadoDeParticipantes(sorteoId, tipoSorteo); 
+
     } else {
         // Si no hay ID, cargamos la lista de sorteos para elegir
         listadoContainer.classList.add('oculto');
@@ -100,59 +102,94 @@ document.getElementById('listado-tbody').addEventListener('click', (e) => {
         alert('¡Texto para compartir copiado al portapapeles!');
     }
 });
-    async function cargarListaDeSorteos() {
-        const listaSorteosDiv = document.getElementById('lista-de-sorteos');
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/listable-raffles`);
-            const data = await response.json();
-            if (!data.success) throw new Error(data.error);
 
-            if(data.sorteos.length === 0) {
-                 listaSorteosDiv.innerHTML = '<p>No hay sorteos activos o finalizados para mostrar.</p>';
-            } else {
-                data.sorteos.forEach(sorteo => {
-                    const link = document.createElement('a');
-                    link.href = `listado.html?sorteo=${sorteo.id_sorteo}`;
-                    link.className = 'sorteo-selection-item';
-                    link.innerHTML = `<span>${sorteo.nombre_premio_display}</span> <span class="status-tag status-${sorteo.status_sorteo}">${sorteo.status_sorteo}</span>`;
-                    listaSorteosDiv.appendChild(link);
-                });
-            }
-        } catch (error) {
-            listaSorteosDiv.innerHTML = `<p class="error-message">${error.message}</p>`;
-        } finally {
-            loaderEl.style.display = 'none';
+async function cargarListaDeSorteos() {
+    const listaSorteosDiv = document.getElementById('lista-de-sorteos');
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/listable-raffles`);
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error);
+
+        if (data.sorteos.length === 0) {
+            listaSorteosDiv.innerHTML = '<p>No hay sorteos activos o finalizados para mostrar.</p>';
+        } else {
+            // Ahora incluimos el tipo de sorteo en el enlace
+            data.sorteos.forEach(sorteo => {
+                const link = document.createElement('a');
+                link.href = `listado.html?sorteo=${sorteo.id_sorteo}&tipo=${sorteo.tipo_sorteo}`;
+                link.className = 'sorteo-selection-item';
+                link.innerHTML = `<span>${sorteo.nombre_premio_display}</span> <span class="status-tag status-${sorteo.status_sorteo}">${sorteo.status_sorteo}</span>`;
+                listaSorteosDiv.appendChild(link);
+            });
         }
+    } catch (error) {
+        listaSorteosDiv.innerHTML = `<p class="error-message">${error.message}</p>`;
+    } finally {
+        loaderEl.style.display = 'none';
     }
+}
 
-    async function cargarListadoDeParticipantes(id) {
+    async function cargarListadoDeParticipantes(id, tipo) {
         const tbody = document.getElementById('listado-tbody');
         const totalBoletosEl = document.getElementById('total-boletos');
         const searchInput = document.getElementById('searchInput');
-        
+        const headerBoleto = document.getElementById('header-boleto-combinacion');
+
+        // Determinar qué API llamar
+        const endpoint = (tipo === 'tombola_interactiva') 
+            ? `${API_BASE_URL}/api/public-list/tombola/${id}`
+            : `${API_BASE_URL}/api/public-list/${id}`;
+
         try {
-            const response = await fetch(`${API_BASE_URL}/api/public-list/${id}`);
+            const response = await fetch(endpoint);
             const data = await response.json();
             if (!data.success) throw new Error(data.error);
 
             tituloEl.textContent = `Listado Oficial: ${data.nombreSorteo}`;
             subtituloEl.innerHTML = `<a href="listado.html" class="back-link-small"><i class="fas fa-arrow-left"></i> Volver a la lista de sorteos</a>`;
-            totalBoletosEl.textContent = `Total de boletos registrados: ${data.listado.length}`;
-            
+            totalBoletosEl.textContent = `Total de registros: ${data.listado.length}`;
+
             let filasHTML = '';
-            data.listado.forEach(p => {
-                const searchData = `${p.nombre_raw || ''} ${p.cedula_raw || ''}`.toLowerCase();
-                filasHTML += `<tr data-search="${searchData}">
-                                <td data-label="# Boleto">${p.boleto}</td>
-                                <td data-label="Participante">${p.nombre_display}</td>
-                                <td data-label="Cédula">${p.cedula_display}</td>
-                                <td data-label="Compartir">
-                                    <button class="btn-share-ticket" data-boleto="${p.boleto}" data-sorteo-nombre="${data.nombreSorteo}" title="Compartir mi boleto">
-                                        <i class="fas fa-share-alt"></i>
-                                    </button>
-                                </td>
-                            </tr>`;
-            });
+
+            if (tipo === 'tombola_interactiva') {
+                headerBoleto.textContent = 'Combinaciones';
+                data.listado.forEach(p => {
+                    const combinacionesHTML = p.numeros.map(combo => 
+                        `<div class="combinacion-fila">${combo.map(n => `<span class="bola-small-listado">${n}</span>`).join('')}</div>`
+                    ).join('');
+
+                    const numerosParaBusqueda = p.numeros.flat().join(' ');
+                    const searchData = `${p.nombre || ''} ${numerosParaBusqueda}`.toLowerCase();
+
+                    filasHTML += `<tr data-search="${searchData}">
+                                    <td data-label="Combinaciones"><div class="combinacion-bolas-container">${combinacionesHTML}</div></td>
+                                    <td data-label="Participante">${p.nombre}</td>
+                                    <td data-label="Cédula">N/A</td>
+                                    <td data-label="Compartir">
+                                        <button class="btn-share-ticket" data-sorteo-nombre="${data.nombreSorteo}" title="Compartir mi boleto">
+                                            <i class="fas fa-share-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>`;
+                });
+            } else {
+                // Lógica para sorteos de ruleta (la que ya tenías)
+                headerBoleto.textContent = '# Boleto';
+                data.listado.forEach(p => {
+                    const searchData = `${p.nombre_raw || ''} ${p.cedula_raw || ''}`.toLowerCase();
+                    filasHTML += `<tr data-search="${searchData}">
+                                    <td data-label="# Boleto">${p.boleto}</td>
+                                    <td data-label="Participante">${p.nombre_display}</td>
+                                    <td data-label="Cédula">${p.cedula_display}</td>
+                                    <td data-label="Compartir">
+                                        <button class="btn-share-ticket" data-boleto="${p.boleto}" data-sorteo-nombre="${data.nombreSorteo}" title="Compartir mi boleto">
+                                            <i class="fas fa-share-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>`;
+                });
+            }
+
             tbody.innerHTML = filasHTML;
 
             searchInput.addEventListener('input', (e) => {
@@ -165,7 +202,7 @@ document.getElementById('listado-tbody').addEventListener('click', (e) => {
 
         } catch (error) {
             tituloEl.textContent = 'Error al Cargar el Listado';
-            tbody.innerHTML = `<tr><td colspan="3" class="error-message">${error.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="error-message">${error.message}</td></tr>`;
         } finally {
             loaderEl.style.display = 'none';
         }
