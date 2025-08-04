@@ -2866,27 +2866,43 @@ nav.bg-custom-dark-bg-frame a:hover {
     margin-right: auto;
 }
 
-.search-bar {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.search-bar .fa-search {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--clr-light-text-alt);
-}
 
 .search-bar input[type="search"] {
     width: 100%;
-    padding: 12px 15px 12px 45px; /* Espacio para el ícono */
-    background-color: var(--clr-dark-bg);
-    border: 1px solid var(--clr-light-border);
-    border-radius: 8px;
+    height: 50px; /* Un poco más alto */
+    padding: 12px 20px 12px 50px; /* Más espacio interno y para el ícono */
+    background-color: var(--clr-light-bg-frame); /* Fondo más claro */
+    border: 2px solid var(--clr-light-border); /* Borde más visible */
+    border-radius: 25px; /* Bordes totalmente redondeados */
     color: var(--clr-light-text);
     font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+/* Estilo cuando el usuario hace clic en la barra */
+.search-bar input[type="search"]:focus {
+    outline: none;
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 10px rgba(var(--clr-primary-rgb), 0.3);
+}
+
+/* Estilo para el texto de ejemplo (placeholder) */
+.search-bar input[type="search"]::placeholder {
+    color: var(--clr-light-text-alt);
+    opacity: 0.8;
+}
+
+/* Posicionamos mejor el ícono de la lupa */
+.search-bar .fa-search {
+    left: 20px;
+    font-size: 1.1em;
+    color: var(--clr-light-text-alt);
+    transition: color 0.3s ease;
+}
+
+/* El ícono cambia de color cuando la barra está activa */
+.search-bar input[type="search"]:focus + .fa-search {
+    color: var(--clr-primary);
 }
 
 .table-wrapper {
@@ -2907,15 +2923,18 @@ nav.bg-custom-dark-bg-frame a:hover {
 }
 
 .public-list-table thead {
-    background-color: var(--clr-dark-bg-frame);
+    background-color: var(--clr-light-bg-frame); /* Fondo sólido */
     position: sticky;
     top: 0;
+    z-index: 10; /* Se asegura de que esté por encima del contenido */
 }
 
 .public-list-table tbody tr:nth-child(even) {
     background-color: var(--clr-dark-bg);
 }
-
+.public-list-table tbody tr:hover {
+    background-color: rgba(var(--clr-primary-rgb), 0.1); /* Un naranja muy suave */
+}
 #total-boletos {
     margin-top: 20px;
     font-weight: 600;

@@ -159,13 +159,17 @@ async function cargarListaDeSorteos() {
                         `<div class="combinacion-fila">${combo.map(n => `<span class="bola-small-listado">${n}</span>`).join('')}</div>`
                     ).join('');
 
-                    const numerosParaBusqueda = p.numeros.flat().join(' ');
-                    const searchData = `${p.nombre || ''} ${numerosParaBusqueda}`.toLowerCase();
+                    const numerosParaBusqueda = p.numeros.flat().join('');
+
+                    // Lógica para anonimizar nombre y cédula (igual que en la ruleta)
+                    const nombreDisplay = p.nombre ? `${p.nombre.trim().split(' ')[0]} ${p.nombre.trim().split(' ').pop().charAt(0)}.` : 'Participante';
+                    const cedulaDisplay = (p.id_documento && p.id_documento.length === 10) ? `${p.id_documento.substring(0, 2)}...${p.id_documento.substring(8)}` : 'ID Oculto';
+                    const searchData = `${p.nombre || ''} ${p.id_documento || ''} ${numerosParaBusqueda}`.toLowerCase();
 
                     filasHTML += `<tr data-search="${searchData}">
                                     <td data-label="Combinaciones"><div class="combinacion-bolas-container">${combinacionesHTML}</div></td>
-                                    <td data-label="Participante">${p.nombre}</td>
-                                    <td data-label="Cédula">N/A</td>
+                                    <td data-label="Participante">${nombreDisplay}</td>
+                                    <td data-label="Cédula">${cedulaDisplay}</td>
                                     <td data-label="Compartir">
                                         <button class="btn-share-ticket" data-sorteo-nombre="${data.nombreSorteo}" title="Compartir mi boleto">
                                             <i class="fas fa-share-alt"></i>

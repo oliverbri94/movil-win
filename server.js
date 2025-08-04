@@ -385,7 +385,7 @@ app.get('/api/public-list/tombola/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const sql = `
-            SELECT p.nombre, p.numeros_elegidos, s.nombre_premio_display
+            SELECT p.nombre, p.id_documento, p.numeros_elegidos, s.nombre_premio_display
             FROM participaciones p
             JOIN sorteos_config s ON p.id_sorteo_config_fk = s.id_sorteo
             WHERE p.id_sorteo_config_fk = $1 AND p.numeros_elegidos IS NOT NULL
