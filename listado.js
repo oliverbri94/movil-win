@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tbody.querySelectorAll('tr').forEach(row => {
             const searchableText = row.dataset.search || '';
-            const isVisible = searchableText.includes(searchTerm);
+            const isVisible = searchableText.startsWith(searchTerm);
             row.style.display = isVisible ? '' : 'none';
             if (isVisible) {
                 resultadosEncontrados++;

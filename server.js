@@ -397,6 +397,7 @@ app.get('/api/public-list/tombola/:id', async (req, res) => {
 
         const listado = result.map(row => ({
             nombre: row.nombre,
+            id_documento: row.id_documento, // <-- AÑADE ESTA LÍNEA
             numeros: JSON.parse(row.numeros_elegidos)
         }));
 
