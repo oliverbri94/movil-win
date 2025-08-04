@@ -401,35 +401,29 @@ function initializeRafflePage() {
         let html = '';
 
         if (paqueteIndividual) {
-            const params = new URLSearchParams({sorteoId, sorteoNombre, paqueteNombre: paqueteIndividual.nombre, paquetePrecio: paqueteIndividual.precio_final, paqueteBoletos: paqueteIndividual.cantidad_boletos});
+            // Se añade 'sorteoNombre' a los parámetros del enlace
+            const params = new URLSearchParams({sorteoId, sorteoNombre, paqueteNombre: paqueteIndividual.nombre, paquetePrecio: paqueteIndividual.precio, paqueteBoletos: paqueteIndividual.boletos});
             const enlaceCompra = `comprar.html?${params.toString()}`;
             html += `
                 <a href="${enlaceCompra}" class="mini-package-btn">
-                    <div class="mini-package-info">
-                        <strong>${paqueteIndividual.cantidad_boletos} Número</strong>
-                        <span>por $${paqueteIndividual.precio_final}</span>
-                    </div>
-                    <span class="mini-package-cta">Comprar</span>
+                    <strong>${paqueteIndividual.boletos} Número</strong>
+                    <span>por $${paqueteIndividual.precio}</span>
                 </a>
-            `;
-        }
+            `;        }
         if (paqueteMejorValor) {
-            const params = new URLSearchParams({sorteoId, sorteoNombre, paqueteNombre: paqueteMejorValor.nombre, paquetePrecio: paqueteMejorValor.precio_final, paqueteBoletos: paqueteMejorValor.cantidad_boletos});
+            // Se añade 'sorteoNombre' a los parámetros del enlace
+            const params = new URLSearchParams({sorteoId, sorteoNombre, paqueteNombre: paqueteMejorValor.nombre, paquetePrecio: paqueteMejorValor.precio, paqueteBoletos: paqueteMejorValor.boletos});
             const enlaceCompra = `comprar.html?${params.toString()}`;
             html += `
                 <a href="${enlaceCompra}" class="mini-package-btn popular">
-                    <div class="mini-package-info">
-                        <strong>${paqueteMejorValor.cantidad_boletos} Números</strong>
-                        <span>por $${paqueteMejorValor.precio_final}</span>
-                    </div>
+                    <strong>${paqueteMejorValor.boletos} Números</strong>
+                    <span>por $${paqueteMejorValor.precio}</span>
                     <span class="popular-tag">¡Recomendado!</span>
-                    <span class="mini-package-cta">Comprar</span>
                 </a>
             `;
         }
-            
+        
         html += `<a href="#paquetes-section" class="mini-package-btn all-packages"><strong>Ver Todos</strong><span><i class="fas fa-arrow-down"></i></span></a>`;
-
         return html;
     }
 

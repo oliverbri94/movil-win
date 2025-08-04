@@ -1835,13 +1835,10 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 .mini-package-btn {
     flex: 1; /* Ocupan el mismo espacio */
-    padding: 12px 10px; 
+    padding: 12px 5px;
     border-radius: var(--border-radius-medium);
     border: 2px solid var(--clr-light-border);
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Espacia el contenido verticalmente */
     text-decoration: none;
     color: var(--clr-light-text);
     background-color: rgba(var(--clr-dark-bg-rgb), 0.5); /* Usando una variable que deberías definir en :root */
@@ -1849,14 +1846,6 @@ nav.bg-custom-dark-bg-frame a:hover {
     position: relative;
     z-index: 1;
 
-}
-
-.mini-package-info {
-    /* Este nuevo contenedor agrupa el texto superior */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 8px; /* Espacio antes de la etiqueta "Comprar" */
 }
 
 .mini-package-btn:hover {
@@ -1869,25 +1858,6 @@ nav.bg-custom-dark-bg-frame a:hover {
     display: block;
     font-size: 1.1em;
     font-weight: 700;
-}
-.mini-package-cta {
-    background-color: var(--clr-primary);
-    color: white;
-    font-size: 0.8em;
-    font-weight: 700;
-    padding: 4px 12px;
-    border-radius: 50px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: background-color 0.3s ease;
-}
-
-.mini-package-btn.all-packages {
-    justify-content: center; /* Centra verticalmente su contenido */
-}
-
-.mini-package-btn:hover .mini-package-cta {
-    background-color: var(--clr-secondary);
 }
 
 .mini-package-btn span {
