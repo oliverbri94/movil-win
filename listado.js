@@ -1,60 +1,64 @@
 // Espera a que el DOM esté completamente cargado
+// Espera a que el DOM (tu archivo HTML) esté completamente cargado
 document.addEventListener('DOMContentLoaded', () => {
-    // Referencias a los elementos del DOM
+    // Referencias a los elementos que SÍ existen en tu HTML
     const listContainer = document.getElementById('combinationsList');
     const searchInput = document.getElementById('searchInput');
-    const loadingMessage = document.getElementById('loadingMessage');
 
-    // Muestra el mensaje de carga antes de empezar el trabajo pesado
-    loadingMessage.style.display = 'block';
+    // --- Lógica para generar la lista de forma eficiente ---
+    // Usamos un "fragmento" para construir toda la lista en memoria antes de mostrarla.
+    // Esto es mucho más rápido y evita que el navegador se congele.
+    const fragment = document.createDocumentFragment();
 
-    // Usamos setTimeout para hacer la generación asíncrona
-    // Esto evita que el navegador se congele
-    setTimeout(() => {
-        // MEJORA DE EFICIENCIA: Usamos un DocumentFragment
-        const fragment = document.createDocumentFragment();
+    // Tu bucle para generar los elementos
+    for (let i = 0; i < 100000; i++) {
+        const combination = i.toString().padStart(5, '0');
+        const listItem = document.createElement('li');
 
-        // Bucle para generar las 100,000 combinaciones
-        for (let i = 0; i < 100000; i++) {
-            // Formatea el número para que siempre tenga 5 dígitos (ej. 00001, 00045, 98765)
-            const combination = i.toString().padStart(5, '0');
+        // Se crea la estructura HTML interna de cada <li> tal como la tienes en tu archivo
+        listItem.innerHTML = `
+            <div>
+                <strong>NOMBRE:</strong>
+                <span>OLIVER ISMAEL BRICEÑO BARRIGA</span>
+            </div>
+            <div>
+                <strong>CEDULA:</strong>
+                <span>1718997925</span>
+            </div>
+            <div>
+                <strong>COMBINACIÓN:</strong>
+                <span>${combination}</span>
+            </div>
+        `;
+        // Se añade el nuevo <li> al fragmento
+        fragment.appendChild(listItem);
+    }
 
-            // Crea el elemento <li>
-            const listItem = document.createElement('li');
-            listItem.textContent = combination;
+    // Se añade toda la lista al HTML de una sola vez.
+    listContainer.appendChild(fragment);
 
-            // Añade el <li> al fragmento en memoria, no al DOM real
-            fragment.appendChild(listItem);
-        }
 
-        // INYECTA EN EL DOM UNA SOLA VEZ: Esto es súper rápido
-        listContainer.appendChild(fragment);
-
-        // Oculta el mensaje de carga cuando termina
-        loadingMessage.style.display = 'none';
-    }, 10); // Un pequeño retraso para permitir que el UI se actualice
-
-    // Lógica de búsqueda (ya optimizada con startsWith)
+    // --- Lógica de búsqueda corregida ---
     searchInput.addEventListener('keyup', () => {
         const searchTerm = searchInput.value;
         const items = listContainer.getElementsByTagName('li');
 
         for (const item of items) {
-            // En tu HTML, la combinación está en el TERCER div, dentro de un span.
-            // Lo seleccionamos de forma más robusta.
+            // Buscamos el 'span' que está dentro del TERCER 'div' de cada 'li'
             const combinationElement = item.querySelector('div:nth-child(3) span');
 
+            // Si lo encuentra, compara su texto con la búsqueda
             if (combinationElement) {
                 const combinationText = combinationElement.textContent;
 
                 if (searchTerm === '' || combinationText.startsWith(searchTerm)) {
-                    item.style.display = ''; // Usamos '' para restaurar el display original (flex)
+                    item.style.display = 'flex'; // Usamos 'flex' para que coincida con el CSS
                 } else {
                     item.style.display = 'none';
                 }
             }
         }
-    }); 
+    });
 
 // En listado.js, AÑADE este bloque de código al final
 
