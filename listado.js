@@ -1,64 +1,66 @@
-// Espera a que el DOM esté completamente cargado
 // Espera a que el DOM (tu archivo HTML) esté completamente cargado
 document.addEventListener('DOMContentLoaded', () => {
-    // Referencias a los elementos que SÍ existen en tu HTML
+    // Referencias a los elementos del DOM
     const listContainer = document.getElementById('combinationsList');
     const searchInput = document.getElementById('searchInput');
 
-    // --- Lógica para generar la lista de forma eficiente ---
-    // Usamos un "fragmento" para construir toda la lista en memoria antes de mostrarla.
-    // Esto es mucho más rápido y evita que el navegador se congele.
+    console.log("DOM cargado. Empezando a generar la lista...");
+
     const fragment = document.createDocumentFragment();
 
-    // Tu bucle para generar los elementos
+    // Bucle para generar los elementos
     for (let i = 0; i < 100000; i++) {
         const combination = i.toString().padStart(5, '0');
         const listItem = document.createElement('li');
 
-        // Se crea la estructura HTML interna de cada <li> tal como la tienes en tu archivo
+        // Se crea la estructura HTML con clases específicas para cada dato.
+        // Esto hace que la búsqueda sea mucho más fácil y segura.
         listItem.innerHTML = `
             <div>
                 <strong>NOMBRE:</strong>
-                <span>OLIVER ISMAEL BRICEÑO BARRIGA</span>
+                <span class="nombre">OLIVER ISMAEL BRICEÑO BARRIGA</span>
             </div>
             <div>
                 <strong>CEDULA:</strong>
-                <span>1718997925</span>
+                <span class="cedula">1718997925</span>
             </div>
             <div>
                 <strong>COMBINACIÓN:</strong>
-                <span>${combination}</span>
+                <span class="combinacion">${combination}</span>
             </div>
         `;
-        // Se añade el nuevo <li> al fragmento
         fragment.appendChild(listItem);
     }
 
-    // Se añade toda la lista al HTML de una sola vez.
     listContainer.appendChild(fragment);
+    console.log("¡Lista generada y añadida a la página!");
 
-
-    // --- Lógica de búsqueda corregida ---
+    // --- LÓGICA DE BÚSQUEDA MÚLTIPLE CORREGIDA ---
     searchInput.addEventListener('keyup', () => {
-        const searchTerm = searchInput.value;
+        // Obtenemos el término de búsqueda y lo convertimos a mayúsculas para que no distinga entre mayúsculas y minúsculas
+        const searchTerm = searchInput.value.toUpperCase(); 
         const items = listContainer.getElementsByTagName('li');
 
         for (const item of items) {
-            // Buscamos el 'span' que está dentro del TERCER 'div' de cada 'li'
-            const combinationElement = item.querySelector('div:nth-child(3) span');
+            // Obtenemos el texto de cada campo que queremos buscar
+            const nombre = item.querySelector('.nombre').textContent.toUpperCase();
+            const cedula = item.querySelector('.cedula').textContent;
+            const combinacion = item.querySelector('.combinacion').textContent;
 
-            // Si lo encuentra, compara su texto con la búsqueda
-            if (combinationElement) {
-                const combinationText = combinationElement.textContent;
-
-                if (searchTerm === '' || combinationText.startsWith(searchTerm)) {
-                    item.style.display = 'flex'; // Usamos 'flex' para que coincida con el CSS
-                } else {
-                    item.style.display = 'none';
-                }
+            // Comprobamos si el término de búsqueda está vacío o si coincide con el inicio de CUALQUIERA de los tres campos
+            if (
+                searchTerm === '' || 
+                nombre.startsWith(searchTerm) || 
+                cedula.startsWith(searchTerm) || 
+                combinacion.startsWith(searchTerm)
+            ) {
+                item.style.display = ''; // Usamos '' para restaurar el display original (flex, grid, etc.)
+            } else {
+                item.style.display = 'none';
             }
         }
     });
+
 
 // En listado.js, AÑADE este bloque de código al final
 
