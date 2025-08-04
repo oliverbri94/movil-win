@@ -2910,39 +2910,62 @@ nav.bg-custom-dark-bg-frame a:hover {
     color: var(--clr-light-text-alt);
 }
 
-/* Hacemos la tabla responsiva en móviles */
 @media (max-width: 600px) {
+    /* Ocultamos el encabezado tradicional en móviles */
     .public-list-table thead {
         display: none;
     }
+
+    /* Convertimos la tabla y sus elementos a bloques para controlarlos mejor */
     .public-list-table, .public-list-table tbody, .public-list-table tr, .public-list-table td {
         display: block;
         width: 100%;
     }
+
+    /* Cada fila se convierte en una "tarjeta" individual */
     .public-list-table tr {
         margin-bottom: 15px;
         border: 1px solid var(--clr-light-border);
-        border-radius: 8px;
+        border-radius: var(--border-radius-medium); /* Bordes redondeados */
+        overflow: hidden; /* Para que el contenido respete los bordes */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
+
+    /* Cada celda ahora es una fila dentro de la tarjeta */
     .public-list-table td {
+        display: flex; /* <-- La clave: usamos flexbox para alinear */
+        justify-content: space-between; /* El título a la izquierda, el dato a la derecha */
+        align-items: center; /* Centramos verticalmente */
         text-align: right;
-        padding-left: 50%;
-        position: relative;
+        padding: 12px 15px;
         border-bottom: 1px solid var(--clr-light-border);
+        position: relative;
     }
+
     .public-list-table td:last-child {
-        border-bottom: none;
+        border-bottom: none; /* La última celda no necesita borde */
     }
+
+    /* El pseudo-elemento "data-label" ahora es el título de la fila */
     .public-list-table td::before {
         content: attr(data-label);
-        position: absolute;
-        left: 15px;
-        width: calc(50% - 30px);
-        text-align: left;
         font-weight: 600;
         color: var(--clr-light-text);
+        text-align: left;
+        margin-right: 15px; /* Espacio entre el título y el dato */
+    }
+
+    /* Estilos especiales para la celda de Combinaciones */
+    .public-list-table td[data-label="Combinaciones"] {
+        /* Hacemos que las bolitas se alineen a la derecha */
+        justify-content: flex-end;
+    }
+     .public-list-table td[data-label="Combinaciones"]::before {
+        /* Alineamos el título "Combinaciones" arriba para dar espacio */
+        align-self: flex-start;
     }
 }
+
 /* En style.css */
 .selection-title {
     font-size: 1.2em;
