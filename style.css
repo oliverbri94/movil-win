@@ -3195,8 +3195,42 @@ nav.bg-custom-dark-bg-frame a:hover {
     }
 
     #combinationsList li {
-        font-size: 1rem; /* Ajustamos el tamaño del texto para que no se corte */
-        padding: 12px;
+    display: flex; /* Flexbox para alinear el contenido dentro de cada tarjeta */
+    justify-content: space-between; /* Separa la info y la combinación */
+    align-items: center; /* Centra verticalmente */
+    padding: 15px;
+    background-color: #eaf2f8;
+    border: 1px solid #d4e6f1;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    #combinationsList li div {
+    display: flex;
+    flex-direction: column; /* Apila el label (strong) y el valor (span) */
+    }
+    #combinationsList li strong {
+    font-size: 0.75rem;
+    color: #566573;
+    text-transform: uppercase;
+    }
+    #combinationsList li span {
+    font-size: 1rem;
+    font-weight: bold;
+    /* Solución a la cédula oculta y nombres largos */
+    word-break: break-all;
+    }
+
+    #combinationsList li div:nth-child(3) span {
+    font-size: 1.7rem;
+    color: #3498db;
+    text-align: right; /* Alinea el número a la derecha */
+    padding-left: 15px;
+    }
+
+    #combinationsList li:hover {
+    background-color: #d4e6f1;
+    transform: translateY(-2px);
     }
 
 }

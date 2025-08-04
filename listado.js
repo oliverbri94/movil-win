@@ -36,18 +36,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Lógica de búsqueda (ya optimizada con startsWith)
     searchInput.addEventListener('keyup', () => {
-        const searchTerm = searchInput.value; // No se necesita toLowerCase para números
+        const searchTerm = searchInput.value;
         const items = listContainer.getElementsByTagName('li');
 
         for (const item of items) {
-            // Se muestra si el término de búsqueda está vacío o si el texto comienza con el término
-            if (searchTerm === '' || item.textContent.startsWith(searchTerm)) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
+            // En tu HTML, la combinación está en el TERCER div, dentro de un span.
+            // Lo seleccionamos de forma más robusta.
+            const combinationElement = item.querySelector('div:nth-child(3) span');
+
+            if (combinationElement) {
+                const combinationText = combinationElement.textContent;
+
+                if (searchTerm === '' || combinationText.startsWith(searchTerm)) {
+                    item.style.display = ''; // Usamos '' para restaurar el display original (flex)
+                } else {
+                    item.style.display = 'none';
+                }
             }
         }
-    });
+    }); 
 
 // En listado.js, AÑADE este bloque de código al final
 
