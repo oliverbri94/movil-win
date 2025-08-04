@@ -1,34 +1,54 @@
+// Espera a que el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = 'https://movil-win-production.up.railway.app';
-    const params = new URLSearchParams(window.location.search); // <-- AHORA ESTÁ PRIMERO
-    const sorteoId = params.get('sorteo');
-    function formatConfidentialId(id_documento) {
-        if (typeof id_documento === 'string' && id_documento.length === 10) {
-            return `${id_documento.substring(0, 2)}...${id_documento.substring(id_documento.length - 2)}`;
+    // Referencias a los elementos del DOM
+    const listContainer = document.getElementById('combinationsList');
+    const searchInput = document.getElementById('searchInput');
+    const loadingMessage = document.getElementById('loadingMessage');
+
+    // Muestra el mensaje de carga antes de empezar el trabajo pesado
+    loadingMessage.style.display = 'block';
+
+    // Usamos setTimeout para hacer la generación asíncrona
+    // Esto evita que el navegador se congele
+    setTimeout(() => {
+        // MEJORA DE EFICIENCIA: Usamos un DocumentFragment
+        const fragment = document.createDocumentFragment();
+
+        // Bucle para generar las 100,000 combinaciones
+        for (let i = 0; i < 100000; i++) {
+            // Formatea el número para que siempre tenga 5 dígitos (ej. 00001, 00045, 98765)
+            const combination = i.toString().padStart(5, '0');
+
+            // Crea el elemento <li>
+            const listItem = document.createElement('li');
+            listItem.textContent = combination;
+
+            // Añade el <li> al fragmento en memoria, no al DOM real
+            fragment.appendChild(listItem);
         }
-        return id_documento || 'ID Oculto';
-    }
-    const tipoSorteo = params.get('tipo'); 
 
-    const tituloEl = document.getElementById('listado-titulo');
-    const subtituloEl = document.getElementById('listado-subtitulo');
-    const loaderEl = document.getElementById('loader');
-    
-    const seleccionContainer = document.getElementById('seleccion-sorteo-container');
-    const listadoContainer = document.getElementById('listado-participantes-container');
+        // INYECTA EN EL DOM UNA SOLA VEZ: Esto es súper rápido
+        listContainer.appendChild(fragment);
 
-    if (sorteoId) {
-        // Si la URL tiene un ID, cargamos la lista de ese sorteo
-        seleccionContainer.classList.add('oculto');
-        listadoContainer.classList.remove('oculto');
-        cargarListadoDeParticipantes(sorteoId, tipoSorteo); 
+        // Oculta el mensaje de carga cuando termina
+        loadingMessage.style.display = 'none';
+    }, 10); // Un pequeño retraso para permitir que el UI se actualice
 
-    } else {
-        // Si no hay ID, cargamos la lista de sorteos para elegir
-        listadoContainer.classList.add('oculto');
-        seleccionContainer.classList.remove('oculto');
-        cargarListaDeSorteos();
-    }
+    // Lógica de búsqueda (ya optimizada con startsWith)
+    searchInput.addEventListener('keyup', () => {
+        const searchTerm = searchInput.value; // No se necesita toLowerCase para números
+        const items = listContainer.getElementsByTagName('li');
+
+        for (const item of items) {
+            // Se muestra si el término de búsqueda está vacío o si el texto comienza con el término
+            if (searchTerm === '' || item.textContent.startsWith(searchTerm)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        }
+    });
+
 // En listado.js, AÑADE este bloque de código al final
 
 document.getElementById('listado-tbody').addEventListener('click', (e) => {
