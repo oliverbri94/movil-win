@@ -163,7 +163,8 @@ async function cargarListaDeSorteos() {
 
                     // Lógica para anonimizar nombre y cédula (igual que en la ruleta)
                     const nombreDisplay = p.nombre ? `${p.nombre.trim().split(' ')[0]} ${p.nombre.trim().split(' ').pop().charAt(0)}.` : 'Participante';
-                    const cedulaDisplay = (p.id_documento && p.id_documento.length === 10) ? `${p.id_documento.substring(0, 2)}...${p.id_documento.substring(8)}` : 'ID Oculto';
+                    const cedulaDisplay = formatConfidentialId(p.id_documento);
+
                     const searchData = `${p.nombre || ''} ${p.id_documento || ''} ${numerosParaBusqueda}`.toLowerCase();
 
                     filasHTML += `<tr data-search="${searchData}">
@@ -197,12 +198,28 @@ async function cargarListaDeSorteos() {
 
             tbody.innerHTML = filasHTML;
 
+            const searchCounter = document.getElementById('search-results-counter');
             searchInput.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
+                let resultadosEncontrados = 0;
+
                 tbody.querySelectorAll('tr').forEach(row => {
                     const searchableText = row.dataset.search || '';
-                    row.style.display = searchableText.includes(searchTerm) ? '' : 'none';
+                    const isVisible = searchableText.includes(searchTerm);
+                    row.style.display = isVisible ? '' : 'none';
+                    if (isVisible) {
+                        resultadosEncontrados++;
+                    }
                 });
+
+                // Actualizar el texto del contador
+                if (searchTerm === '') {
+                    searchCounter.textContent = ''; // Limpiar si no hay búsqueda
+                } else if (resultadosEncontrados === 1) {
+                    searchCounter.textContent = '1 resultado encontrado';
+                } else {
+                    searchCounter.textContent = `${resultadosEncontrados} resultados encontrados`;
+                }
             });
 
         } catch (error) {

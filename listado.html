@@ -76,8 +76,12 @@
             </div>
 
             <div id="listado-participantes-container" class="oculto">
-                <div class="form-group affiliate-search-bar"> <label for="searchInput">Buscar en la lista:</label>
-                    <input type="search" id="searchInput" placeholder="Escribe un nombre o cédula para filtrar...">
+                <div class="form-group affiliate-search-bar">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
+                        <label for="searchInput">Buscar en la lista:</label>
+                        <span id="search-results-counter" style="font-size: 0.9em; color: var(--clr-light-text-alt);"></span>
+                    </div>
+                    <input type="search" id="searchInput" placeholder="Escribe nombre, cédula o combinación (ej: 110)...">
                 </div>
                 <div class="table-wrapper">
                     <table class="tabla-sorteos public-list-table">
