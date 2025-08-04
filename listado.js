@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = 'https://movil-win-production.up.railway.app';
+    const params = new URLSearchParams(window.location.search); // <-- AHORA ESTÁ PRIMERO
     const sorteoId = new URLSearchParams(window.location.search).get('sorteo');
     const tipoSorteo = params.get('tipo'); 
 
