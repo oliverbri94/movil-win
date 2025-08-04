@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         `<div class="combinacion-fila">${combo.map(n => `<span class="bola-small-listado">${n}</span>`).join('')}</div>`
                     ).join('');
 
-                    const numerosParaBusqueda = p.numeros.flat().join('');
+                    const numerosParaBusqueda = p.numeros.map(combo => combo.join('')).join(' '); 
                     const nombreDisplay = p.nombre ? `${p.nombre.trim().split(' ')[0]} ${p.nombre.trim().split(' ').pop().charAt(0)}.` : 'Participante';
                     const cedulaDisplay = formatConfidentialId(p.id_documento);
                     const searchData = `${p.nombre || ''} ${p.id_documento || ''} ${numerosParaBusqueda}`.toLowerCase();
@@ -129,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 4. EVENT LISTENERS ---
     searchInput.addEventListener('input', () => {
         const searchTerm = searchInput.value.toLowerCase().trim();
         const searchCounter = document.getElementById('search-results-counter');
@@ -137,13 +136,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tbody.querySelectorAll('tr').forEach(row => {
             const searchableText = row.dataset.search || '';
-            const isVisible = searchableText.startsWith(searchTerm);
+
+            // La nueva lógica:
+            // 1. Separa el texto de búsqueda en "palabras" (nombres, cédulas, números)
+            const searchWords = searchableText.split(' ');
+
+            // 2. Revisa si ALGUNA de esas palabras EMPIEZA CON el término de búsqueda
+            const isVisible = searchWords.some(word => word.startsWith(searchTerm));
+
             row.style.display = isVisible ? '' : 'none';
             if (isVisible) {
                 resultadosEncontrados++;
             }
         });
 
+        // La lógica del contador no cambia
         if (searchTerm === '') {
             searchCounter.textContent = '';
         } else if (resultadosEncontrados === 1) {
