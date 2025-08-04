@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const headerHTML = `
             <div class="form-section-header">
                 <i class="fas fa-hand-pointer"></i>
-                <h4>Elige tu combinación de la suerte</h4>
+                <h4>Elige tu combinación de la suerte (desliza o introduce manualmente el número)</h4>
             </div>`;
         selectorContainer.innerHTML = headerHTML;
         selectorContainer.classList.remove('oculto');
@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const randomButton = document.createElement('button');
         randomButton.type = 'button';
         randomButton.className = 'admin-button-secondary'; 
-        randomButton.innerHTML = '<i class="fas fa-random"></i> Llenar Aleatoriamente';
+        randomButton.innerHTML = '<i class="fas fa-random"></i> Elige Aleatoriamente';
         randomButton.style.marginTop = '10px';
         randomButton.addEventListener('click', anadirNumerosAleatorios);
         
