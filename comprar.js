@@ -278,9 +278,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const paqueteNombre = currentParams.get('paqueteNombre') || "Boleto Individual";
         const paquetePrecio = parseFloat(currentParams.get('paquetePrecio') || '0').toFixed(2);
-        document.getElementById('resumen-sorteo-nombre').textContent = sorteoData.nombre_premio_display;
+        // Nueva línea para obtener la cantidad de boletos
+        const paqueteBoletos = currentParams.get('paqueteBoletos') || '0';
+
+        if (sorteoData) document.getElementById('resumen-sorteo-nombre').textContent = sorteoData.nombre_premio_display;
         document.getElementById('resumen-paquete-nombre').textContent = paqueteNombre;
         document.getElementById('resumen-total-pagar').textContent = `$${paquetePrecio}`;
+        // Nueva línea para actualizar el contador en el resumen
+        document.getElementById('resumen-cantidad-numeros').textContent = paqueteBoletos;
     };
 
     // RESTAURADO: Hemos vuelto a la función original que crea las bolas y los inputs

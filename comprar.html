@@ -47,6 +47,7 @@
             <img src="images/logo.png" alt="Logo Movil Win" class="h-20 w-auto mb-8">
             <ul class="flex flex-col items-center space-y-6">
                 <li><a href="index.html" class="text-2xl text-custom-text-light hover:text-custom-primary">Inicio</a></li>
+                <li><a href="listado.html" class="text-2xl text-custom-text-light hover:text-custom-primary transition duration-300 font-semibold menu-link">Lista Pública</a></li>                                
                 <li><a href="faq.html" class="text-2xl text-custom-text-light hover:text-custom-primary">Preguntas Frecuentes</a></li>
                 <li><a href="bases.html" class="text-2xl text-custom-text-light hover:text-custom-primary">Bases y Condiciones</a></li>
                 <li><a href="ganadores.html" class="text-2xl text-custom-text-light hover:text-custom-primary">Ganadores</a></li>
@@ -85,7 +86,6 @@
             <form id="form-pedido" class="site-form multistep-form" style="max-width: 600px; margin: 40px auto 0;">
 
                 <div class="form-step active" id="step-1">
-
                     <div id="resumen-pedido" class="resumen-pedido-card">
                         <div class="resumen-linea">
                             <span>Sorteo:</span>
@@ -95,6 +95,15 @@
                             <span>Paquete:</span>
                             <strong id="resumen-paquete-nombre">Cargando...</strong>
                         </div>
+
+                        <div class="resumen-linea" style="align-items: center;">
+                            <span>Cantidad de Números:</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <strong id="resumen-cantidad-numeros" style="font-size: 1.2em;">0</strong>
+                                <button type="button" id="btn-anadir-otro" class="quick-add-btn" title="Añadir 1 Número Más">+</button>
+                            </div>
+                        </div>
+
                         <div class="resumen-total">
                             <span>Total a Pagar:</span>
                             <strong id="resumen-total-pagar">$0</strong>
@@ -107,10 +116,6 @@
                         <h4>Tus Números Elegidos <span id="contador-numeros">0/0</span></h4>
                     </div>
                         <ul id="lista-numeros-elegidos"><li class="empty-list">Aún no has elegido números.</li></ul>
- 
-                        <button type="button" id="btn-anadir-otro" class="admin-button-secondary" style="width: 100%; margin-top: 15px;">
-                            <i class="fas fa-plus-circle"></i> Comprar 1 Número Más
-                        </button>
                     </div>
                     <div class="form-navigation">
                         <button type="button" class="btn-next admin-button">Siguiente <i class="fas fa-arrow-right"></i></button>
@@ -120,13 +125,14 @@
                 <div class="form-step" id="step-2">
                     <h3 class="step-title">Primero, tus datos de participante</h3>
                     <div class="form-group">
+                        <label for="cedula">Cédula (no será visible en nuestra web):</label>
+                        <input type="text" id="cedula" required maxlength="10" autocomplete="on">
+                    </div>
+                    <div class="form-group">
                         <label for="nombre">Primer nombre y primer apellido:</label>
                         <input type="text" id="nombre" required autocomplete="name">
                     </div>
-                    <div class="form-group">
-                        <label for="cedula">Cédula:</label>
-                        <input type="text" id="cedula" required maxlength="10" autocomplete="on">
-                    </div>
+
                     <div class="form-navigation">
                         <button type="button" class="btn-prev admin-button-secondary"><i class="fas fa-arrow-left"></i> Anterior</button>
                         <button type="button" class="btn-next admin-button">Siguiente <i class="fas fa-arrow-right"></i></button>
