@@ -1319,7 +1319,7 @@ nav.bg-custom-dark-bg-frame a:hover {
     color: var(--clr-light-text);
 }
 .form-group { margin-bottom: 20px; }
-.admin-button, .login-button {
+.login-button {
      display: block; 
      width: 100%; 
      padding: 12px 20px; 
@@ -1330,8 +1330,7 @@ nav.bg-custom-dark-bg-frame a:hover {
      transition: background-color 0.3s ease, transform 0.1s ease;
      margin-top: 10px;
 }
-.admin-button { background-color: var(--clr-green); color: var(--clr-white); }
-.admin-button:hover { background-color: #2abf51; transform: translateY(-2px); }
+
 .login-button { background-color: var(--clr-primary); color: var(--clr-white); }
 .login-button:hover { background-color: #0056b3; transform: translateY(-2px); }
 #statusMessage, #loginStatusMessage { text-align: center; margin-top: 20px; font-weight: 500; min-height: 20px; font-size: 0.95em;}
@@ -3915,22 +3914,7 @@ nav.bg-custom-dark-bg-frame a:hover {
     border-top: 1px solid var(--clr-dark-border);
     padding-top: 20px;
 }
-/* Botón secundario para "Anterior" */
-.admin-button-secondary {
-    background-color: transparent;
-    border: 2px solid var(--clr-primary);
-    color: var(--clr-primary);
-    font-weight: 600;
-    padding: 10px 20px;
-    border-radius: var(--border-radius-small);
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
 
-.admin-button-secondary:hover {
-    background-color: var(--clr-primary);
-    color: white;
-}
 
 /* --- Feedback de Validación --- */
 .form-group.valid input {
@@ -4416,4 +4400,51 @@ box-shadow: 0 0 30px rgba(var(--clr-secondary-rgb), 0.4); }
 
 .search-bar input[type="search"]:focus + .search-icon {
     color: var(--clr-primary);
+}
+
+/* ================================================= */
+/* --- ESTILOS MEJORADOS PARA BOTONES DE NAVEGACIÓN DE FORMULARIO --- */
+/* ================================================= */
+
+/* Estilo base que compartirán todos los botones */
+.admin-button,
+.admin-button-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Espacio entre el texto y el ícono */
+    padding: 12px 24px;
+    border-radius: 50px; /* Bordes totalmente redondeados */
+    font-size: 1.05em;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent; /* Borde transparente por defecto */
+    transition: all 0.3s ease;
+    text-decoration: none; /* Quitamos el subrayado si es un enlace */
+}
+
+/* Estilo principal para "Siguiente" o "Generar Pedido" */
+.admin-button {
+    background-color: var(--clr-primary);
+    color: white;
+    box-shadow: 0 4px 15px rgba(var(--clr-primary-rgb), 0.3);
+}
+
+.admin-button:hover {
+    background-color: color-mix(in srgb, var(--clr-primary) 85%, black);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--clr-primary-rgb), 0.4);
+}
+
+/* Estilo secundario para "Anterior" */
+.admin-button-secondary {
+    background-color: transparent;
+    color: var(--clr-primary);
+    border-color: var(--clr-primary); /* Borde del color primario */
+}
+
+.admin-button-secondary:hover {
+    background-color: var(--clr-primary);
+    color: white;
+    transform: translateY(-2px);
 }
