@@ -294,7 +294,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="form-section-header">
                 <i class="fas fa-hand-pointer"></i>
                 <h4>Elige tu combinación de la suerte (desliza o introduce manualmente el número)</h4>
-            </div>`;
+                <p style="margin-top: 8px;">El día del sorteo sacaremos los números ganadores de nuestra tombola en vivo</p>
+                </div>`;
         selectorContainer.innerHTML = headerHTML;
         selectorContainer.classList.remove('oculto');
         misNumerosContainer.style.display = 'block';
