@@ -588,58 +588,58 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     cargarDatosIniciales();
 
-    // --- Lógica para Añadir un Número Extra con UPGRADE ---
+        // --- Lógica para Añadir un Número Extra con UPGRADE ---
+    // REEMPLAZA ESTA FUNCIÓN COMPLETA
     function actualizarCantidad(cambio) {
-        // 1. Validaciones iniciales
         if (!sorteoData || !sorteoData.paquetes_json || sorteoData.paquetes_json.length === 0) {
             alert('No se encontró información de paquetes para este sorteo.');
             return;
         }
 
         const currentParams = new URLSearchParams(window.location.search);
-        let boletosActuales = parseInt(currentParams.get('paqueteBoletos') || '0', 10);
+        let boletosActuales = parseInt(currentParams.get('paquetesBoletos') || '0', 10);
         const nuevosBoletos = boletosActuales + cambio;
 
-        // No permitir menos de 1 boleto
         if (nuevosBoletos < 1) return;
 
-        // 2. Lógica de cálculo de precio y paquete
         const todosLosPaquetes = sorteoData.paquetes_json;
         let nuevoPrecio;
         let nuevoNombrePaquete;
 
-        // Buscamos si la nueva cantidad coincide exactamente con un paquete
+        // LÓGICA CORREGIDA PARA PRECIO Y UPGRADE
+        // 1. Buscamos si la nueva cantidad coincide exactamente con un paquete
         const paqueteDirecto = todosLosPaquetes.find(p => p.cantidad_boletos === nuevosBoletos);
 
         if (paqueteDirecto) {
-            // Si coincide, usamos el precio y nombre de ese paquete
+            // Si coincide, usamos el precio y nombre de ese paquete (¡Upgrade funciona!)
             nuevoPrecio = parseFloat(paqueteDirecto.precio_final);
             nuevoNombrePaquete = paqueteDirecto.nombre;
         } else {
-            // Si no coincide, calculamos el precio basado en el paquete inferior más cercano
+            // 2. Si no hay paquete directo, calculamos el precio
+            // Encontramos el paquete más pequeño para usar como precio base por número
+            const paqueteIndividual = todosLosPaquetes.reduce((prev, curr) => 
+                (prev.cantidad_boletos < curr.cantidad_boletos) ? prev : curr
+            );
+            const precioPorBoletoBase = parseFloat(paqueteIndividual.precio_final) / paqueteIndividual.cantidad_boletos;
+
+            // Buscamos el mejor paquete INFERIOR al que hemos llegado
             const paqueteBase = todosLosPaquetes
                 .filter(p => p.cantidad_boletos < nuevosBoletos)
                 .sort((a, b) => b.cantidad_boletos - a.cantidad_boletos)[0];
 
             if (paqueteBase) {
-                const precioPorBoletoBase = parseFloat(paqueteBase.precio_final) / paqueteBase.cantidad_boletos;
+                // Si existe un paquete inferior, calculamos el precio a partir de él
                 const boletosExtra = nuevosBoletos - paqueteBase.cantidad_boletos;
                 nuevoPrecio = parseFloat(paqueteBase.precio_final) + (boletosExtra * precioPorBoletoBase);
-                nuevoNombrePaquete = `Paquete Personalizado (${nuevosBoletos} números)`;
             } else {
-                // Si no hay paquete base (ej: estamos en 1), usamos el más barato
-                const paqueteIndividual = todosLosPaquetes.reduce((prev, curr) => (prev.cantidad_boletos < curr.cantidad_boletos) ? prev : curr);
-                const precioPorBoletoIndividual = parseFloat(paqueteIndividual.precio_final) / paqueteIndividual.cantidad_boletos;
-                nuevoPrecio = nuevosBoletos * precioPorBoletoIndividual;
-                nuevoNombrePaquete = `Paquete Personalizado (${nuevosBoletos} números)`;
+                // Si no hay paquete inferior (estamos entre 0 y el primer paquete), calculamos desde cero
+                nuevoPrecio = nuevosBoletos * precioPorBoletoBase;
             }
+            nuevoNombrePaquete = `Paquete Personalizado (${nuevosBoletos} números)`;
         }
 
-        // 3. Si estamos disminuyendo, quitamos el último número elegido
         if (cambio < 0 && misNumerosSeleccionados.length > 0) {
-            // Prioriza quitar slots vacíos o migrados antes que números elegidos
-            let ultimoIndice = misNumerosSeleccionados.length - 1;
-            misNumerosSeleccionados.splice(ultimoIndice, 1);
+            misNumerosSeleccionados.pop(); // Quitamos el último número
         }
 
         // 4. Actualizar la URL y la interfaz
