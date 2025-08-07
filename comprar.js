@@ -293,9 +293,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const headerHTML = `
             <div class="form-section-header">
                 <i class="fas fa-hand-pointer"></i>
-                <h4>Elige tu combinación de la suerte (desliza o introduce manualmente el número)</h4>
-                <p style="margin-top: 8px;">El día del sorteo sacaremos los números ganadores de nuestra tombola en vivo</p>
-                </div>`;
+                <div class="header-text-container">
+                    <h4>Elige tu combinación de la suerte</h4>
+                    <p class="header-subtitle">Desliza o introduce manualmente el número. El día del sorteo sacaremos los números ganadores de nuestra tómbola en vivo.</p>
+                </div>
+            </div>`;
         selectorContainer.innerHTML = headerHTML;
         selectorContainer.classList.remove('oculto');
         misNumerosContainer.style.display = 'block';

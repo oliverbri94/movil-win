@@ -4448,3 +4448,23 @@ box-shadow: 0 0 30px rgba(var(--clr-secondary-rgb), 0.4); }
     color: white;
     transform: translateY(-2px);
 }
+
+
+/* ================================================= */
+/* --- ESTILOS PARA SUBTÍTULO EN CABECERA DE FORMULARIO --- */
+/* ================================================= */
+
+/* Contenedor para el texto */
+.header-text-container {
+    display: flex;
+    flex-direction: column; /* Apila el título y el subtítulo verticalmente */
+}
+
+/* Estilo para el nuevo subtítulo informativo */
+.header-subtitle {
+    font-size: 0.85em; /* Un poco más pequeño */
+    font-weight: 400; /* Menos grueso que el título */
+    color: var(--clr-light-text-alt); /* Un color más suave */
+    margin-top: 4px; /* Pequeño espacio superior */
+    line-height: 1.4;
+}
