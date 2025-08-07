@@ -401,8 +401,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         statusCombinacion.id = 'status-combinacion';
         statusCombinacion.className = 'status-container oculto';
 
+        selectorContainer.appendChild(addButton); 
         selectorContainer.appendChild(randomButton);
-        selectorContainer.appendChild(addButton);
         selectorContainer.appendChild(statusCombinacion);
     };
 
@@ -589,60 +589,79 @@ document.addEventListener('DOMContentLoaded', async () => {
     cargarDatosIniciales();
 
     // --- Lógica para Añadir un Número Extra con UPGRADE ---
-    const btnAnadirOtro = document.getElementById('btn-anadir-otro');
-    if (btnAnadirOtro) {
-        btnAnadirOtro.addEventListener('click', () => {
-            if (!sorteoData || !sorteoData.paquetes_json || sorteoData.paquetes_json.length === 0) {
-                alert('No se encontró información de paquetes para este sorteo.');
-                return;
-            }
-            const todosLosPaquetes = sorteoData.paquetes_json;
-            const currentParams = new URLSearchParams(window.location.search);
-            let boletosActuales = parseInt(currentParams.get('paqueteBoletos') || '0', 10);
-            let precioActual = parseFloat(currentParams.get('paquetePrecio') || '0.00');
+    function actualizarCantidad(cambio) {
+        // 1. Validaciones iniciales
+        if (!sorteoData || !sorteoData.paquetes_json || sorteoData.paquetes_json.length === 0) {
+            alert('No se encontró información de paquetes para este sorteo.');
+            return;
+        }
 
-            // 1. Encontrar el precio por número del paquete más básico para usarlo como base
-            const paqueteIndividual = todosLosPaquetes.reduce((prev, curr) => {
-                return (prev.boletos < curr.boletos) ? prev : curr;
-            });
-            const precioPorBoletoBase = parseFloat(paqueteIndividual.precio) / paqueteIndividual.boletos;
+        const currentParams = new URLSearchParams(window.location.search);
+        let boletosActuales = parseInt(currentParams.get('paqueteBoletos') || '0', 10);
+        const nuevosBoletos = boletosActuales + cambio;
 
-            // 2. Calcular el nuevo precio tentativo al añadir un número más
-            const nuevoPrecioCalculado = precioActual + precioPorBoletoBase;
+        // No permitir menos de 1 boleto
+        if (nuevosBoletos < 1) return;
 
-            // 3. BUSCAR EL MEJOR UPGRADE POSIBLE BASADO EN EL NUEVO PRECIO
-            const paquetesOrdenados = [...todosLosPaquetes].sort((a, b) => parseFloat(b.precio) - parseFloat(a.precio));
-            const paquetePotencial = paquetesOrdenados.find(p => nuevoPrecioCalculado >= parseFloat(p.precio));
+        // 2. Lógica de cálculo de precio y paquete
+        const todosLosPaquetes = sorteoData.paquetes_json;
+        let nuevoPrecio;
+        let nuevoNombrePaquete;
 
-            let nuevosBoletos, nuevoPrecio, nuevoNombrePaquete;
+        // Buscamos si la nueva cantidad coincide exactamente con un paquete
+        const paqueteDirecto = todosLosPaquetes.find(p => p.cantidad_boletos === nuevosBoletos);
 
-            // ¡ESTA ES LA LÍNEA CLAVE DE LA CORRECCIÓN!
-            // Verificamos si el paquete encontrado es realmente un "upgrade" (mejor precio o más boletos)
-            const esRealmenteUnUpgrade = paquetePotencial && (parseFloat(paquetePotencial.precio) > precioActual || (parseFloat(paquetePotencial.precio) === precioActual && paquetePotencial.cantidad_boletos > boletosActuales));
+        if (paqueteDirecto) {
+            // Si coincide, usamos el precio y nombre de ese paquete
+            nuevoPrecio = parseFloat(paqueteDirecto.precio_final);
+            nuevoNombrePaquete = paqueteDirecto.nombre;
+        } else {
+            // Si no coincide, calculamos el precio basado en el paquete inferior más cercano
+            const paqueteBase = todosLosPaquetes
+                .filter(p => p.cantidad_boletos < nuevosBoletos)
+                .sort((a, b) => b.cantidad_boletos - a.cantidad_boletos)[0];
 
-            if (esRealmenteUnUpgrade) {
-                // ¡UPGRADE! Asignamos los valores del paquete superior que se alcanzó
-                nuevosBoletos = paquetePotencial.boletos;
-                nuevoPrecio = parseFloat(paquetePotencial.precio);
-                nuevoNombrePaquete = paquetePotencial.nombre;
-                showStatusMessage('status-combinacion', `¡Felicidades! Se actualizó a ${nuevoNombrePaquete}`, false);
+            if (paqueteBase) {
+                const precioPorBoletoBase = parseFloat(paqueteBase.precio_final) / paqueteBase.cantidad_boletos;
+                const boletosExtra = nuevosBoletos - paqueteBase.cantidad_boletos;
+                nuevoPrecio = parseFloat(paqueteBase.precio_final) + (boletosExtra * precioPorBoletoBase);
+                nuevoNombrePaquete = `Paquete Personalizado (${nuevosBoletos} números)`;
             } else {
-                // No hay upgrade, solo se suma un boleto más con el precio calculado
-                nuevosBoletos = boletosActuales + 1;
-                nuevoPrecio = nuevoPrecioCalculado;
+                // Si no hay paquete base (ej: estamos en 1), usamos el más barato
+                const paqueteIndividual = todosLosPaquetes.reduce((prev, curr) => (prev.cantidad_boletos < curr.cantidad_boletos) ? prev : curr);
+                const precioPorBoletoIndividual = parseFloat(paqueteIndividual.precio_final) / paqueteIndividual.cantidad_boletos;
+                nuevoPrecio = nuevosBoletos * precioPorBoletoIndividual;
                 nuevoNombrePaquete = `Paquete Personalizado (${nuevosBoletos} números)`;
             }
+        }
 
-            // 4. Actualizar la URL y la interfaz (esta parte no cambia)
-            currentParams.set('paqueteBoletos', nuevosBoletos);
-            currentParams.set('paquetePrecio', nuevoPrecio.toFixed(2));
-            currentParams.set('paqueteNombre', nuevoNombrePaquete);
-            const nuevaUrl = `${window.location.pathname}?${currentParams.toString()}`;
-            history.pushState({ path: nuevaUrl }, '', nuevaUrl);
+        // 3. Si estamos disminuyendo, quitamos el último número elegido
+        if (cambio < 0 && misNumerosSeleccionados.length > 0) {
+            // Prioriza quitar slots vacíos o migrados antes que números elegidos
+            let ultimoIndice = misNumerosSeleccionados.length - 1;
+            misNumerosSeleccionados.splice(ultimoIndice, 1);
+        }
 
-            actualizarResumen();
-            actualizarListaMisNumeros();
-        });
+        // 4. Actualizar la URL y la interfaz
+        currentParams.set('paqueteBoletos', nuevosBoletos);
+        currentParams.set('paquetePrecio', nuevoPrecio.toFixed(2));
+        currentParams.set('paqueteNombre', nuevoNombrePaquete);
+        const nuevaUrl = `${window.location.pathname}?${currentParams.toString()}`;
+        history.pushState({ path: nuevaUrl }, '', nuevaUrl);
+
+        actualizarResumen();
+        actualizarListaMisNumeros();
+    }
+
+    // --- Asignación de eventos a los botones ---
+    const btnAnadirOtro = document.getElementById('btn-anadir-otro');
+    const btnQuitarUno = document.getElementById('btn-quitar-uno');
+
+    if (btnAnadirOtro) {
+        btnAnadirOtro.addEventListener('click', () => actualizarCantidad(1));
+    }
+    if (btnQuitarUno) {
+        btnQuitarUno.addEventListener('click', () => actualizarCantidad(-1));
     }
     // --- Lógica para Autocompletar Datos del Cliente ---
     const cedulaInput = document.getElementById('cedula');
