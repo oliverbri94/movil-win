@@ -698,4 +698,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             clearTimeout(typingTimer);
         });
     }
+    // --- LÓGICA PARA EVITAR ABANDONO DE PÁGINA ---
+    window.addEventListener('beforeunload', function (e) {
+        // La mayoría de los navegadores modernos ya no muestran un mensaje personalizado por seguridad,
+        // pero es necesario establecer un valor a returnValue para que el diálogo aparezca.
+        e.returnValue = '¿Estás seguro de que quieres salir? Perderás tu selección actual.';
+
+        // Para navegadores más antiguos
+        return '¿Estás seguro de que quieres salir? Perderás tu selección actual.';
+    });
 }); 
