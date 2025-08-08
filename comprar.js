@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let sorteoData = null;
     let numerosOcupados = [];
     let misNumerosSeleccionados = [];
+    let isSubmitting = false; // <--- AÑADE ESTA LÍNEA
+    //...
 
 
     if (couponCode && couponCode.startsWith('MIGRACION-')) {
@@ -520,6 +522,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     form.addEventListener('submit', async (e) => {
+        isSubmitting = true; // <-- AÑADE ESTA LÍNEA AL INICIO
         e.preventDefault();
         
         const submitButton = form.querySelector('button[type="submit"]');
@@ -700,6 +703,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     // --- LÓGICA PARA EVITAR ABANDONO DE PÁGINA ---
     window.addEventListener('beforeunload', function (e) {
+        // Si la bandera está levantada, no hacemos nada
+        if (isSubmitting) {
+            return;
+        }
         // La mayoría de los navegadores modernos ya no muestran un mensaje personalizado por seguridad,
         // pero es necesario establecer un valor a returnValue para que el diálogo aparezca.
         e.returnValue = '¿Estás seguro de que quieres salir? Perderás tu selección actual.';
