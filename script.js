@@ -323,7 +323,7 @@ function initializeRafflePage() {
         if (url.endsWith('.mp4') || url.endsWith('.webm')) {
             return `<video src="${url}" class="${classes}" autoplay loop muted playsinline></video>`;
         }
-        return `<img src="${url}" alt="${sorteo.nombre_premio_display}" class="${classes}">`;
+        return `<img loading="lazy" src="${url}" alt="${sorteo.nombre_premio_display}" class="${classes}">`;
     }
 
 
@@ -1107,7 +1107,7 @@ function initializeRafflePage() {
                 ganadores.forEach(g => {
                     const card = document.createElement('div');
                     card.className = 'ganador-card';
-                    let mediaHTML = g.imagenUrl ? `<img src="${g.imagenUrl}" alt="Foto de ${g.nombre}" class="ganador-foto">` : `<div class="placeholder-pending"><i class="fas fa-shipping-fast"></i><span>Entrega de premio en proceso</span></div>`;
+                    let mediaHTML = g.imagenUrl ? `<img loading="lazy" src="${g.imagenUrl}" alt="Foto de ${g.nombre}" class="ganador-foto">` : `<div class="placeholder-pending">...</div>`;
                     card.innerHTML = `${mediaHTML}<div class="ganador-info"><h3 class="ganador-nombre">${g.nombre}</h3><p class="ganador-premio">Premio: ${g.premio}</p></div>`;
                     listaGanadoresDiv.appendChild(card);
                 });

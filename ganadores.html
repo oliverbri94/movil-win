@@ -284,7 +284,7 @@
                     // Si existe una URL de imagen y no está vacía...
                     if (ganador.imagenUrl && ganador.imagenUrl.trim() !== '') {
                         // ...muestra la imagen del ganador.
-                        mediaHTML = `<img src="${ganador.imagenUrl}" alt="Foto de ${ganador.nombre}" class="ganador-foto" onerror="this.onerror=null; this.src='images/placeholder-ganador.png';">`;
+                        mediaHTML = `<img loading="lazy" src="${ganador.imagenUrl}" alt="Foto de ${ganador.nombre}" class="ganador-foto" onerror="this.onerror=null; this.src='images/placeholder-ganador.png';">`;
                     } else {
                         // ...de lo contrario, muestra el mensaje de "en proceso".
                         mediaHTML = `
