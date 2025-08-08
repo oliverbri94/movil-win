@@ -4468,3 +4468,40 @@ box-shadow: 0 0 30px rgba(var(--clr-secondary-rgb), 0.4); }
     margin-top: 4px; /* Pequeño espacio superior */
     line-height: 1.4;
 }
+
+/* ================================================= */
+/* --- ESTILOS PARA VALIDACIÓN DE FORMULARIO EN TIEMPO REAL --- */
+/* ================================================= */
+
+.form-group {
+    position: relative; /* Necesario para posicionar los íconos */
+}
+
+/* Estilo base para los íconos (ocultos por defecto) */
+.form-group::after {
+    font-family: "Font Awesome 6 Free"; /* Usamos la fuente de íconos que ya tienes */
+    font-weight: 900;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    font-size: 1.2em;
+    opacity: 0; /* Oculto */
+    transform: translateY(-50%) scale(0.5); /* Posición inicial para la animación */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Cuando el campo es VÁLIDO */
+.form-group.valid::after {
+    content: '\f058'; /* Icono de check-circle */
+    color: var(--clr-green);
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+
+/* Cuando el campo es INVÁLIDO */
+.form-group.invalid::after {
+    content: '\f071'; /* Icono de exclamation-triangle */
+    color: var(--clr-red);
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}

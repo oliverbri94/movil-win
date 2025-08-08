@@ -707,4 +707,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Para navegadores más antiguos
         return '¿Estás seguro de que quieres salir? Perderás tu selección actual.';
     });
+
+    // --- LÓGICA PARA VALIDACIÓN DE FORMULARIO EN TIEMPO REAL ---
+    const inputsToValidate = [
+        { id: 'nombre', minLength: 3 },
+        { id: 'cedula', exactLength: 10 },
+        { id: 'ciudad', minLength: 3 },
+        { id: 'celular', exactLength: 10 }
+    ];
+
+    inputsToValidate.forEach(item => {
+        const inputElement = document.getElementById(item.id);
+        if (inputElement) {
+            inputElement.addEventListener('input', () => {
+                const parentGroup = inputElement.closest('.form-group');
+                let isValid = false;
+
+                if (item.minLength) {
+                    isValid = inputElement.value.trim().length >= item.minLength;
+                }
+                if (item.exactLength) {
+                    isValid = inputElement.value.trim().length === item.exactLength;
+                }
+
+                if (inputElement.value.trim().length === 0) {
+                    // Si el campo está vacío, no mostramos ningún estado
+                    parentGroup.classList.remove('valid', 'invalid');
+                } else if (isValid) {
+                    parentGroup.classList.add('valid');
+                    parentGroup.classList.remove('invalid');
+                } else {
+                    parentGroup.classList.add('invalid');
+                    parentGroup.classList.remove('valid');
+                }
+            });
+        }
+    });
 }); 
