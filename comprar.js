@@ -605,31 +605,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         let nuevoPrecio;
         let nuevoNombrePaquete;
 
-        // LÓGICA CORREGIDA USANDO 'precio' EN LUGAR DE 'precio_final'
-        const paqueteDirecto = todosLosPaquetes.find(p => p.cantidad_boletos === nuevosBoletos);
+        // LÓGICA CORREGIDA USANDO 'boletos' Y 'precio'
+        const paqueteDirecto = todosLosPaquetes.find(p => p.boletos === nuevosBoletos);
 
         if (paqueteDirecto) {
             nuevoPrecio = parseFloat(paqueteDirecto.precio);
             nuevoNombrePaquete = paqueteDirecto.nombre;
         } else {
             const paqueteIndividual = todosLosPaquetes.reduce((prev, curr) => 
-                (prev.cantidad_boletos < curr.cantidad_boletos) ? prev : curr
+                (prev.boletos < curr.boletos) ? prev : curr
             );
-            const precioPorBoletoBase = parseFloat(paqueteIndividual.precio) / paqueteIndividual.cantidad_boletos;
+            const precioPorBoletoBase = parseFloat(paqueteIndividual.precio) / paqueteIndividual.boletos;
 
             const paqueteBase = todosLosPaquetes
-                .filter(p => p.cantidad_boletos < nuevosBoletos)
-                .sort((a, b) => b.cantidad_boletos - a.cantidad_boletos)[0];
+                .filter(p => p.boletos < nuevosBoletos)
+                .sort((a, b) => b.boletos - a.boletos)[0];
 
             if (paqueteBase) {
-                const boletosExtra = nuevosBoletos - paqueteBase.cantidad_boletos;
+                const boletosExtra = nuevosBoletos - paqueteBase.boletos;
                 nuevoPrecio = parseFloat(paqueteBase.precio) + (boletosExtra * precioPorBoletoBase);
             } else {
                 nuevoPrecio = nuevosBoletos * precioPorBoletoBase;
             }
             nuevoNombrePaquete = `Paquete Personalizado (${nuevosBoletos} números)`;
         }
-
+        
         if (cambio < 0 && misNumerosSeleccionados.length > 0) {
             misNumerosSeleccionados.pop();
         }
