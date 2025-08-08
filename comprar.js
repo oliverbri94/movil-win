@@ -597,6 +597,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const currentParams = new URLSearchParams(window.location.search);
         let boletosActuales = parseInt(currentParams.get('paqueteBoletos') || '0', 10);
+        let precioActual = parseFloat(currentParams.get('paquetePrecio') || '0.00');
         const nuevosBoletos = boletosActuales + cambio;
 
         if (nuevosBoletos < 1) return;
@@ -605,37 +606,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         let nuevoPrecio;
         let nuevoNombrePaquete;
 
-        // LÓGICA CORREGIDA USANDO 'boletos' Y 'precio'
-        const paqueteDirecto = todosLosPaquetes.find(p => p.boletos === nuevosBoletos);
+        // --- INICIO DE LA LÓGICA CORREGIDA ---
+        // 1. Encontrar el precio base por número (del paquete más pequeño)
+        const paqueteIndividual = todosLosPaquetes.reduce((prev, curr) => (prev.boletos < curr.boletos) ? prev : curr);
+        const precioPorBoletoBase = parseFloat(paqueteIndividual.precio) / paqueteIndividual.boletos;
 
-        if (paqueteDirecto) {
-            nuevoPrecio = parseFloat(paqueteDirecto.precio);
-            nuevoNombrePaquete = paqueteDirecto.nombre;
+        // 2. Calcular el precio tentativo SI NO HUBIERA UPGRADE
+        // Si sumamos, añadimos el precio base. Si restamos, buscamos el precio del estado anterior.
+        const precioTentativo = (cambio > 0)
+            ? precioActual + precioPorBoletoBase
+            : (todosLosPaquetes.find(p => p.boletos === nuevosBoletos)?.precio || nuevosBoletos * precioPorBoletoBase);
+
+        // 3. BUSCAR EL MEJOR UPGRADE POSIBLE BASADO EN ESE PRECIO TENTATIVO
+        const paquetesOrdenados = [...todosLosPaquetes].sort((a, b) => parseFloat(b.precio) - parseFloat(a.precio));
+        const paqueteUpgrade = paquetesOrdenados.find(p => precioTentativo >= parseFloat(p.precio));
+
+        const esRealmenteUnUpgrade = paqueteUpgrade && (parseFloat(paqueteUpgrade.precio) > precioActual || paqueteUpgrade.boletos > boletosActuales);
+
+        if (cambio > 0 && esRealmenteUnUpgrade) {
+            // ¡UPGRADE! Asignamos los valores del paquete superior que se alcanzó
+            nuevoPrecio = parseFloat(paqueteUpgrade.precio);
+            nuevoNombrePaquete = paqueteUpgrade.nombre;
+            // ¡IMPORTANTE! Actualizamos también la cantidad de boletos a la del paquete
+            currentParams.set('paqueteBoletos', paqueteUpgrade.boletos);
         } else {
-            const paqueteIndividual = todosLosPaquetes.reduce((prev, curr) => 
-                (prev.boletos < curr.boletos) ? prev : curr
-            );
-            const precioPorBoletoBase = parseFloat(paqueteIndividual.precio) / paqueteIndividual.boletos;
-
-            const paqueteBase = todosLosPaquetes
-                .filter(p => p.boletos < nuevosBoletos)
-                .sort((a, b) => b.boletos - a.boletos)[0];
-
-            if (paqueteBase) {
-                const boletosExtra = nuevosBoletos - paqueteBase.boletos;
-                nuevoPrecio = parseFloat(paqueteBase.precio) + (boletosExtra * precioPorBoletoBase);
-            } else {
-                nuevoPrecio = nuevosBoletos * precioPorBoletoBase;
-            }
+            // No hay upgrade o estamos restando, usamos el cálculo normal
+            nuevoPrecio = precioTentativo;
             nuevoNombrePaquete = `Paquete Personalizado (${nuevosBoletos} números)`;
+            currentParams.set('paqueteBoletos', nuevosBoletos);
         }
-        
-        if (cambio < 0 && misNumerosSeleccionados.length > 0) {
+        // --- FIN DE LA LÓGICA CORREGIDA ---
+
+        if (cambio < 0 && misNumerosSeleccionados.length > nuevosBoletos) {
             misNumerosSeleccionados.pop();
         }
 
         // Actualizar la URL y la interfaz
-        currentParams.set('paqueteBoletos', nuevosBoletos);
         currentParams.set('paquetePrecio', nuevoPrecio.toFixed(2));
         currentParams.set('paqueteNombre', nuevoNombrePaquete);
         const nuevaUrl = `${window.location.pathname}?${currentParams.toString()}`;
