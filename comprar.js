@@ -522,20 +522,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     form.addEventListener('submit', async (e) => {
-        isSubmitting = true; // <-- AÑADE ESTA LÍNEA AL INICIO
         e.preventDefault();
-        
+        isSubmitting = true; // Mantenemos la bandera por si acaso
+
         const submitButton = form.querySelector('button[type="submit"]');
         submitButton.disabled = true;
         statusDiv.textContent = 'Procesando tu pedido...';
         statusDiv.className = 'status-container';
 
+        // ¡CORRECCIÓN IMPORTANTE!
+        // Usamos los parámetros ACTUALES de la URL, no los originales
+        const currentParams = new URLSearchParams(window.location.search);
+
         const payload = {
             sorteoId: sorteoId,
             sorteoNombre: sorteoData.nombre_premio_display,
-            paquete: params.get('paqueteNombre'),
-            precio_paquete: parseFloat(params.get('paquetePrecio')),
-            cantidad_boletos: parseInt(params.get('paqueteBoletos')),
+            paquete: currentParams.get('paqueteNombre'),
+            precio_paquete: parseFloat(currentParams.get('paquetePrecio')),
+            cantidad_boletos: parseInt(currentParams.get('paqueteBoletos')),
             nombre: document.getElementById('nombre').value,
             cedula: document.getElementById('cedula').value,
             ciudad: document.getElementById('ciudad').value,
@@ -555,15 +559,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || 'Error en el servidor.');
-            
+
             if (typeof fbq === 'function') {
                 fbq('track', 'Lead', {
                     content_name: sorteoData.nombre_premio_display,
-                    value: parseFloat(params.get('paquetePrecio')),
+                    value: payload.precio_paquete,
                     currency: 'USD'
                 });
             }
-            
+
+            // ¡CORRECCIÓN FINAL PARA LA ALERTA!
+            // Removemos el listener ANTES de redirigir
+            window.removeEventListener('beforeunload', exitConfirmation);
+
             const numerosQuery = encodeURIComponent(JSON.stringify(misNumerosSeleccionados));
             window.location.href = `gracias.html?pedidoId=${result.pedidoId}&numeros=${numerosQuery}`;
 
@@ -571,6 +579,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             statusDiv.textContent = `Error: ${error.message}`;
             statusDiv.className = 'status-container error';
             submitButton.disabled = false;
+            isSubmitting = false; // Reactivamos la bandera si hay un error
         }
     });
 
@@ -702,18 +711,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     // --- LÓGICA PARA EVITAR ABANDONO DE PÁGINA ---
-    window.addEventListener('beforeunload', function (e) {
-        // Si la bandera está levantada, no hacemos nada
+    const exitConfirmation = function (e) {
         if (isSubmitting) {
             return;
         }
-        // La mayoría de los navegadores modernos ya no muestran un mensaje personalizado por seguridad,
-        // pero es necesario establecer un valor a returnValue para que el diálogo aparezca.
         e.returnValue = '¿Estás seguro de que quieres salir? Perderás tu selección actual.';
-
-        // Para navegadores más antiguos
         return '¿Estás seguro de que quieres salir? Perderás tu selección actual.';
-    });
+    };
+    window.addEventListener('beforeunload', exitConfirmation);
 
     // --- LÓGICA PARA VALIDACIÓN DE FORMULARIO EN TIEMPO REAL ---
     const inputsToValidate = [
