@@ -68,4 +68,20 @@ document.addEventListener('DOMContentLoaded', () => {
             button.classList.remove('copied');
         }, 2000);
     }
-});
+
+const pedidoId = params.get('pedidoId');
+const linkContainer = document.getElementById('link-boleto-container');
+const linkBoton = document.getElementById('link-a-mi-boleto');
+
+if (pedidoId && linkContainer && linkBoton) {
+    // Construimos el enlace a la nueva página
+    const enlace = `combinacion.html?id=${pedidoId}`;
+    linkBoton.href = enlace;
+
+    // Hacemos visible el contenedor
+    linkContainer.classList.remove('oculto');
+}
+
+// ---> FIN DEL BLOQUE AÑADIDO <---
+
+}); // <-- Esta es la llave de cierre final de tu archivo

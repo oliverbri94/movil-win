@@ -380,6 +380,40 @@ app.get('/api/numeros-ocupados/:id', async (req, res) => {
     }
 });
 
+// server.js
+// DEVUELVE LOS DETALLES PARA UNA TARJETA DE COMBINACIÓN DIGITAL
+app.get('/api/combinacion-details/:pedidoId', async (req, res) => {
+    try {
+        const { pedidoId } = req.params;
+        const sql = `
+            SELECT
+                p.nombre_cliente,
+                p.numeros_elegidos,
+                s.nombre_premio_display,
+                s.imagen_url
+            FROM pedidos p
+            JOIN sorteos_config s ON p.id_sorteo_fk = s.id_sorteo
+            WHERE p.id_pedido = $1;
+        `;
+        const pedido = await new Promise((resolve, reject) => {
+            db.get(sql, [pedidoId], (err, row) => err ? reject(err) : resolve(row));
+        });
+
+        if (pedido) {
+            // Parseamos los números antes de enviarlos
+            if(pedido.numeros_elegidos) {
+                pedido.numeros_elegidos = JSON.parse(pedido.numeros_elegidos);
+            }
+            res.json({ success: true, data: pedido });
+        } else {
+            res.status(404).json({ success: false, message: 'Pedido no encontrado.' });
+        }
+    } catch (error) {
+        console.error("Error al buscar detalles de la combinación:", error);
+        res.status(500).json({ success: false, error: 'Error interno del servidor.' });
+    }
+});
+
 // NUEVA RUTA: OBTENER LISTA PÚBLICA PARA TÓMBOLA
 app.get('/api/public-list/tombola/:id', async (req, res) => {
     try {

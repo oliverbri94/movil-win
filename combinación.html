@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Combinación de la Suerte - Movil Win</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="config.js"></script>
+</head>
+<body class="boleto-digital-body">
+
+    <div id="boleto-card" class="boleto-card" style="display: none;">
+        <img id="premio-imagen" src="" alt="Premio del Sorteo" class="premio-imagen">
+        <h1 id="premio-nombre">Cargando...</h1>
+        <h2 id="participante-nombre"></h2>
+
+        <p class="combinaciones-titulo">Tus combinaciones de la suerte:</p>
+        <div id="combinaciones-container" class="combinacion-bolas-container" style="justify-content: center;"></div>
+
+        <div class="boleto-share-buttons">
+            <a id="share-whatsapp" href="#" class="boton-cta boton-whatsapp" target="_blank">
+                <i class="fab fa-whatsapp"></i> Compartir en WhatsApp
+            </a>
+            </div>
+         <p style="font-size: 0.8em; color: #aaa; margin-top: 20px;">
+            <a href="index.html" style="color: #aaa;">Volver a Movil Win</a>
+        </p>
+    </div>
+
+    <div id="loader-boleto">Cargando tu combinación...</div>
+
+    <script src="combinacion.js"></script>
+</body>
+</html>
