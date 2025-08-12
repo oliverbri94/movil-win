@@ -62,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function cargarListadoDeParticipantes(id, tipo) {
-        const totalBoletosEl = document.getElementById('total-boletos');
         const headerBoleto = document.getElementById('header-boleto-combinacion');
         if(loaderEl) loaderEl.style.display = 'flex';
 
@@ -77,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tituloEl.textContent = `Listado Oficial: ${data.nombreSorteo}`;
             subtituloEl.innerHTML = `<a href="listado.html" class="back-link-small"><i class="fas fa-arrow-left"></i> Volver a la lista de sorteos</a>`;
-            totalBoletosEl.textContent = `Total de registros: ${data.listado.length}`;
 
             let filasHTML = '';
 
