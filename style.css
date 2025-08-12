@@ -34,6 +34,8 @@
     --gold: #ffcd38;  /* Color dorado principal */
     --light-shadow: #f0e68c; /* Sombra clara para el efecto 3D del texto */
     --dark-shadow: #d4af37; /* Sombra más oscura para el efecto 3D */
+    --clr-dark-bg: #1f2937; /* Color sólido */
+    --clr-dark-bg-rgb: 31, 41, 55; /* Los mismos valores pero en formato RGB */
     /* Tipografía */
     --font-main: 'Poppins', sans-serif;
 
