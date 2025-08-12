@@ -34,8 +34,6 @@
     --gold: #ffcd38;  /* Color dorado principal */
     --light-shadow: #f0e68c; /* Sombra clara para el efecto 3D del texto */
     --dark-shadow: #d4af37; /* Sombra más oscura para el efecto 3D */
-    --clr-dark-bg: #1f2937; /* Color sólido */
-    --clr-dark-bg-rgb: 31, 41, 55; /* Los mismos valores pero en formato RGB */
     /* Tipografía */
     --font-main: 'Poppins', sans-serif;
 
@@ -343,65 +341,8 @@ body {
 .como-participar-section { text-align: center; }
 /* === ESTILOS MEJORADOS PARA LA SECCIÓN 'CÓMO PARTICIPAR' === */
 
-/* Contenedor principal de los pasos */
-.pasos-container-nuevo {
-    display: grid;
-    gap: 30px 60px; /* Espacio vertical y horizontal entre los pasos */
-    margin: 40px 0;
-    /* En móvil (por defecto), es una sola columna */
-    grid-template-columns: 1fr;
-}
 
-/* El paso individual */
-.paso-nuevo {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    background-color: transparent; /* Hacemos el fondo transparente */
-    padding: 15px;
-    border-radius: var(--border-radius-medium);
-    border: none; /* Quitamos el borde individual */
-    position: relative; /* Necesario para posicionar las flechas conectoras */
-    transition: transform 0.3s ease;
-}
 
-.paso-nuevo:hover {
-    transform: translateY(-5px); /* Efecto de "levantarse" al pasar el cursor */
-}
-
-/* El círculo del icono */
-.paso-icono-nuevo {
-    font-size: 2.2em;
-    color: var(--clr-white);
-    background: linear-gradient(135deg, var(--clr-secondary), var(--clr-primary));
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    box-shadow: 0 4px 15px rgba(var(--clr-secondary-rgb, 255, 3, 46), 0.3);
-    transition: transform 0.3s ease;
-}
-
-/* Animación para el icono al pasar el cursor */
-.paso-nuevo:hover .paso-icono-nuevo {
-    transform: scale(1.1);
-}
-
-.paso-texto-nuevo h3 {
-    font-size: 1.3em;
-    font-weight: 700;
-    color: var(--clr-primary);
-    margin-bottom: 5px;
-}
-
-.paso-texto-nuevo p {
-    font-size: 1em;
-    color: var(--clr-light-text-alt);
-    line-height: 1.6;
-}
 /* --- AÑADE ESTO A STYLE.CSS --- */
 .reveal-on-scroll {
     opacity: 0;
@@ -1826,16 +1767,12 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 /* --- AÑADE ESTO AL FINAL DE STYLE.CSS SI NO LO HAS HECHO ANTES --- */
 
-
 .mini-package-selector {
     display: flex;
     gap: 15px; /* Espacio entre botones */
     width: 100%;
     margin-top: 15px;
     margin-bottom: 25px; /* Espacio antes de la barra de progreso */
-    background-color: rgba(var(--clr-dark-bg-rgb), 0.3);
-    padding: 20px;
-    border-radius: var(--border-radius-medium);
 }
 
 .mini-package-btn {
@@ -1846,7 +1783,6 @@ nav.bg-custom-dark-bg-frame a:hover {
     text-align: center;
     text-decoration: none;
     color: var(--clr-light-text);
-    background-color: rgba(var(--clr-dark-bg-rgb), 0.5); /* Usando una variable que deberías definir en :root */
     transition: all 0.3s ease;
     position: relative;
     z-index: 1;
@@ -4567,4 +4503,130 @@ box-shadow: 0 0 30px rgba(var(--clr-secondary-rgb), 0.4); }
     display: flex;
     flex-direction: column;
     gap: 15px;
+}
+
+
+/* ================================================= */
+/* --- ESTILOS PARA LA LÍNEA DE TIEMPO DEL SORTEO --- */
+/* ================================================= */
+
+.proceso-timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px 0;
+}
+
+/* La línea vertical del tiempo */
+.proceso-timeline::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    background-color: var(--clr-light-border);
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    margin-left: -2px;
+}
+
+/* Contenedor de cada paso en la línea */
+.timeline-item {
+    padding: 10px 40px;
+    position: relative;
+    background-color: inherit;
+    width: 50%;
+}
+
+/* El círculo del ícono */
+.timeline-icon {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    right: -30px;
+    top: 25px;
+    background: linear-gradient(135deg, var(--clr-secondary), var(--clr-primary));
+    border: 4px solid var(--clr-light-bg-alt);
+    border-radius: 50%;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8em;
+    box-shadow: 0 0 0 4px var(--clr-light-border);
+}
+
+/* Posicionamos los contenedores a la izquierda y derecha */
+.timeline-item:nth-child(odd) {
+    left: 0;
+}
+.timeline-item:nth-child(even) {
+    left: 50%;
+}
+
+/* Para los items de la derecha, movemos su ícono a la izquierda */
+.timeline-item:nth-child(even) .timeline-icon {
+    left: -30px;
+}
+
+/* El contenido de cada paso */
+.timeline-content {
+    padding: 20px 30px;
+    background-color: var(--clr-light-bg-alt);
+    border: 1px solid var(--clr-light-border);
+    position: relative;
+    border-radius: var(--border-radius-medium);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* Alineamos el texto */
+.timeline-content.right {
+    text-align: left;
+}
+.timeline-item:nth-child(odd) .timeline-content {
+    text-align: right;
+}
+
+.timeline-content h3 {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: var(--clr-primary);
+    margin-bottom: 8px;
+}
+.timeline-content p {
+    font-size: 0.95em;
+    color: var(--clr-light-text-alt);
+}
+
+/* Media Query para MÓVILES */
+@media (max-width: 767px) {
+    /* Ocultamos la línea central */
+    .proceso-timeline::after {
+        display: none;
+    }
+
+    /* Todos los items ocupan el ancho completo y se alinean a la izquierda */
+    .timeline-item {
+        width: 100%;
+        padding-left: 80px;
+        padding-right: 15px;
+    }
+
+    .timeline-item:nth-child(odd),
+    .timeline-item:nth-child(even) {
+        left: 0;
+    }
+
+    .timeline-item:nth-child(odd) .timeline-content,
+    .timeline-item:nth-child(even) .timeline-content {
+        text-align: left;
+    }
+
+    /* Movemos todos los íconos a la izquierda */
+    .timeline-icon {
+        left: 5px;
+    }
+    .timeline-item:nth-child(even) .timeline-icon {
+        left: 5px;
+    }
 }
