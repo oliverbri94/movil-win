@@ -1824,12 +1824,16 @@ nav.bg-custom-dark-bg-frame a:hover {
 
 /* --- AÑADE ESTO AL FINAL DE STYLE.CSS SI NO LO HAS HECHO ANTES --- */
 
+
 .mini-package-selector {
     display: flex;
     gap: 15px; /* Espacio entre botones */
     width: 100%;
     margin-top: 15px;
     margin-bottom: 25px; /* Espacio antes de la barra de progreso */
+    background-color: rgba(var(--clr-dark-bg-rgb), 0.3);
+    padding: 20px;
+    border-radius: var(--border-radius-medium);
 }
 
 .mini-package-btn {
